@@ -24,6 +24,7 @@ void find_model_example(int x_min) {
     s.add(b2 == 102);
     s.add(b3 == 103);
     s.add(x == 1);
+    s.add(x == 2);
     std::cout << s.check() << "\n" << "-------" << "\n";
 
     std::cout << s << "\n" << "-------" << "\n";
