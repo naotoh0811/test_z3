@@ -14,8 +14,8 @@ void find_model_example(int x_min) {
     expr x = c.int_const("x");
     solver s(c);
     int num_flow = 10;
-    int cycle[10];
     int win[2][4] = {};
+    int cycle_time[2] = {};
 
     for(int i = 0; i < 10; i++){
         std::stringstream optime_name, cltime_name, que_name;
@@ -25,10 +25,6 @@ void find_model_example(int x_min) {
         optime.push_back(c.int_const(optime_name.str().c_str()));
         cltime.push_back(c.int_const(cltime_name.str().c_str()));
         que.push_back(c.int_const(que_name.str().c_str()));
-    }
-
-    for(int i = 0; i < 10; i++){
-        cycle[i] == 10;
     }
 
     //s.add(optime[1] == 100);
@@ -45,13 +41,15 @@ void find_model_example(int x_min) {
     win[0][3] = 5;
     win[1][0] = 1;
     win[1][1] = 4;
+    cycle_time[0] = 20;
+    cycle_time[1] = 30;
 
     //周期を守る
     for(int i = 0; i < 4 - 1; i++){
-        s.add(optime[win[0][i + 1]] - optime[win[0][i]] == 20);
+        s.add(optime[win[0][i + 1]] - optime[win[0][i]] == cycle_time[0]);
     }
     for(int i = 0; i < 2 - 1; i++){
-        s.add(optime[win[1][i + 1]] - optime[win[1][i]] == 30);
+        s.add(optime[win[1][i + 1]] - optime[win[1][i]] == cycle_time[1]);
     }
 
     //排他性
