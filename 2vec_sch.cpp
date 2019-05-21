@@ -14,7 +14,7 @@ void find_model_example(int x_min) {
 
     // request
     int ocu_time = 1;
-    int cycle_time[] = {20, 30, 40};
+    int cycle_time[] = {20, 30, 50};
 
     // various variables
     int num_flow; // the number of all flows
@@ -97,10 +97,10 @@ void find_model_example(int x_min) {
     */
     std::cout << "schedule cycle time = " << schedule_cycle << "\n";
     for(int i = 0; i < num_flow; i++){
-        std::cout << "cycle : " << cycle_time[i] << "\n";
+        std::cout << "#cycle:" << cycle_time[i] << "\n";
         for(int j = i_win_first[i]; j < i_win_last[i] + 1; j++){
-            std::cout << "optime_" << j << " = " << m.eval(optime[j]) << " ";
-            std::cout << "cltime_" << j << " = " << m.eval(cltime[j]) << "\n";
+            std::cout << m.eval(optime[j]) << ",";
+            std::cout << m.eval(cltime[j]) << "\n";
         }
         //std::cout << "\n";
     }
