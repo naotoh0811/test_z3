@@ -3,7 +3,6 @@
 
 using namespace z3;
 
-
 void find_model_example(int x_min) {
     std::cout << "find_model_example1\n";
     context c;
@@ -12,8 +11,12 @@ void find_model_example(int x_min) {
     expr_vector que(c);
     expr x = c.int_const("x");
     solver s(c);
+
+    // request
     int ocu_time = 1;
-    int cycle_time[2] = {20, 30};
+    int cycle_time[] = {20, 30, 40};
+
+    // various variables
     int num_flow; // the number of all flows
     num_flow = sizeof(cycle_time) / sizeof(*cycle_time); // 2
 
@@ -86,9 +89,20 @@ void find_model_example(int x_min) {
     std::cout << m << "\n";
     std::cout << "-----------------" << "\n"; 
 
-    for(int i = 0; i < num_win; i++){
-        std::cout << "optime_" << i << " = " << m.eval(optime[i]) << " ";
-        std::cout << "cltime_" << i << " = " << m.eval(cltime[i]) << "\n";
+    /*
+    std::cout << "each cycle time of flow...";
+    for(int i = 0; i < num_flow; i++){
+        std::cout << cycle_time[i] << " ";
+    }
+    */
+    std::cout << "schedule cycle time = " << schedule_cycle << "\n";
+    for(int i = 0; i < num_flow; i++){
+        std::cout << "cycle : " << cycle_time[i] << "\n";
+        for(int j = i_win_first[i]; j < i_win_last[i] + 1; j++){
+            std::cout << "optime_" << j << " = " << m.eval(optime[j]) << " ";
+            std::cout << "cltime_" << j << " = " << m.eval(cltime[j]) << "\n";
+        }
+        //std::cout << "\n";
     }
 }
 
