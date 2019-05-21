@@ -10,14 +10,28 @@ void find_model_example(int x_min) {
     expr_vector optime(c);
     expr_vector cltime(c);
     expr_vector que(c);
-    //expr_vector win(c);
     expr x = c.int_const("x");
     solver s(c);
-    //int num_flow = 10;
-    //int win[2][4] = {};
+    int ocu_time = 1;
     int cycle_time[2] = {20, 30};
+    int num_flow; // the number of all flows
+    num_flow = sizeof(cycle_time) / sizeof(*cycle_time); // 2
 
-    for(int i = 0; i < 5; i++){
+	int schedule_cycle; // one cyle time of shcedule
+	schedule_cycle = multi_lcm(cycle_time, num_flow); // 60
+
+    int num_win = 0; // the number of all windows
+    int i_win_first[num_flow]; // index of first window of each flow
+    int i_win_last[num_flow]; // index of last window of each flow
+    int each_num_win = 0;
+	for(int i = 0; i < num_flow; i++){
+        i_win_first[i] = num_win;
+        num_win += schedule_cycle / cycle_time[i];
+        i_win_last[i] = num_win - 1;
+    } // num_win = 5
+
+    // define vector
+    for(int i = 0; i < num_win; i++){
         std::stringstream optime_name, cltime_name, que_name;
         optime_name << "optime_" << i;
         cltime_name << "cltime_" << i;
@@ -27,41 +41,41 @@ void find_model_example(int x_min) {
         que.push_back(c.int_const(que_name.str().c_str()));
     }
 
-    /*win[0][0] = 0;
-    win[0][1] = 2;
-    win[0][2] = 3;
-    win[0][3] = 5;
-    win[1][0] = 1;
-    win[1][1] = 4;*/
+    /********** Constraint **********/
 
-    //周期を守る
-    for(int i = 0; i < 3 - 1; i++){
-        s.add(optime[i+1] - optime[i] == cycle_time[0]);
-    }
-    for(int i = 3; i < 5 - 1; i++){
-        s.add(optime[i+1] - optime[i] == cycle_time[1]);
+    // flow cycle
+    for(int i = 0; i < num_flow; i++){
+        for(int j = i_win_first[i]; j < i_win_last[i] + 1; j++){
+            if(j != i_win_last[i]){
+                s.add(optime[j+1] - optime[j] == cycle_time[i]);
+            }else{
+                s.add( (schedule_cycle - optime[j]) + (optime[i_win_first[i]] - 0) == cycle_time[i] );
+            }
+        }
     }
 
-    //排他性
-    for(int i = 0; i < 5; i++){
-        for(int j = 0; j < 5; j++){
+    // exclusiveness
+    for(int i = 0; i < num_win; i++){
+        for(int j = 0; j < num_win; j++){
             if(i != j){
                 s.add(cltime[i] < optime[j] || cltime[i] > cltime[j]);
             }
         }
     }
 
-    //長さ
-    for(int i = 0; i < 5; i++){
-        s.add(cltime[i] - optime[i] == 1);
+    // occupancy time
+    for(int i = 0; i < num_win; i++){
+        s.add(cltime[i] - optime[i] == ocu_time);
     }
 
-    //範囲
-    for(int i = 0; i < 5; i++){
+    // range of shchedule cycle
+    for(int i = 0; i < num_win; i++){
         s.add(optime[i] >= 0);
-        s.add(cltime[i] <= 60);
+        s.add(cltime[i] <= schedule_cycle);
     }
-    s.add(optime[0] == 0);
+    //s.add(optime[0] == 0);
+
+    /********************************/
 
     std::cout << "-----sat check-----" << "\n"; 
     std::cout << s.check() << "\n";
@@ -72,16 +86,7 @@ void find_model_example(int x_min) {
     std::cout << m << "\n";
     std::cout << "-----------------" << "\n"; 
 
-    /*
-    // traversing the model
-    for (unsigned i = 0; i < m.size(); i++) {
-        func_decl v = m[i];
-        // this problem contains only constants
-        assert(v.arity() == 0); 
-        std::cout << v.name() << " = " << m.get_const_interp(v) << "\n";
-    }
-    */
-    for(int i = 0; i < 6; i++){
+    for(int i = 0; i < num_win; i++){
         std::cout << "optime_" << i << " = " << m.eval(optime[i]) << " ";
         std::cout << "cltime_" << i << " = " << m.eval(cltime[i]) << "\n";
     }
@@ -99,7 +104,5 @@ int main(int argc, char *argv[]) {
     catch (exception & ex) {
         std::cout << "unexpected error: " << ex << "\n";
     }
-    //int hog[]={3,4,5,8};
-    //std::cout << multi_lcm(hog, 4) << "\n";
     return 0;
 }
