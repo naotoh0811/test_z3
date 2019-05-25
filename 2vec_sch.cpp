@@ -20,7 +20,7 @@ void find_model_example(int x_min) {
     int num_flow; // the number of all flows
     num_flow = sizeof(cycle_time) / sizeof(*cycle_time); // 2
 
-	int schedule_cycle; // one cyle time of shcedule
+	int schedule_cycle; // one cycle time of schedule
 	schedule_cycle = multi_lcm(cycle_time, num_flow); // 60
 
     int num_win = 0; // the number of all windows
@@ -71,7 +71,7 @@ void find_model_example(int x_min) {
         s.add(cltime[i] - optime[i] == ocu_time);
     }
 
-    // range of shchedule cycle
+    // range of schedule cycle
     for(int i = 0; i < num_win; i++){
         s.add(optime[i] >= 0);
         s.add(cltime[i] <= schedule_cycle);
