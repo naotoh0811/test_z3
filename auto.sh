@@ -9,6 +9,5 @@ g++ -D_MP_INTERNAL -DNDEBUG -D_EXTERNAL_RELEASE -D_AMD64_ -D_USE_THREAD_LOCAL  -
 g++ -o $NAME.out _$NAME.o ~/workspace/z3/build/libz3.so -lpthread  -fopenmp -lrt
 rm _$NAME.o
 
-./2vec_sch.out >> result.txt
+./$NAME.out >> result.txt
 python3 dataget.py
-
