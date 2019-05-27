@@ -14,7 +14,7 @@ void find_model_example(int x_min) {
 
     // request
     int ocu_time = 2;
-    int cycle_time[] = {20, 30, 50};
+    int cycle_time[] = {20, 30, 40};
 
     // various variables
     int num_flow; // the number of all flows
