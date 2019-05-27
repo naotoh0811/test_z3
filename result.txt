@@ -6,99 +6,99 @@ sat
 (define-fun optime_1 () Int
   20)
 (define-fun optime_16 () Int
-  32)
-(define-fun optime_26 () Int
-  94)
-(define-fun cltime_30 () Int
-  295)
-(define-fun cltime_29 () Int
-  245)
-(define-fun cltime_28 () Int
-  195)
-(define-fun cltime_27 () Int
-  145)
-(define-fun cltime_26 () Int
-  95)
-(define-fun cltime_25 () Int
-  45)
-(define-fun cltime_24 () Int
-  273)
-(define-fun cltime_23 () Int
-  243)
-(define-fun cltime_22 () Int
-  213)
-(define-fun cltime_21 () Int
-  183)
-(define-fun cltime_20 () Int
-  153)
-(define-fun cltime_19 () Int
-  123)
-(define-fun cltime_18 () Int
-  93)
-(define-fun cltime_17 () Int
-  63)
-(define-fun cltime_16 () Int
   33)
+(define-fun optime_26 () Int
+  96)
+(define-fun cltime_30 () Int
+  298)
+(define-fun cltime_29 () Int
+  248)
+(define-fun cltime_28 () Int
+  198)
+(define-fun cltime_27 () Int
+  148)
+(define-fun cltime_26 () Int
+  98)
+(define-fun cltime_25 () Int
+  48)
+(define-fun cltime_24 () Int
+  275)
+(define-fun cltime_23 () Int
+  245)
+(define-fun cltime_22 () Int
+  215)
+(define-fun cltime_21 () Int
+  185)
+(define-fun cltime_20 () Int
+  155)
+(define-fun cltime_19 () Int
+  125)
+(define-fun cltime_18 () Int
+  95)
+(define-fun cltime_17 () Int
+  65)
+(define-fun cltime_16 () Int
+  35)
 (define-fun cltime_15 () Int
-  3)
+  5)
 (define-fun cltime_14 () Int
-  281)
+  282)
 (define-fun cltime_13 () Int
-  261)
+  262)
 (define-fun cltime_12 () Int
-  241)
-(define-fun cltime_11 () Int
-  221)
-(define-fun cltime_10 () Int
-  201)
-(define-fun cltime_9 () Int
-  181)
-(define-fun cltime_8 () Int
-  161)
-(define-fun cltime_7 () Int
-  141)
-(define-fun cltime_6 () Int
-  121)
-(define-fun cltime_5 () Int
-  101)
-(define-fun cltime_4 () Int
-  81)
-(define-fun cltime_3 () Int
-  61)
-(define-fun cltime_2 () Int
-  41)
-(define-fun cltime_1 () Int
-  21)
-(define-fun cltime_0 () Int
-  1)
-(define-fun optime_25 () Int
-  44)
-(define-fun optime_30 () Int
-  294)
-(define-fun optime_29 () Int
-  244)
-(define-fun optime_28 () Int
-  194)
-(define-fun optime_27 () Int
-  144)
-(define-fun optime_15 () Int
-  2)
-(define-fun optime_24 () Int
-  272)
-(define-fun optime_23 () Int
   242)
-(define-fun optime_22 () Int
-  212)
-(define-fun optime_21 () Int
+(define-fun cltime_11 () Int
+  222)
+(define-fun cltime_10 () Int
+  202)
+(define-fun cltime_9 () Int
   182)
-(define-fun optime_20 () Int
-  152)
-(define-fun optime_19 () Int
+(define-fun cltime_8 () Int
+  162)
+(define-fun cltime_7 () Int
+  142)
+(define-fun cltime_6 () Int
   122)
-(define-fun optime_18 () Int
-  92)
-(define-fun optime_17 () Int
+(define-fun cltime_5 () Int
+  102)
+(define-fun cltime_4 () Int
+  82)
+(define-fun cltime_3 () Int
   62)
+(define-fun cltime_2 () Int
+  42)
+(define-fun cltime_1 () Int
+  22)
+(define-fun cltime_0 () Int
+  2)
+(define-fun optime_25 () Int
+  46)
+(define-fun optime_30 () Int
+  296)
+(define-fun optime_29 () Int
+  246)
+(define-fun optime_28 () Int
+  196)
+(define-fun optime_27 () Int
+  146)
+(define-fun optime_15 () Int
+  3)
+(define-fun optime_24 () Int
+  273)
+(define-fun optime_23 () Int
+  243)
+(define-fun optime_22 () Int
+  213)
+(define-fun optime_21 () Int
+  183)
+(define-fun optime_20 () Int
+  153)
+(define-fun optime_19 () Int
+  123)
+(define-fun optime_18 () Int
+  93)
+(define-fun optime_17 () Int
+  63)
 (define-fun optime_0 () Int
   0)
 (define-fun optime_14 () Int
@@ -130,38 +130,38 @@ sat
 -----------------
 schedule cycle time = 300
 #cycle:20
-0,1
-20,21
-40,41
-60,61
-80,81
-100,101
-120,121
-140,141
-160,161
-180,181
-200,201
-220,221
-240,241
-260,261
-280,281
+0,2
+20,22
+40,42
+60,62
+80,82
+100,102
+120,122
+140,142
+160,162
+180,182
+200,202
+220,222
+240,242
+260,262
+280,282
 #cycle:30
-2,3
-32,33
-62,63
-92,93
-122,123
-152,153
-182,183
-212,213
-242,243
-272,273
+3,5
+33,35
+63,65
+93,95
+123,125
+153,155
+183,185
+213,215
+243,245
+273,275
 #cycle:50
-44,45
-94,95
-144,145
-194,195
-244,245
-294,295
+46,48
+96,98
+146,148
+196,198
+246,248
+296,298
 
 done

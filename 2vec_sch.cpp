@@ -13,7 +13,7 @@ void find_model_example(int x_min) {
     solver s(c);
 
     // request
-    int ocu_time = 1;
+    int ocu_time = 2;
     int cycle_time[] = {20, 30, 50};
 
     // various variables
