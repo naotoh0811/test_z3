@@ -31,10 +31,12 @@ def read_and_plot(filename):
 
     plt.axis([0, schedule_time, 0, 100])
     plt.grid(axis="x")
-    plt.xlabel("Time [μs]")
-    plt.tick_params(labelleft=False,left=False)
+    plt.xlabel("Time", fontsize=18)
+    plt.tick_params(labelleft=False, left=False, labelsize=18)
+    plt.tight_layout()
     pp = PdfPages("test.pdf")
     pp.savefig()
     pp.close()
+    plt.clf()
 
 read_and_plot("result.txt")
