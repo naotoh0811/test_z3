@@ -20,14 +20,14 @@ void find_model_example() {
     int num_flow; // the number of all flows
     num_flow = sizeof(cycle_time) / sizeof(*cycle_time);
 
-	int schedule_cycle; // one cycle time of schedule
-	schedule_cycle = multi_lcm(cycle_time, num_flow);
+    int schedule_cycle; // one cycle time of schedule
+    schedule_cycle = multi_lcm(cycle_time, num_flow);
 
     int num_win = 0; // the number of all windows
     int i_win_first[num_flow]; // index of first window of each flow
     int i_win_last[num_flow]; // index of last window of each flow
     int each_num_win = 0;
-	for(int i = 0; i < num_flow; i++){
+    for(int i = 0; i < num_flow; i++){
         i_win_first[i] = num_win;
         num_win += schedule_cycle / cycle_time[i];
         i_win_last[i] = num_win - 1;
@@ -101,11 +101,11 @@ void find_model_example() {
 
 
 int main(int argc, char *argv[]) {
-	int arg = 10;
-	if (argc > 1) arg = atoi(argv[1]);
+    int arg = 10;
+    if (argc > 1) arg = atoi(argv[1]);
     try {
         find_model_example();
-		std::cout << "\n";
+        std::cout << "\n";
         std::cout << "done\n";
     }
     catch (exception & ex) {
