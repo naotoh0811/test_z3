@@ -3,7 +3,7 @@
 
 using namespace z3;
 
-void find_model_example(int x_min) {
+void find_model_example() {
     std::cout << "find_model_example1\n";
     context c;
     expr_vector optime(c);
@@ -18,10 +18,10 @@ void find_model_example(int x_min) {
 
     // various variables
     int num_flow; // the number of all flows
-    num_flow = sizeof(cycle_time) / sizeof(*cycle_time); // 2
+    num_flow = sizeof(cycle_time) / sizeof(*cycle_time);
 
 	int schedule_cycle; // one cycle time of schedule
-	schedule_cycle = multi_lcm(cycle_time, num_flow); // 60
+	schedule_cycle = multi_lcm(cycle_time, num_flow);
 
     int num_win = 0; // the number of all windows
     int i_win_first[num_flow]; // index of first window of each flow
@@ -31,7 +31,7 @@ void find_model_example(int x_min) {
         i_win_first[i] = num_win;
         num_win += schedule_cycle / cycle_time[i];
         i_win_last[i] = num_win - 1;
-    } // num_win = 5
+    }
 
     // define vector
     for(int i = 0; i < num_win; i++){
@@ -76,7 +76,6 @@ void find_model_example(int x_min) {
         s.add(optime[i] >= 0);
         s.add(cltime[i] <= schedule_cycle);
     }
-    //s.add(optime[0] == 0);
 
     /********************************/
 
@@ -89,12 +88,6 @@ void find_model_example(int x_min) {
     std::cout << m << "\n";
     std::cout << "-----------------" << "\n"; 
 
-    /*
-    std::cout << "each cycle time of flow...";
-    for(int i = 0; i < num_flow; i++){
-        std::cout << cycle_time[i] << " ";
-    }
-    */
     std::cout << "schedule cycle time = " << schedule_cycle << "\n";
     for(int i = 0; i < num_flow; i++){
         std::cout << "#cycle:" << cycle_time[i] << "\n";
@@ -111,7 +104,7 @@ int main(int argc, char *argv[]) {
 	int arg = 10;
 	if (argc > 1) arg = atoi(argv[1]);
     try {
-        find_model_example(arg);
+        find_model_example();
 		std::cout << "\n";
         std::cout << "done\n";
     }
