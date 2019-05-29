@@ -1,3 +1,5 @@
+#include<iostream>
+#include<fstream>
 #include "z3++.h"
 #include "func.h"
 
@@ -84,11 +86,30 @@ void find_model_example() {
     std::cout << "-------------------" << "\n"; 
 
     model m = s.get_model();
-    std::cout << "-----model m-----" << "\n"; 
-    std::cout << m << "\n";
-    std::cout << "-----------------" << "\n"; 
+    //std::cout << "-----model m-----" << "\n"; 
+    //std::cout << m << "\n";
+    //std::cout << "-----------------" << "\n"; 
 
     std::cout << "schedule cycle time = " << schedule_cycle << "\n";
+
+    std::ofstream out("hoge.txt");
+
+    out << "{";
+    for(int i = 0; i < num_flow; i++){
+        out << "{";
+        out << "\"flow" << i << "\":{";
+        out << "\"cycle\":" << cycle_time[i] << ",";
+        out << "\"time\":[";
+        for(int j = i_win_first[i]; j <  i_win_last[i] + 1; j++){
+            out << "[" << m.eval(optime[j]) << "," << m.eval(cltime[j]) << "],";
+        }
+        out << "]";
+        out << "},";
+    }
+    out << "}";
+    
+    out.close();
+
     for(int i = 0; i < num_flow; i++){
         std::cout << "#cycle:" << cycle_time[i] << "\n";
         for(int j = i_win_first[i]; j < i_win_last[i] + 1; j++){
@@ -113,3 +134,4 @@ int main(int argc, char *argv[]) {
     }
     return 0;
 }
+
