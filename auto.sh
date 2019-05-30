@@ -1,7 +1,3 @@
-if test -e "result.txt"; then
-    rm result.txt
-fi
-
 CPP="2vec_sch.cpp"
 NAME=${CPP%.*}
 
@@ -14,5 +10,5 @@ else
 fi
 
 rm _$NAME.o
-./$NAME.out >> result.txt
+./$NAME.out
 python3 dataget.py
