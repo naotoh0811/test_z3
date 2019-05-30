@@ -94,12 +94,15 @@ void find_model_example() {
 
     // make yaml file
     std::ofstream out("schedule.yml");
+    out << "num_flow : " << num_flow << "\n";
+    out << "schedule_cycle: " << schedule_cycle << "\n";
+    out << "flow:\n";
     for(int i = 0; i < num_flow; i++){
-        out << "flow" << i << ":\n";
-        out << "  cycle: " << cycle_time[i] << "\n";
-        out << "  time:\n";
+        out << "  - name: flow" << i << "\n";
+        out << "    cycle: " << cycle_time[i] << "\n";
+        out << "    time:\n";
         for(int j = i_win_first[i]; j <  i_win_last[i] + 1; j++){
-            out << "    - [" << m.eval(optime[j]) << "," << m.eval(cltime[j]) << "]\n";
+            out << "      - [" << m.eval(optime[j]) << "," << m.eval(cltime[j]) << "]\n";
         }
     }
     out.close();
