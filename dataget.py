@@ -32,4 +32,5 @@ def read_and_plot(filename):
     pp.close()
     plt.clf()
 
-read_and_plot("schedule.yml")
+if __name__ == '__main__':
+    read_and_plot("schedule.yml")
