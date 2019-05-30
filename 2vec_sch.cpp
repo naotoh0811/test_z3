@@ -92,22 +92,16 @@ void find_model_example() {
 
     std::cout << "schedule cycle time = " << schedule_cycle << "\n";
 
-    std::ofstream out("hoge.txt");
-
-    out << "{";
+    // make yaml file
+    std::ofstream out("schedule.yml");
     for(int i = 0; i < num_flow; i++){
-        out << "{";
-        out << "\"flow" << i << "\":{";
-        out << "\"cycle\":" << cycle_time[i] << ",";
-        out << "\"time\":[";
+        out << "flow" << i << ":\n";
+        out << "  cycle: " << cycle_time[i] << "\n";
+        out << "  time:\n";
         for(int j = i_win_first[i]; j <  i_win_last[i] + 1; j++){
-            out << "[" << m.eval(optime[j]) << "," << m.eval(cltime[j]) << "],";
+            out << "    - [" << m.eval(optime[j]) << "," << m.eval(cltime[j]) << "]\n";
         }
-        out << "]";
-        out << "},";
     }
-    out << "}";
-    
     out.close();
 
     for(int i = 0; i < num_flow; i++){
