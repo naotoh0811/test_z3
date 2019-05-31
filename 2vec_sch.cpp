@@ -1,5 +1,5 @@
-#include<iostream>
-#include<fstream>
+#include <iostream>
+#include <fstream>
 #include "z3++.h"
 #include "func.h"
 
@@ -15,8 +15,8 @@ void find_model_example() {
     solver s(c);
 
     // request
-    int ocu_time = 2;
-    int cycle_time[] = {20, 30, 40};
+    int ocu_time = 3;
+    int cycle_time[] = {20, 30, 40, 60};
 
     // various variables
     int num_flow; // the number of all flows
@@ -63,7 +63,7 @@ void find_model_example() {
     for(int i = 0; i < num_win; i++){
         for(int j = 0; j < num_win; j++){
             if(i != j){
-                s.add(cltime[i] < optime[j] || cltime[i] > cltime[j]);
+                s.add(cltime[i] <= optime[j] || cltime[i] >= cltime[j]);
             }
         }
     }
@@ -90,8 +90,6 @@ void find_model_example() {
     //std::cout << m << "\n";
     //std::cout << "-----------------" << "\n"; 
 
-    std::cout << "schedule cycle time = " << schedule_cycle << "\n";
-
     // make yaml file
     std::ofstream out("schedule.yml");
     out << "num_flow : " << num_flow << "\n";
@@ -107,6 +105,7 @@ void find_model_example() {
     }
     out.close();
 
+    std::cout << "schedule cycle time = " << schedule_cycle << "\n";
     for(int i = 0; i < num_flow; i++){
         std::cout << "#cycle:" << cycle_time[i] << "\n";
         for(int j = i_win_first[i]; j < i_win_last[i] + 1; j++){
