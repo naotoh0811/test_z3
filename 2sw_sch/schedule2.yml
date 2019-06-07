@@ -1,0 +1,16 @@
+num_flow : 2
+schedule_cycle: 100
+flow:
+  - name: flow0
+    cycle: 20
+    time:
+      - [0,3]
+      - [20,23]
+      - [40,43]
+      - [60,63]
+      - [80,83]
+  - name: flow1
+    cycle: 50
+    time:
+      - [43,46]
+      - [93,96]

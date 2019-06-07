@@ -5,22 +5,13 @@
 
 using namespace z3;
 
-void find_model_example() {
-    std::cout << "find_model_example1\n";
+void find_model_example(int i_sw, int *cycle_time, int num_flow, int ocu_time) {
     context c;
     expr_vector optime(c);
     expr_vector cltime(c);
     expr_vector que(c);
     expr x = c.int_const("x");
     solver s(c);
-
-    // request
-    int ocu_time = 3;
-    int cycle_time[] = {20, 30, 40, 60};
-
-    // various variables
-    int num_flow; // the number of all flows
-    num_flow = sizeof(cycle_time) / sizeof(*cycle_time);
 
     int schedule_cycle; // one cycle time of schedule
     schedule_cycle = multi_lcm(cycle_time, num_flow);
@@ -63,7 +54,7 @@ void find_model_example() {
     for(int i = 0; i < num_win; i++){
         for(int j = 0; j < num_win; j++){
             if(i != j){
-                s.add(cltime[i] <= optime[j] || cltime[i] >= cltime[j]);
+                s.add(cltime[i] <= optime[j] || optime[i] >= cltime[j]);
             }
         }
     }
@@ -86,12 +77,10 @@ void find_model_example() {
     std::cout << "-------------------" << "\n"; 
 
     model m = s.get_model();
-    //std::cout << "-----model m-----" << "\n"; 
-    //std::cout << m << "\n";
-    //std::cout << "-----------------" << "\n"; 
 
     // make yaml file
-    std::ofstream out("schedule.yml");
+    std::string yaml_filename = "schedule" + std::to_string(i_sw) + ".yml";
+    std::ofstream out(yaml_filename);
     out << "num_flow : " << num_flow << "\n";
     out << "schedule_cycle: " << schedule_cycle << "\n";
     out << "flow:\n";
@@ -118,10 +107,21 @@ void find_model_example() {
 
 
 int main(int argc, char *argv[]) {
-    int arg = 10;
-    if (argc > 1) arg = atoi(argv[1]);
+    int cycle_time1[] = {20, 30, 40, 60};
+    int cycle_time2[] = {20, 50};
+    int num_flow1 = sizeof(cycle_time1) / sizeof(*cycle_time1);
+    int num_flow2 = sizeof(cycle_time2) / sizeof(*cycle_time2);
     try {
-        find_model_example();
+        find_model_example(1, cycle_time1, num_flow1, 3);
+        std::cout << "\n";
+        std::cout << "done\n";
+    }
+    catch (exception & ex) {
+        std::cout << "unexpected error: " << ex << "\n";
+    }
+
+    try {
+        find_model_example(2, cycle_time2, num_flow2, 3);
         std::cout << "\n";
         std::cout << "done\n";
     }
