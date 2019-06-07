@@ -1,4 +1,4 @@
-CPP="2vec_sch.cpp"
+CPP="1sw_sch.cpp"
 NAME=${CPP%.*}
 
 if [ "$(uname)" == 'Darwin' ]; then

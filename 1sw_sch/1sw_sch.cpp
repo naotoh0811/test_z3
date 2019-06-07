@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "z3++.h"
-#include "func.h"
+#include "../func.h"
 
 using namespace z3;
 
