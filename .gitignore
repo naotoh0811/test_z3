@@ -1,4 +1,4 @@
 g++.txt
 *.out
-/1sw_sch/.vscode/
-/2sw_sch/.vscode/
+.vscode/
+
