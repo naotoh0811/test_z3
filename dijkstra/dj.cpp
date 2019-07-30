@@ -59,7 +59,7 @@ void dijkstra(int size, int startNode_index){
         cout << "node" << startNode_index << " to node" << i
         << " : distance = " << ( cost[i] == INFTY ? -1 : cost[i] ) << endl;
 
-        // all passed nodes
+        // path
         int prevprevNode = prevNode[i];
         cout << i << " <- ";
         while(prevprevNode != startNode_index){
