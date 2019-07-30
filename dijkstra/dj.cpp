@@ -1,5 +1,12 @@
 // https://algorithmbeginner.blogspot.com/2018/02/blog-post_21.html
 #include <iostream>
+#include <stdio.h>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
+#include <vector>
+#include "../func.h"
 using namespace std;
 #define MAX 100
 #define INFTY 1<<22
@@ -57,7 +64,7 @@ void dijkstra(int size, int startNode_index){
     for(int i = 0;i < size;++i){
         // distance
         cout << "node" << startNode_index << " to node" << i
-        << " : distance = " << ( cost[i] == INFTY ? -1 : cost[i] ) << endl;
+             << " : distance = " << ( cost[i] == INFTY ? -1 : cost[i] ) << endl;
 
         // path
         int prevprevNode = prevNode[i];
@@ -71,27 +78,30 @@ void dijkstra(int size, int startNode_index){
 }
 
 int main(){
-    int size = 5;
+    int size = 8;
     int startNode_index = 0;
     
-    for(int i = 0;i < size;++i){
-        for(int j = 0;j < size;++j){
+    for(int i = 0; i < size; ++i){
+        for(int j = 0; j < size; ++j){
             gMatrix[i][j] = INFTY;
         }
     }
 
-    gMatrix[0][1] = 1;
-    gMatrix[0][2] = 2;
-    gMatrix[0][3] = 1;
-    gMatrix[1][0] = 1;
-    gMatrix[1][4] = 2;
-    gMatrix[2][0] = 2;
-    gMatrix[2][3] = 1;
-    gMatrix[2][4] = 3;
-    gMatrix[3][0] = 1;
-    gMatrix[3][2] = 1;
-    gMatrix[4][1] = 2;
-    gMatrix[4][2] = 3;
+    ifstream ifs("network.csv");
+    string str;
+    vector<string> result;
+    
+    // ignore first line
+    getline(ifs, str);
+
+    while(getline(ifs, str)){
+        result = split(str, ',');
+        int nodeFrom = atoi(result[0].c_str());
+        int nodeTo = atoi(result[1].c_str());
+        int cost = atoi(result[2].c_str());
+        gMatrix[nodeFrom][nodeTo] = cost;
+        gMatrix[nodeTo][nodeFrom] = cost;
+    }
 
     dijkstra(size, startNode_index);
     return 0;
