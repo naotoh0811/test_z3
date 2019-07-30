@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import networkx as nx
+import pandas as pd
 
-def gen_edge_labels_from_matrix(g):
+def gen_edge_labels_from_matrix(networkMatrix):
     edge_labels = {}
-    for hi, costList  in enumerate(g):
+    for hi, costList  in enumerate(networkMatrix):
         for wi, cost in enumerate(costList):
             if(cost):
                 edge_labels[(hi, wi)] = cost
@@ -33,8 +34,19 @@ def gen_pdf(filename):
     pp.close()
     plt.clf()
 
+def csv_to_edge_labels(filename):
+    df = pd.read_csv(filename)
+    edge_labels = {}
+    for i in range(9):
+        nodeFrom = int(df.loc[[i], 'nodeFrom'])
+        nodeTo = int(df.loc[[i], 'nodeTo'])
+        cost = int(df.loc[[i], 'cost'])
+        edge_labels[(nodeFrom, nodeTo)] = cost
+    
+    return edge_labels
+
 if __name__ == '__main__':
-    g = [
+    networkMatrix = [
         [ 0, 10,  0, 20,  0,  0,  0, 30],
         [10,  0, 10,  0,  0,  0,  0,  0],
         [ 0, 10,  0,  0, 20,  0,  0,  0],
@@ -44,18 +56,8 @@ if __name__ == '__main__':
         [ 0,  0,  0,  0,  0, 10,  0, 10],
         [30,  0,  0,  0, 20,  0, 10,  0]
     ]
-    edge_labels = {
-        (0, 1): 10,
-        (1, 2): 10,
-        (4, 7): 20,
-        (6, 7): 10,
-        (2, 4): 20,
-        (5, 6): 10,
-        (0, 7): 30,
-        (0, 3): 20,
-        (3, 5): 20
-    }
 
-    #edge_labels = gen_edge_labels_from_matrix(g)
+    #edge_labels = gen_edge_labels_from_matrix(networkMatrix)
+    edge_labels = csv_to_edge_labels('network.csv')
     gen_graph(edge_labels)
     gen_pdf('network.pdf')
