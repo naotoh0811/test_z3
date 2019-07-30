@@ -3,62 +3,75 @@
 using namespace std;
 #define MAX 100
 #define INFTY 1<<22
-#define WHITE 0
-#define GRAY 1
-#define BLACK 2
+#define WHITE 0 // unfixed
+#define BLACK 1 // fixed
 
 int gMatrix[MAX][MAX];
 
 void dijkstra(int size, int startNode_index){
-    // 最小の重みを記録する
-    int minV;
-    // weight[adjNode_index]に始点sからvまでの最短コストを保存する
-    int weight[MAX];
-    // 訪問状態を記録
-    int color[MAX];
-    // 1.初期化
-    for(int i = 0;i < size;++i){
-        weight[i] = INFTY;
-        color[i] = WHITE;
-    }
-    // 始点
-    weight[startNode_index] = 0;
-    color[startNode_index] = GRAY;
+    // minimum cost
+    int minCost;
+    // cost from startNode
+    int cost[size];
+    // fixed or unfixed
+    int color[size];
+    // passed prevNode
+    int prevNode[size];
     
+    // initialize
+    for(int i = 0;i < size;++i){
+        cost[i] = INFTY;
+        color[i] = WHITE;
+        prevNode[i] = -1;
+    }
+
+    // startNode
+    cost[startNode_index] = 0;
+    prevNode[startNode_index] = startNode_index;
+
     while(1){
-        minV = INFTY;
-        // 頂点を示す
+        minCost = INFTY;
         int minNode_index = -1;
-        // 2.1weight[minNode_index]が最小である頂点を決定する
+        // search node which has minimum cost
         for(int i = 0;i < size;++i){
-            if(minV > weight[i] && color[i] != BLACK){
+            if(minCost > cost[i] && color[i] != BLACK){
                 minNode_index = i;
-                minV = weight[i];
+                minCost = cost[i];
             }
         }
         if(minNode_index == -1)break;
         color[minNode_index] = BLACK;
         
-        for(int adjNode_index = 0;adjNode_index < size;++adjNode_index){
-            // 辺が存在する
+        for(int adjNode_index = 0; adjNode_index < size; ++adjNode_index){
             if(color[adjNode_index] != BLACK && gMatrix[minNode_index][adjNode_index] != INFTY){
-                // 2.2最短コストを更新する
-                // この処理の終了後weight[adjNode_index]sからS内の頂点のみを経由したvまでの最短コストが記録される
-                if(weight[adjNode_index] > weight[minNode_index] + gMatrix[minNode_index][adjNode_index]){
-                    weight[adjNode_index] = weight[minNode_index] + gMatrix[minNode_index][adjNode_index];
-                    color[adjNode_index] = GRAY;
+                // update cost and prevNode
+                if(cost[adjNode_index] > cost[minNode_index] + gMatrix[minNode_index][adjNode_index]){
+                    cost[adjNode_index] = cost[minNode_index] + gMatrix[minNode_index][adjNode_index];
+                    prevNode[adjNode_index] = minNode_index;
                 }
             }
         }
     }
-    // 出力
+
+    // result output
     for(int i = 0;i < size;++i){
-        cout << "node" << startNode_index << " to node" << i << " " << ( weight[i] == INFTY ? -1 : weight[i] ) << endl;
+        // distance
+        cout << "node" << startNode_index << " to node" << i
+        << " : distance = " << ( cost[i] == INFTY ? -1 : cost[i] ) << endl;
+
+        // all passed nodes
+        int prevprevNode = prevNode[i];
+        cout << i << " <- ";
+        while(prevprevNode != startNode_index){
+            cout << prevprevNode << " <- ";
+            prevprevNode = prevNode[prevprevNode];
+        }
+        cout << prevprevNode << endl;
     }
 }
 
 int main(){
-    int size = 4;
+    int size = 5;
     int startNode_index = 0;
     
     for(int i = 0;i < size;++i){
@@ -67,12 +80,18 @@ int main(){
         }
     }
 
+    gMatrix[0][1] = 1;
+    gMatrix[0][2] = 2;
     gMatrix[0][3] = 1;
-    gMatrix[1][3] = 1;
+    gMatrix[1][0] = 1;
+    gMatrix[1][4] = 2;
+    gMatrix[2][0] = 2;
     gMatrix[2][3] = 1;
+    gMatrix[2][4] = 3;
     gMatrix[3][0] = 1;
-    gMatrix[3][1] = 1;
     gMatrix[3][2] = 1;
+    gMatrix[4][1] = 2;
+    gMatrix[4][2] = 3;
 
     dijkstra(size, startNode_index);
     return 0;
