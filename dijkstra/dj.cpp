@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <cstdlib>
 #include "../func.h"
 using namespace std;
 #define MAX 100
