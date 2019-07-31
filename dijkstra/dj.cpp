@@ -88,8 +88,17 @@ int main(){
     for (int i = 0; i < size; i++) matrix_arg[i] = gMatrix[i];
 
     // set cost from csv
-    set_matrix_from_csv(matrix_arg, ifs);
+    vector<network_status> ns_vec;
+    ns_vec = set_matrix_from_csv(matrix_arg, ifs);
+    set_matrix(matrix_arg, ns_vec, size);
 
+    // for(int i = 0; i < size; i++){
+    //     for (int ii = 0; ii < size; ii++){
+    //         cout << gMatrix[i][ii] << ", ";
+    //     }
+    //     cout << endl;
+    // }
+    
     int startNode_index = 0;
 
     dijkstra(matrix_arg, size, startNode_index);

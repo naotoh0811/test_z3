@@ -65,16 +65,40 @@ int get_size(ifstream &ifs){
 	return atoi(result[3].c_str());
 }
 
-void set_matrix_from_csv(int **matrix, ifstream &ifs){
+struct network_status{
+	int nodeFrom;
+	int nodeTo;
+	int cost;
+	
+	network_status(int nf, int nt, int c){
+		nodeFrom = nf;
+		nodeTo = nt;
+		cost = c;
+	}
+};
+
+vector<network_status> set_matrix_from_csv(int **matrix, ifstream &ifs){
     string str;
     vector<string> result;
+	vector<network_status> ns_vec;
     while(getline(ifs, str)){
         result = split(str, ',');
 
         int nodeFrom = atoi(result[0].c_str());
         int nodeTo = atoi(result[1].c_str());
         int cost = atoi(result[2].c_str());
-        matrix[nodeFrom][nodeTo] = cost;
-        matrix[nodeTo][nodeFrom] = cost;
+
+		ns_vec.push_back(network_status(nodeFrom, nodeTo, cost));
+
+        //matrix[nodeFrom][nodeTo] = cost;
+        //matrix[nodeTo][nodeFrom] = cost;
+
     }
+	return ns_vec;
+}
+
+void set_matrix(int **matrix, vector<network_status> ns_vec, int size){
+	for(auto itr : ns_vec){
+		matrix[itr.nodeFrom][itr.nodeTo] = itr.cost;		
+	}
 }
