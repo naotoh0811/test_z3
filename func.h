@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <cstdlib>
 using namespace std;
 
 // http://katsura-kotonoha.sakura.ne.jp/prog/c/tip0000a.shtml
@@ -52,4 +54,27 @@ vector<string> split(string str, char del) {
     }
  
     return result;
+}
+
+int get_size(ifstream &ifs){
+    string str;
+
+	getline(ifs, str);
+    vector<string> result = split(str, ',');
+
+	return atoi(result[3].c_str());
+}
+
+void set_matrix_from_csv(int **matrix, ifstream &ifs){
+    string str;
+    vector<string> result;
+    while(getline(ifs, str)){
+        result = split(str, ',');
+
+        int nodeFrom = atoi(result[0].c_str());
+        int nodeTo = atoi(result[1].c_str());
+        int cost = atoi(result[2].c_str());
+        matrix[nodeFrom][nodeTo] = cost;
+        matrix[nodeTo][nodeFrom] = cost;
+    }
 }

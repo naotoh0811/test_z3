@@ -1,19 +1,13 @@
 // https://algorithmbeginner.blogspot.com/2018/02/blog-post_21.html
 #include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
-#include <cstdlib>
 #include "../func.h"
 using namespace std;
-#define MAX 100
 #define INFTY 1<<22
 #define WHITE 0 // unfixed
 #define BLACK 1 // fixed
 
-int gMatrix[MAX][MAX];
 
-void dijkstra(int size, int startNode_index){
+void dijkstra(int **matrix, int size, int startNode_index){
     // minimum cost
     int minCost;
     // cost from startNode
@@ -48,10 +42,10 @@ void dijkstra(int size, int startNode_index){
         color[minNode_index] = BLACK;
         
         for(int adjNode_index = 0; adjNode_index < size; ++adjNode_index){
-            if(color[adjNode_index] != BLACK && gMatrix[minNode_index][adjNode_index] != INFTY){
+            if(color[adjNode_index] != BLACK && matrix[minNode_index][adjNode_index] != INFTY){
                 // update cost and prevNode
-                if(cost[adjNode_index] > cost[minNode_index] + gMatrix[minNode_index][adjNode_index]){
-                    cost[adjNode_index] = cost[minNode_index] + gMatrix[minNode_index][adjNode_index];
+                if(cost[adjNode_index] > cost[minNode_index] + matrix[minNode_index][adjNode_index]){
+                    cost[adjNode_index] = cost[minNode_index] + matrix[minNode_index][adjNode_index];
                     prevNode[adjNode_index] = minNode_index;
                 }
             }
@@ -77,34 +71,28 @@ void dijkstra(int size, int startNode_index){
 
 int main(){
     ifstream ifs("network.csv");
-    string str;
-    vector<string> result;
-    
-    // ignore first line
-    getline(ifs, str);
 
-    int size = 0;
-    while(getline(ifs, str)){
-        result = split(str, ',');
+    // get size
+    int size = get_size(ifs);
 
-        // set size and initialize matrix
-        if(size == 0){
-            size = atoi(result[3].c_str());
-            for(int i = 0; i < size; ++i){
-                for(int j = 0; j < size; ++j){
-                    gMatrix[i][j] = INFTY;
-                }
-            }
+    // initialize matrix
+    int gMatrix[size][size];
+    for(int i = 0; i < size; ++i){
+        for(int j = 0; j < size; ++j){
+            gMatrix[i][j] = INFTY;
         }
-
-        int nodeFrom = atoi(result[0].c_str());
-        int nodeTo = atoi(result[1].c_str());
-        int cost = atoi(result[2].c_str());
-        gMatrix[nodeFrom][nodeTo] = cost;
-        gMatrix[nodeTo][nodeFrom] = cost;
     }
 
+    // prepare for arg
+    int *matrix_arg[size];
+    for (int i = 0; i < size; i++) matrix_arg[i] = gMatrix[i];
+
+    // set cost from csv
+    set_matrix_from_csv(matrix_arg, ifs);
+
     int startNode_index = 0;
-    dijkstra(size, startNode_index);
+
+    dijkstra(matrix_arg, size, startNode_index);
+
     return 0;
 }
