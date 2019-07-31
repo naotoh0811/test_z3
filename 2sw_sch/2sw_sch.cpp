@@ -108,7 +108,7 @@ void find_model_example(int i_sw, int *cycle_time, int num_flow, int ocu_time) {
 
 int main(int argc, char *argv[]) {
     int cycle_time1[] = {20, 30, 40, 60};
-    int cycle_time2[] = {20, 50};
+    int cycle_time2[] = {20000, 50000};
     int num_flow1 = sizeof(cycle_time1) / sizeof(*cycle_time1);
     int num_flow2 = sizeof(cycle_time2) / sizeof(*cycle_time2);
     try {
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
     }
 
     try {
-        find_model_example(2, cycle_time2, num_flow2, 3);
+        find_model_example(2, cycle_time2, num_flow2, 30);
         std::cout << "\n";
         std::cout << "done\n";
     }

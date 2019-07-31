@@ -1,10 +1,7 @@
 // https://algorithmbeginner.blogspot.com/2018/02/blog-post_21.html
 #include <iostream>
-#include <stdio.h>
 #include <string>
 #include <fstream>
-#include <sstream>
-#include <cstdlib>
 #include <vector>
 #include "../func.h"
 using namespace std;
