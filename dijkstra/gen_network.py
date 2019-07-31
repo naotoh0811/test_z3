@@ -37,10 +37,10 @@ def gen_pdf(filename):
 def csv_to_edge_labels(filename):
     df = pd.read_csv(filename)
     edge_labels = {}
-    for i in range(9):
-        nodeFrom = int(df.loc[[i], 'nodeFrom'])
-        nodeTo = int(df.loc[[i], 'nodeTo'])
-        cost = int(df.loc[[i], 'cost'])
+    for row in df.itertuples():
+        nodeFrom = row.nodeFrom
+        nodeTo = row.nodeTo
+        cost = row.cost
         edge_labels[(nodeFrom, nodeTo)] = cost
     
     return edge_labels

@@ -78,15 +78,6 @@ void dijkstra(int size, int startNode_index){
 }
 
 int main(){
-    int size = 8;
-    int startNode_index = 0;
-    
-    for(int i = 0; i < size; ++i){
-        for(int j = 0; j < size; ++j){
-            gMatrix[i][j] = INFTY;
-        }
-    }
-
     ifstream ifs("network.csv");
     string str;
     vector<string> result;
@@ -94,8 +85,20 @@ int main(){
     // ignore first line
     getline(ifs, str);
 
+    int size = 0;
     while(getline(ifs, str)){
         result = split(str, ',');
+
+        // set size and initialize matrix
+        if(size == 0){
+            size = atoi(result[3].c_str());
+            for(int i = 0; i < size; ++i){
+                for(int j = 0; j < size; ++j){
+                    gMatrix[i][j] = INFTY;
+                }
+            }
+        }
+
         int nodeFrom = atoi(result[0].c_str());
         int nodeTo = atoi(result[1].c_str());
         int cost = atoi(result[2].c_str());
@@ -103,6 +106,7 @@ int main(){
         gMatrix[nodeTo][nodeFrom] = cost;
     }
 
+    int startNode_index = 0;
     dijkstra(size, startNode_index);
     return 0;
 }

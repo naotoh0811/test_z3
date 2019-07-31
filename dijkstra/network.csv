@@ -1,5 +1,5 @@
-nodeFrom,nodeTo,cost
-0,1,10
+nodeFrom,nodeTo,cost,nodeNum
+0,1,10,8
 1,2,10
 4,7,20
 6,7,10
