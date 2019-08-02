@@ -89,8 +89,8 @@ int main(){
 
     // set cost from csv
     vector<network_status> ns_vec;
-    ns_vec = set_matrix_from_csv(matrix_arg, ifs);
-    set_matrix(matrix_arg, ns_vec, size);
+    ns_vec = csv_to_status(matrix_arg, ifs);
+    set_matrix(matrix_arg, ns_vec);
 
     // for(int i = 0; i < size; i++){
     //     for (int ii = 0; ii < size; ii++){

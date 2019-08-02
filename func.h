@@ -77,7 +77,7 @@ struct network_status{
 	}
 };
 
-vector<network_status> set_matrix_from_csv(int **matrix, ifstream &ifs){
+vector<network_status> csv_to_status(int **matrix, ifstream &ifs){
     string str;
     vector<string> result;
 	vector<network_status> ns_vec;
@@ -89,16 +89,13 @@ vector<network_status> set_matrix_from_csv(int **matrix, ifstream &ifs){
         int cost = atoi(result[2].c_str());
 
 		ns_vec.push_back(network_status(nodeFrom, nodeTo, cost));
-
-        //matrix[nodeFrom][nodeTo] = cost;
-        //matrix[nodeTo][nodeFrom] = cost;
-
     }
 	return ns_vec;
 }
 
-void set_matrix(int **matrix, vector<network_status> ns_vec, int size){
+void set_matrix(int **matrix, vector<network_status> ns_vec){
 	for(auto itr : ns_vec){
-		matrix[itr.nodeFrom][itr.nodeTo] = itr.cost;		
+		matrix[itr.nodeFrom][itr.nodeTo] = itr.cost;
+		matrix[itr.nodeTo][itr.nodeFrom] = itr.cost;
 	}
 }
