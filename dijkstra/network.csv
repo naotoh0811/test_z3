@@ -1,4 +1,4 @@
-nodeFrom,nodeTo,cost,8
+nodeFrom,nodeTo,cost
 0,1,10
 1,2,10
 4,7,20

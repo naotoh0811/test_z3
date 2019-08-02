@@ -59,15 +59,6 @@ std::vector<std::string> split(std::string str, char del) {
     return result;
 }
 
-int get_size(std::ifstream &ifs){
-    std::string str;
-
-	getline(ifs, str);
-    std::vector<std::string> result = split(str, ',');
-
-	return atoi(result[3].c_str());
-}
-
 struct network_status{
 	int nodeFrom;
 	int nodeTo;
@@ -86,7 +77,7 @@ bool check_int(std::string str)
     else return false;
 }
 
-std::vector<network_status> csv_to_status(int **matrix, std::ifstream &ifs){
+std::vector<network_status> csv_to_status(std::ifstream &ifs){
     std::string str;
     std::vector<std::string> result;
 	std::vector<network_status> ns_vec;
@@ -94,7 +85,7 @@ std::vector<network_status> csv_to_status(int **matrix, std::ifstream &ifs){
         result = split(str, ',');
 
 		// skip header
-		if(!check_int(result[0])) continue;
+		if(!check_int(result[2])) continue;
 
         int nodeFrom = atoi(result[0].c_str());
         int nodeTo = atoi(result[1].c_str());
@@ -105,7 +96,7 @@ std::vector<network_status> csv_to_status(int **matrix, std::ifstream &ifs){
 	return ns_vec;
 }
 
-int get_size2(std::vector<network_status> ns_vec){
+int get_size(std::vector<network_status> ns_vec){
 	std::vector<int> nodes;
 	for(auto itr : ns_vec){
 		nodes.push_back(itr.nodeFrom);

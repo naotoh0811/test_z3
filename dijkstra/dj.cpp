@@ -72,8 +72,12 @@ void dijkstra(int **matrix, int size, int startNode_index){
 int main(){
     ifstream ifs("network.csv");
 
-    // get size
-    int size = get_size(ifs);
+    // read status from csv
+    vector<network_status> ns_vec;
+    ns_vec = csv_to_status(ifs);
+
+    // set size
+    int size = get_size(ns_vec);
 
     // initialize matrix
     int gMatrix[size][size];
@@ -87,12 +91,8 @@ int main(){
     int *matrix_arg[size];
     for (int i = 0; i < size; i++) matrix_arg[i] = gMatrix[i];
 
-    // set cost from csv
-    vector<network_status> ns_vec;
-    ns_vec = csv_to_status(matrix_arg, ifs);
+    //set cost
     set_matrix(matrix_arg, ns_vec);
-
-    size = get_size2(ns_vec);
 
     // for(int i = 0; i < size; i++){
     //     for (int ii = 0; ii < size; ii++){
