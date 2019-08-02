@@ -3,7 +3,10 @@
 #include <vector>
 #include <fstream>
 #include <cstdlib>
-using namespace std;
+// for all_of
+#include <cctype>
+#include <algorithm>
+//using namespace std;
 
 // http://katsura-kotonoha.sakura.ne.jp/prog/c/tip0000a.shtml
 int gcd(int m, int n){
@@ -34,21 +37,21 @@ int multi_lcm(int *num, int size){
 }
 
 // https://www.sejuku.net/blog/49378#find_first_of
-vector<string> split(string str, char del) {
+std::vector<std::string> split(std::string str, char del) {
     int first = 0;
     int last = str.find_first_of(del);
  
-    vector<string> result;
+    std::vector<std::string> result;
  
     while (first < str.size()) {
-        string subStr(str, first, last - first);
+        std::string subStr(str, first, last - first);
  
         result.push_back(subStr);
  
         first = last + 1;
         last = str.find_first_of(del, first);
  
-        if (last == string::npos) {
+        if (last == std::string::npos) {
             last = str.size();
         }
     }
@@ -56,11 +59,11 @@ vector<string> split(string str, char del) {
     return result;
 }
 
-int get_size(ifstream &ifs){
-    string str;
+int get_size(std::ifstream &ifs){
+    std::string str;
 
 	getline(ifs, str);
-    vector<string> result = split(str, ',');
+    std::vector<std::string> result = split(str, ',');
 
 	return atoi(result[3].c_str());
 }
@@ -77,12 +80,20 @@ struct network_status{
 	}
 };
 
-vector<network_status> csv_to_status(int **matrix, ifstream &ifs){
-    string str;
-    vector<string> result;
-	vector<network_status> ns_vec;
+bool check_int(std::string str)
+{
+    if (std::all_of(str.cbegin(), str.cend(), isdigit)) return true;
+    else return false;
+}
+
+std::vector<network_status> csv_to_status(int **matrix, std::ifstream &ifs){
+    std::string str;
+    std::vector<std::string> result;
+	std::vector<network_status> ns_vec;
     while(getline(ifs, str)){
         result = split(str, ',');
+
+		if(!check_int(result[0])) continue;
 
         int nodeFrom = atoi(result[0].c_str());
         int nodeTo = atoi(result[1].c_str());
@@ -93,7 +104,7 @@ vector<network_status> csv_to_status(int **matrix, ifstream &ifs){
 	return ns_vec;
 }
 
-void set_matrix(int **matrix, vector<network_status> ns_vec){
+void set_matrix(int **matrix, std::vector<network_status> ns_vec){
 	for(auto itr : ns_vec){
 		matrix[itr.nodeFrom][itr.nodeTo] = itr.cost;
 		matrix[itr.nodeTo][itr.nodeFrom] = itr.cost;
