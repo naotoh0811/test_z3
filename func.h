@@ -93,6 +93,7 @@ std::vector<network_status> csv_to_status(int **matrix, std::ifstream &ifs){
     while(getline(ifs, str)){
         result = split(str, ',');
 
+		// skip header
 		if(!check_int(result[0])) continue;
 
         int nodeFrom = atoi(result[0].c_str());
@@ -102,6 +103,18 @@ std::vector<network_status> csv_to_status(int **matrix, std::ifstream &ifs){
 		ns_vec.push_back(network_status(nodeFrom, nodeTo, cost));
     }
 	return ns_vec;
+}
+
+int get_size2(std::vector<network_status> ns_vec){
+	std::vector<int> nodes;
+	for(auto itr : ns_vec){
+		nodes.push_back(itr.nodeFrom);
+		nodes.push_back(itr.nodeTo);
+	}
+	std::sort(nodes.begin(), nodes.end());
+	nodes.erase(std::unique(nodes.begin(), nodes.end()), nodes.end());
+
+	return nodes.size();
 }
 
 void set_matrix(int **matrix, std::vector<network_status> ns_vec){
