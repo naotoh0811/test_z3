@@ -94,13 +94,6 @@ int main(){
     //set cost
     set_matrix(matrix_arg, ns_vec);
 
-    // for(int i = 0; i < size; i++){
-    //     for (int ii = 0; ii < size; ii++){
-    //         cout << gMatrix[i][ii] << ", ";
-    //     }
-    //     cout << endl;
-    // }
-    
     int startNode_index = 0;
 
     dijkstra(matrix_arg, size, startNode_index);

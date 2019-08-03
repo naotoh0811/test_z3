@@ -55,7 +55,7 @@ if __name__ == '__main__':
         [ 0,  0,  0, 20,  0,  0, 10,  0],
         [ 0,  0,  0,  0,  0, 10,  0, 10],
         [30,  0,  0,  0, 20,  0, 10,  0]
-    ]
+    ] # not used
 
     #edge_labels = gen_edge_labels_from_matrix(networkMatrix)
     edge_labels = csv_to_edge_labels('network.csv')
