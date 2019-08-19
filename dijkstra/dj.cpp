@@ -1,6 +1,6 @@
 // https://algorithmbeginner.blogspot.com/2018/02/blog-post_21.html
 #include <iostream>
-#include "../func.h"
+#include "dj_func.h"
 using namespace std;
 #define INFTY 1<<22
 #define WHITE 0 // unfixed
