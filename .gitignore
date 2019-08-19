@@ -1,4 +1,5 @@
 g++.txt
 *.out
+*.o
 .vscode/
 
