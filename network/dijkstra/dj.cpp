@@ -70,7 +70,7 @@ void dijkstra(int **matrix, int size, int startNode_index){
 }
 
 int main(){
-    ifstream ifs("network.csv");
+    ifstream ifs("../network/network.csv");
 
     // read status from csv
     vector<network_status> ns_vec;
