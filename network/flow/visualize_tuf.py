@@ -34,8 +34,7 @@ def plot_exp(ax, val_ini, coef):
 def data_plot(data):
     for i, flow in enumerate(data):
         fig = plt.figure()
-        ax = fig.add_subplot(111)
-        plt.rcParams['axes.xmargin'] = 0
+        ax = fig.add_subplot(111, xmargin=0)
 
         val_ini = flow['val_ini']
         start_x = 0
