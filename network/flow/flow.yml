@@ -5,8 +5,8 @@
   size : 5
   val_ini : 10
   tuf :
-    - [3, liner, 0]
-    - [5, liner, -5]
+    - [3, linear, 0]
+    - [5, linear, -5]
 - name : flow2
   src : 2
   dst : 3

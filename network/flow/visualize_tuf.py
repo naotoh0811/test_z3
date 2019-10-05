@@ -16,7 +16,7 @@ def make_pdf(index):
     pp.close()
     plt.clf()
 
-def plot_liner(ax, start_x, end_x, start_y, end_y):
+def plot_linear(ax, start_x, end_x, start_y, end_y):
     ax.plot([start_x, end_x], [start_y, end_y], 'k')
     ax.set_ylim(0,)
 
@@ -46,10 +46,10 @@ def data_plot(data):
             time = tuf[0]
             shape = tuf[1]
             coef = tuf[2]
-            if shape == 'liner':
+            if shape == 'linear':
                 end_x = time
                 end_y = end_y + coef * (time - start_x)
-                plot_liner(ax, start_x, end_x, start_y, end_y)
+                plot_linear(ax, start_x, end_x, start_y, end_y)
                 start_x = end_x
                 start_y = end_y
             elif shape == 'step':
