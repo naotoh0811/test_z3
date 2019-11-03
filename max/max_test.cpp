@@ -5,6 +5,10 @@
 using namespace z3;
 
 
+int calc(int a){
+	return a*2;
+}
+
 void opt_example() {
     context c;
     optimize opt(c);
@@ -19,12 +23,12 @@ void opt_example() {
     hoge.push_back(c.int_const("hoge0"));
     hoge.push_back(c.int_const("hoge1"));
 
-    opt.add(2 * x <= 4);
-    opt.add(x + 2 * z <= 8);
-    opt.add(3 * y + z <= 6);
-    opt.add(x >= 0);
-    opt.add(y >= 0);
-    opt.add(z >= 0);
+	int a = 1;
+	//opt.add(x == a);
+    opt.add(x == calc(a)); //calc(x)はcalc(1)とみなされる
+    //opt.add(x <= 10);
+    opt.add(y <= 10);
+    opt.add(z <= 10);
     opt.add(hoge[0] == 0);
     optimize::handle h1 = opt.maximize(3 * x + 4 * y + 2 * z);
     
@@ -36,8 +40,10 @@ void opt_example() {
                 func_decl v = m[i];
                 std::cout << v.name() << " = " << m.get_const_interp(v) << "\n";
             }
+		break;
         }
         else {
+			std::cout << "unsat" << "\n";
             break;
         }
     }

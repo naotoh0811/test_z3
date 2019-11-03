@@ -80,7 +80,7 @@ if r == sat:
     #印字
     for i in range(n):
         for j in range(n):
-            print "%d " % m[ val[i][j] ].as_long(),
+            print("%d " % m[ val[i][j] ].as_long(), end="")
         print()
 else:
     print(r)

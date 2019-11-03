@@ -1,25 +1,30 @@
 //https://stackoverflow.com/questions/30596915/how-to-use-z3-c-api-to-solve-array-theory
 #include"z3++.h"
+# include <vector>
 
 using namespace z3;
 
 void find_model_example(int x_min) {
     context c;
-    unsigned i=0,j;
     expr_vector T(c);
     solver s(c);
 
-    for(; i<20; i++){
+    std::vector<expr_vector> hoge;
+    hoge.push_back(expr_vector(c));
+    hoge[0].push_back(c.int_const("hoge0_0"));
+    hoge[0].push_back(c.int_const("hoge0_1"));
+    s.add(hoge[0][0] == 10);
+
+    for(int i = 0; i<20; i++){
         std::stringstream Tname;
         Tname<<"Tname_"<<i;
         T.push_back(c.int_const(Tname.str().c_str()));
     }
 
-    for(i=0; i<20; i++){
-        for(j=0; j<20;j++){
+    for(int i=0; i<20; i++){
+        for(int j=0; j<20;j++){
             if(j == i){
                 s.add(T[i] != T[j]);
-
             }
         }
     }
