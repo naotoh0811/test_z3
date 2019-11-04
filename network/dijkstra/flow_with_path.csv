@@ -1,0 +1,4 @@
+name,cycle,node_list,ocu_time
+flow1,20,0 1,5
+flow2,30,0 1 2,5
+flow3,60,1 2,5
