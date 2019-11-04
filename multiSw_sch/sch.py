@@ -17,15 +17,25 @@ def lcm_list(numbers):
 def csv_to_flow_info(filename):
     df = pd.read_csv(filename)
     flow_info = []
+    i_flow_dic_cum = {}
     for row in df.itertuples():
         name = row.name
         cycle = int(row.cycle)
+
         node_list = row.node_list.split()
         node_list = [int(i) for i in node_list]
-        i_flow_list = row.i_flow_list.split()
-        i_flow_list = [int(i) for i in i_flow_list]
+
+        i_flow_dic = {}
+        for node in node_list:
+            if node in i_flow_dic_cum:
+                i_flow_dic_cum[node] += 1
+            else:
+                i_flow_dic_cum[node] = 0
+            i_flow_dic[node] = i_flow_dic_cum[node]
+
         ocu_time = row.ocu_time
-        flow_info.append({"name": name, "cycle": cycle, "node_list": node_list, "i_flow_list": i_flow_list, "ocu_time": ocu_time})
+
+        flow_info.append({"name": name, "cycle": cycle, "node_list": node_list, "i_flow_dic": i_flow_dic, "ocu_time": ocu_time})
 
     return flow_info
 
@@ -86,11 +96,12 @@ s = Solver()
 for each_flow in flow_info:
     node_list = each_flow["node_list"]
     cycle = each_flow["cycle"]
-    i_flow_list = each_flow["i_flow_list"]
+    i_flow_dic = each_flow["i_flow_dic"]
     ocu_time = each_flow["ocu_time"]
     prev_i_node = NOT_DEFINE
     prev_i_flow = NOT_DEFINE
-    for (i_node, i_flow) in zip(node_list, i_flow_list):
+    for i_node in node_list:
+        i_flow = i_flow_dic[i_node]
         superCycle = superCycle_dic[i_node]
 
         for i_win in range(numWin_dic[i_node][i_flow]):

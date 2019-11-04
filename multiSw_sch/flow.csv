@@ -1,4 +1,4 @@
-name,cycle,node_list,i_flow_list,ocu_time
-flow0,20,0,0,1
-flow1,30,0 1 2,1 0 0,1
-flow2,60,0 1,2 1,1
+name,cycle,node_list,ocu_time
+flow0,20,0,1
+flow1,30,0 1 2,1
+flow2,60,1 2,1
