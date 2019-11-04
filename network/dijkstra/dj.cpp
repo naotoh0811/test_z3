@@ -7,7 +7,7 @@ using namespace std;
 #define BLACK 1 // fixed
 
 
-void dijkstra(int **matrix, int size, int startNode_index){
+void dijkstra(int **matrix, int size, int startNode_index, int dstNode_index){
     // minimum cost
     int minCost;
     // cost from startNode
@@ -52,24 +52,47 @@ void dijkstra(int **matrix, int size, int startNode_index){
         }
     }
 
-    // result output
-    for(int i = 0;i < size;++i){
-        // distance
-        cout << "node" << startNode_index << " to node" << i
-             << " : distance = " << ( cost[i] == INFTY ? -1 : cost[i] ) << endl;
+    // all result output
+    // for(int i = 0; i < size; ++i){
+    //     // distance
+    //     cout << "node" << startNode_index << " to node" << i
+    //          << " : distance = " << ( cost[i] == INFTY ? -1 : cost[i] ) << endl;
 
-        // path
-        int prevprevNode = prevNode[i];
-        cout << i << " <- ";
-        while(prevprevNode != startNode_index){
-            cout << prevprevNode << " <- ";
-            prevprevNode = prevNode[prevprevNode];
-        }
-        cout << prevprevNode << endl;
+    //     // path
+    //     int prevprevNode = prevNode[i];
+    //     cout << i << " <- ";
+    //     while(prevprevNode != startNode_index){
+    //         cout << prevprevNode << " <- ";
+    //         prevprevNode = prevNode[prevprevNode];
+    //     }
+    //     cout << prevprevNode << endl;
+    // }
+
+    // to dest node
+    //// distance
+    // cout << "node" << startNode_index << " to node" << dstNode_index
+    //         << " : distance = " << ( cost[dstNode_index] == INFTY ? -1 : cost[dstNode_index] ) << endl;
+
+    //// path
+    // int prevprevNode = prevNode[dstNode_index];
+    // cout << dstNode_index << " <- ";
+    // while(prevprevNode != startNode_index){
+    //     cout << prevprevNode << " <- ";
+    //     prevprevNode = prevNode[prevprevNode];
+    // }
+    // cout << prevprevNode << endl;
+
+    //// output for data
+    cout << startNode_index << " " << dstNode_index << ",";
+    int prevprevNode = prevNode[dstNode_index];
+    while(prevprevNode != startNode_index){
+        cout << prevprevNode << " ";
+        prevprevNode = prevNode[prevprevNode];
     }
+    cout << endl;
 }
 
-int main(){
+int main(int argc, char *argv[]){
     ifstream ifs("../network/network.csv");
 
     // read status from csv
@@ -94,9 +117,17 @@ int main(){
     //set cost
     set_matrix(matrix_arg, ns_vec);
 
-    int startNode_index = 0;
+    int startNode_index = 3;
+    int dstNode_index = 5;
+    if (argc != 3){
+        cout << "not valid arg" << endl;
+        return 1;
+    } else{
+        startNode_index = atoi(argv[1]);
+        dstNode_index = atoi(argv[2]);
+    }
 
-    dijkstra(matrix_arg, size, startNode_index);
+    dijkstra(matrix_arg, size, startNode_index, dstNode_index);
 
     return 0;
 }
