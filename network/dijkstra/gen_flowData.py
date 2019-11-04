@@ -20,8 +20,7 @@ def gen_csv_from_data(data, csv_filename):
         output = output.stdout.decode("utf8")
         # delete \n
         output = output.rstrip('\n')
-        nodes_reverse = output.split(",")[1]
-        node_list_reverse = nodes_reverse.split()
+        node_list_reverse = output.split()
         node_list = list(reversed(node_list_reverse))
 
         file_output = name + "," + str(cycle) + ","
@@ -34,12 +33,12 @@ def gen_csv_from_data(data, csv_filename):
             f.write(file_output)
 
 def write_first_line(csv_filename):
+    with open(csv_filename, 'w'):
+        pass
     with open(csv_filename, 'a') as f:
         f.write("name,cycle,node_list,ocu_time\n")
 
 if __name__ == "__main__":
     data = read_yaml('../flow/flow.yml')
     csv_filename = 'flow_with_path.csv'
-    with open(csv_filename, 'w'):
-        pass
     gen_csv_from_data(data, csv_filename)

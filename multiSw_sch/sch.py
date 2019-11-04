@@ -26,7 +26,8 @@ def csv_to_flow_info(filename):
         node_list = [int(i) for i in node_list]
 
         i_flow_dic = {}
-        for node in node_list:
+        node_list_only_sw = node_list[1:-1]
+        for node in node_list_only_sw:
             if node in i_flow_dic_cum:
                 i_flow_dic_cum[node] += 1
             else:
@@ -43,7 +44,9 @@ def gen_cycleInSw_dic(flow_info):
     num_flow = len(flow_info)
     cycleInSw_dic = {}
     for each_flow in flow_info:
-        for node in each_flow["node_list"]:
+        node_list = each_flow["node_list"]
+        node_list_only_sw = node_list[1:-1]
+        for node in node_list_only_sw:
             if not node in cycleInSw_dic:
                 cycleInSw_dic[node] = []
             cycleInSw_dic[node].append(each_flow["cycle"])
@@ -72,13 +75,32 @@ def gen_numFlow_in_sw_dic(cycleInSw_dic):
 
     return numFlow_in_sw_dic
 
+def gen_nextNode_in_sw_dic(flow_info, numFlow_in_sw_dic):
+    nextNode_in_sw_dic = {}
+    # init
+    for (node, numFlow) in zip(numFlow_in_sw_dic.keys(), numFlow_in_sw_dic.values()):
+        nextNode_in_sw_dic[node] = ["-"] * numFlow
+
+    for each_flow in flow_info:
+        node_list = each_flow["node_list"]
+        node_list = node_list[1:]
+        i_flow_dic = each_flow["i_flow_dic"]
+        for i_node_list in range(len(node_list)-1):
+            node = node_list[i_node_list]
+            nextNode = node_list[i_node_list+1]
+            i_flow = i_flow_dic[node]
+            nextNode_in_sw_dic[node][i_flow] = nextNode
+
+    return nextNode_in_sw_dic
+
 link_delay = 5
-flow_info = csv_to_flow_info("flow.csv")
+flow_info = csv_to_flow_info("../network/dijkstra/flow_with_path.csv")
 cycleInSw_dic = gen_cycleInSw_dic(flow_info) # {0: [20, 30, 60], 1: [30, 60], 2: [30]}
 superCycle_dic = gen_superCycle_dic(cycleInSw_dic) # {0: 60, 1: 60, 2: 30}
 numWin_dic = gen_numWin_dic(cycleInSw_dic, superCycle_dic) # {0: [3, 2, 1], 1: [2, 1], 2: [1]}
 numFlow_in_sw_dic = gen_numFlow_in_sw_dic(cycleInSw_dic) # {0: 3, 1: 2, 2: 1}
 num_sw = len(numFlow_in_sw_dic)
+nextNode_in_sw_dic = gen_nextNode_in_sw_dic(flow_info, numFlow_in_sw_dic)
 
 open_time = []
 close_time = []
@@ -95,12 +117,13 @@ s = Solver()
 
 for each_flow in flow_info:
     node_list = each_flow["node_list"]
+    node_list_only_sw = node_list[1:-1]
     cycle = each_flow["cycle"]
     i_flow_dic = each_flow["i_flow_dic"]
     ocu_time = each_flow["ocu_time"]
     prev_i_node = NOT_DEFINE
     prev_i_flow = NOT_DEFINE
-    for i_node in node_list:
+    for i_node in node_list_only_sw:
         i_flow = i_flow_dic[i_node]
         superCycle = superCycle_dic[i_node]
 
@@ -122,19 +145,25 @@ for each_flow in flow_info:
 
         # next node
         if prev_i_node != NOT_DEFINE:
-            s.add(open_time[i_node][i_flow][0] - open_time[prev_i_node][prev_i_flow][0] == link_delay)
+            s.add(open_time[i_node][i_flow][0] - close_time[prev_i_node][prev_i_flow][0] == link_delay)
 
         prev_i_node = i_node
         prev_i_flow = i_flow
 
 # exclusiveness
-for i_sw in range(num_sw): # 0,1,2
+for i_sw in range(num_sw): # 0,1,2  sw_dicを作って回したほうがいいか
     for i_flow in range(numFlow_in_sw_dic[i_sw]): # i_sw=0なら0,1,2
+        nextNode = nextNode_in_sw_dic[i_sw][i_flow]
         for i_win in range(numWin_dic[i_sw][i_flow]): #[0][0]なら0,1,2
+            # each win to another win
             for i2_flow in range(numFlow_in_sw_dic[i_sw]):
+                nextNode2 = nextNode_in_sw_dic[i_sw][i2_flow]
+                # apply exclusiveness only when the next nodes of i,i2 are equal
+                if i_flow >= i2_flow or nextNode != nextNode2:
+                    continue
                 for i2_win in range(numWin_dic[i_sw][i2_flow]):
-                    if i_flow < i2_flow:
-                        s.add(Or(close_time[i_sw][i_flow][i_win] <= open_time[i_sw][i2_flow][i2_win], open_time[i_sw][i_flow][i_win] >= close_time[i_sw][i2_flow][i2_win]))
+                    s.add(Or(close_time[i_sw][i_flow][i_win] <= open_time[i_sw][i2_flow][i2_win], open_time[i_sw][i_flow][i_win] >= close_time[i_sw][i2_flow][i2_win]))
+                    #print(i_sw, i_flow, nextNode, i2_flow, nextNode2)
 
 r = s.check()
 if r == sat:

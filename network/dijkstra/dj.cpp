@@ -83,13 +83,13 @@ void dijkstra(int **matrix, int size, int startNode_index, int dstNode_index){
     // cout << prevprevNode << endl;
 
     //// output for data
-    cout << startNode_index << " " << dstNode_index << ",";
+    cout << dstNode_index << " ";
     int prevprevNode = prevNode[dstNode_index];
     while(prevprevNode != startNode_index){
         cout << prevprevNode << " ";
         prevprevNode = prevNode[prevprevNode];
     }
-    cout << endl;
+    cout << startNode_index << endl;
 }
 
 int main(int argc, char *argv[]){
