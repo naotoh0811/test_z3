@@ -141,9 +141,16 @@ for each_flow in flow_info:
     deadline = each_flow["deadline"]
     prev_i_node = NOT_DEFINE
     prev_i_flow = NOT_DEFINE
+
+    # 0 > time
+    s.add(send_time[src_node] >= 0)
+    # deadline
+    s.add(recv_time[dst_node] - send_time[src_node] <= deadline-1)
+
     for i_node in node_list_only_sw:
         i_flow = i_flow_dic[i_node]
         superCycle = superCycle_dic[i_node]
+        i_last_win = numWin_dic[i_node][i_flow] - 1
 
         for i_win in range(numWin_dic[i_node][i_flow]):
             # fisrt window > 0
@@ -151,22 +158,7 @@ for each_flow in flow_info:
                 s.add(open_time[i_node][i_flow][i_win] >= 0)
             
             # cycle time
-
-            # if i_win != numWin_dic[i_node][i_flow] - 1:
-            #     s.add(open_time[i_node][i_flow][i_win+1] - open_time[i_node][i_flow][i_win] == cycle)
-            # else: # last win
-            #     s.add( (superCycle - open_time[i_node][i_flow][i_win]) + (open_time[i_node][i_flow][0] - 0) == cycle )
-            #     # last window < superCycle
-            #     s.add(close_time[i_node][i_flow][i_win] <= superCycle)
-
-            # if i_win != numWin_dic[i_node][i_flow] - 1: # not last
-            #     s.add(Or(open_time[i_node][i_flow][i_win+1] - open_time[i_node][i_flow][i_win] == cycle, (superCycle - open_time[i_node][i_flow][i_win]) + open_time[i_node][i_flow][i_win+1] == cycle))
-            # else: # last win
-            #     s.add(Or(open_time[i_node][i_flow][0] - open_time[i_node][i_flow][i_win] == cycle, (superCycle - open_time[i_node][i_flow][i_win]) + open_time[i_node][i_flow][0] == cycle))
-
-            if i_win == 0: # fisrt win
-                s.add(open_time[i_node][i_flow][i_win] - send_time[src_node] >= link_delay)
-            if i_win != numWin_dic[i_node][i_flow] - 1: # not first, last
+            if i_win != i_last_win: # not last win
                 s.add(open_time[i_node][i_flow][i_win+1] - open_time[i_node][i_flow][i_win] == cycle)
             else: # last win
                 # 最悪の場合 (closeの瞬間に転送)を想定
@@ -175,32 +167,31 @@ for each_flow in flow_info:
                 # 精々2サイクル分くらいで十分か
                 s.add(close_time[i_node][i_flow][i_win] < superCycle*2)
 
+            # window does not stride over cycle end point
             # exclusivenessの制約付与の際にこれがないと不具合
             # 正直、適切でない
-            s.add(close_time[i_node][i_flow][i_win] % superCycle != 0)
+            s.add(open_time[i_node][i_flow][i_win] % superCycle < close_time[i_node][i_flow][i_win] % superCycle)
 
-            # 0 < time < superCycle
-            # s.add(open_time[i_node][i_flow][i_win] >= 0)
-            # s.add(close_time[i_node][i_flow][i_win] <= superCycle)
-            
             # occupancy time
             s.add(close_time[i_node][i_flow][i_win] - open_time[i_node][i_flow][i_win] == ocu_time)
 
-        # 0 > time
-        s.add(send_time[src_node] >= 0)
-
-        # next node
-        if prev_i_node != NOT_DEFINE: # not first sw
-            # s.add(Or(open_time[i_node][i_flow][0] - close_time[prev_i_node][prev_i_flow][0] >= link_delay, open_time[i_node][i_flow][0] + (superCycle - close_time[prev_i_node][prev_i_flow][0]) >= link_delay))
+        if i_node == node_list_only_sw[0]: # first sw
+            # from src_node
+            s.add(open_time[i_node][i_flow][i_win] - send_time[src_node] >= link_delay)
+        else: # not first sw
+            if i_node == node_list_only_sw[-1]: # last sw
+                # to dst_node
+                # 最悪の場合 (closeの瞬間に転送)を想定
+                s.add(recv_time[dst_node] - close_time[i_node][i_flow][i_last_win] >= link_delay)
+                # これがないと計算時間が無限になる
+                # 精々2サイクル分くらいで十分か
+                s.add(close_time[i_node][i_flow][i_last_win] < superCycle*2)
+                
+            # next node
             s.add(open_time[i_node][i_flow][0] - close_time[prev_i_node][prev_i_flow][0] >= link_delay)
-        # else: # first sw
-        #     s.add(Or(open_time[i_node][i_flow][0] - send_time[src_node] >= link_delay, open_time[i_node][i_flow][0] + (superCycle - send_time[src_node]) >= link_delay))
 
         prev_i_node = i_node
         prev_i_flow = i_flow
-
-    # deadline
-    s.add(recv_time[dst_node] - send_time[src_node] <= deadline)
 
 # exclusiveness
 for i_sw in range(num_sw): # 0,1,2  sw_dicを作って回したほうがいいか
@@ -271,4 +262,3 @@ for each_flow in flow_info:
         print("")
     print(m[recv_time[dst_node]])
     print("")
-    
