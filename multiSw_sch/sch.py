@@ -35,8 +35,9 @@ def csv_to_flow_info(filename):
             i_flow_dic[node] = i_flow_dic_cum[node]
 
         ocu_time = row.ocu_time
+        deadline = row.deadline
 
-        flow_info.append({"name": name, "cycle": cycle, "node_list": node_list, "i_flow_dic": i_flow_dic, "ocu_time": ocu_time})
+        flow_info.append({"name": name, "cycle": cycle, "node_list": node_list, "i_flow_dic": i_flow_dic, "ocu_time": ocu_time, "deadline": deadline})
 
     return flow_info
 
@@ -93,7 +94,7 @@ def gen_nextNode_in_sw_dic(flow_info, numFlow_in_sw_dic):
 
     return nextNode_in_sw_dic
 
-link_delay = 5
+link_delay = 10
 flow_info = csv_to_flow_info("../network/dijkstra/flow_with_path.csv")
 cycleInSw_dic = gen_cycleInSw_dic(flow_info) # {0: [20, 30, 60], 1: [30, 60], 2: [30]}
 superCycle_dic = gen_superCycle_dic(cycleInSw_dic) # {0: 60, 1: 60, 2: 30}
@@ -102,6 +103,8 @@ numFlow_in_sw_dic = gen_numFlow_in_sw_dic(cycleInSw_dic) # {0: 3, 1: 2, 2: 1}
 num_sw = len(numFlow_in_sw_dic)
 nextNode_in_sw_dic = gen_nextNode_in_sw_dic(flow_info, numFlow_in_sw_dic)
 
+# define variable
+## define open_time, close_time for sw
 open_time = []
 close_time = []
 for i_node in range(num_sw):
@@ -113,10 +116,24 @@ for i_node in range(num_sw):
         open_time[i_node].append(IntVector(val_name_open, numWin_dic[i_node][i_flow]))
         close_time[i_node].append(IntVector(val_name_close, numWin_dic[i_node][i_flow]))
 
+## define send_time, recv_time for cli
+send_time = {}
+recv_time = {}
+for each_flow in flow_info:
+    node_list = each_flow["node_list"]
+    src_node = node_list[0]
+    dst_node = node_list[-1]
+    val_name_send = "send_time[" + str(src_node) +"]"
+    val_name_recv = "recv_time[" + str(dst_node) +"]"
+    send_time[src_node] = Int(val_name_send)
+    recv_time[dst_node] = Int(val_name_recv)
+
 s = Solver()
 
 for each_flow in flow_info:
     node_list = each_flow["node_list"]
+    src_node = node_list[0]
+    dst_node = node_list[-1]
     node_list_only_sw = node_list[1:-1]
     cycle = each_flow["cycle"]
     i_flow_dic = each_flow["i_flow_dic"]
@@ -133,25 +150,50 @@ for each_flow in flow_info:
                 s.add(open_time[i_node][i_flow][i_win] >= 0)
             
             # cycle time
-            if i_win != numWin_dic[i_node][i_flow] - 1:
+
+            # if i_win != numWin_dic[i_node][i_flow] - 1:
+            #     s.add(open_time[i_node][i_flow][i_win+1] - open_time[i_node][i_flow][i_win] == cycle)
+            # else: # last win
+            #     s.add( (superCycle - open_time[i_node][i_flow][i_win]) + (open_time[i_node][i_flow][0] - 0) == cycle )
+            #     # last window < superCycle
+            #     s.add(close_time[i_node][i_flow][i_win] <= superCycle)
+
+            # if i_win != numWin_dic[i_node][i_flow] - 1: # not last
+            #     s.add(Or(open_time[i_node][i_flow][i_win+1] - open_time[i_node][i_flow][i_win] == cycle, (superCycle - open_time[i_node][i_flow][i_win]) + open_time[i_node][i_flow][i_win+1] == cycle))
+            # else: # last win
+            #     s.add(Or(open_time[i_node][i_flow][0] - open_time[i_node][i_flow][i_win] == cycle, (superCycle - open_time[i_node][i_flow][i_win]) + open_time[i_node][i_flow][0] == cycle))
+
+            if i_win == 0: # fisrt win
+                s.add(open_time[i_node][i_flow][i_win] - send_time[src_node] >= link_delay)
+            if i_win != numWin_dic[i_node][i_flow] - 1: # not first, last
                 s.add(open_time[i_node][i_flow][i_win+1] - open_time[i_node][i_flow][i_win] == cycle)
             else: # last win
-                s.add( (superCycle - open_time[i_node][i_flow][i_win]) + (open_time[i_node][i_flow][0] - 0) == cycle )
-                # last window < superCycle
-                s.add(close_time[i_node][i_flow][i_win] <= superCycle)
+                # 最悪の場合 (closeの瞬間に転送)を想定
+                s.add(recv_time[dst_node] - close_time[i_node][i_flow][i_win] >= link_delay)
+
+            # 0 < time < superCycle
+            # s.add(open_time[i_node][i_flow][i_win] >= 0)
+            # s.add(close_time[i_node][i_flow][i_win] <= superCycle)
             
             # occupancy time
             s.add(close_time[i_node][i_flow][i_win] - open_time[i_node][i_flow][i_win] == ocu_time)
 
+        # 0 > time
+        s.add(send_time[src_node] >= 0)
+
         # next node
-        if prev_i_node != NOT_DEFINE:
-            s.add(open_time[i_node][i_flow][0] - close_time[prev_i_node][prev_i_flow][0] == link_delay)
+        if prev_i_node != NOT_DEFINE: # not first sw
+            # s.add(Or(open_time[i_node][i_flow][0] - close_time[prev_i_node][prev_i_flow][0] >= link_delay, open_time[i_node][i_flow][0] + (superCycle - close_time[prev_i_node][prev_i_flow][0]) >= link_delay))
+            s.add(open_time[i_node][i_flow][0] - close_time[prev_i_node][prev_i_flow][0] >= link_delay)
+        # else: # first sw
+        #     s.add(Or(open_time[i_node][i_flow][0] - send_time[src_node] >= link_delay, open_time[i_node][i_flow][0] + (superCycle - send_time[src_node]) >= link_delay))
 
         prev_i_node = i_node
         prev_i_flow = i_flow
 
 # exclusiveness
 for i_sw in range(num_sw): # 0,1,2  sw_dicを作って回したほうがいいか
+    superCycle = superCycle_dic[i_sw]
     for i_flow in range(numFlow_in_sw_dic[i_sw]): # i_sw=0なら0,1,2
         nextNode = nextNode_in_sw_dic[i_sw][i_flow]
         for i_win in range(numWin_dic[i_sw][i_flow]): #[0][0]なら0,1,2
@@ -162,8 +204,9 @@ for i_sw in range(num_sw): # 0,1,2  sw_dicを作って回したほうがいい�
                 if i_flow >= i2_flow or nextNode != nextNode2:
                     continue
                 for i2_win in range(numWin_dic[i_sw][i2_flow]):
-                    s.add(Or(close_time[i_sw][i_flow][i_win] <= open_time[i_sw][i2_flow][i2_win], open_time[i_sw][i_flow][i_win] >= close_time[i_sw][i2_flow][i2_win]))
+                    s.add(Or(close_time[i_sw][i_flow][i_win] % superCycle <= open_time[i_sw][i2_flow][i2_win] % superCycle, open_time[i_sw][i_flow][i_win] % superCycle >= close_time[i_sw][i2_flow][i2_win] % superCycle))
                     #print(i_sw, i_flow, nextNode, i2_flow, nextNode2)
+
 
 r = s.check()
 if r == sat:
@@ -180,14 +223,14 @@ for (i_o, i_c) in zip(open_time, close_time):
         print("")
     print("")
 
-for (i_o, i_c) in zip(open_time, close_time):
-    for (j_o, j_c) in zip(i_o, i_c):
-        prev_close = 0
-        for (k_o, k_c) in zip(j_o, j_c):
-            t_o = m[k_o].as_long()
-            t_c = m[k_c].as_long()
-            print("-" * (t_o - prev_close), end="")
-            print("+" * (t_c - t_o), end="")
-            prev_close = t_c
-        print("")
-    print("")
+# for (i_o, i_c) in zip(open_time, close_time):
+#     for (j_o, j_c) in zip(i_o, i_c):
+#         prev_close = 0
+#         for (k_o, k_c) in zip(j_o, j_c):
+#             t_o = m[k_o].as_long()
+#             t_c = m[k_c].as_long()
+#             print("-" * (t_o - prev_close), end="")
+#             print("+" * (t_c - t_o), end="")
+#             prev_close = t_c
+#         print("")
+#     print("")

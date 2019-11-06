@@ -14,6 +14,7 @@ def gen_csv_from_data(data, csv_filename):
         dst = flow["dst"]
         cycle = flow["cycle"]
         size = flow["size"]
+        deadline = flow["deadline"]
 
         output = subprocess.run(["./main.o", str(src), str(dst)], stdout=subprocess.PIPE)
         # convert to str
@@ -27,7 +28,7 @@ def gen_csv_from_data(data, csv_filename):
         for node in node_list:
             file_output += node + " "
         file_output = file_output.rstrip(' ')
-        file_output += "," + str(size) + "\n"
+        file_output += "," + str(size) + "," + str(deadline) + "\n"
 
         with open(csv_filename, 'a') as f:
             f.write(file_output)
@@ -36,9 +37,9 @@ def write_first_line(csv_filename):
     with open(csv_filename, 'w'):
         pass
     with open(csv_filename, 'a') as f:
-        f.write("name,cycle,node_list,ocu_time\n")
+        f.write("name,cycle,node_list,ocu_time,deadline\n")
 
 if __name__ == "__main__":
-    data = read_yaml('../flow/flow.yml')
+    data = read_yaml('../flow/flow_hard.yml')
     csv_filename = 'flow_with_path.csv'
     gen_csv_from_data(data, csv_filename)
