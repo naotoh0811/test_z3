@@ -186,7 +186,7 @@ for each_flow in flow_info:
                 # これがないと計算時間が無限になる
                 # 精々2サイクル分くらいで十分か
                 s.add(close_time[i_node][i_flow][i_last_win] < superCycle*2)
-                
+
             # next node
             s.add(open_time[i_node][i_flow][0] - close_time[prev_i_node][prev_i_flow][0] >= link_delay)
 
@@ -220,26 +220,23 @@ else:
     exit()
 
 
-for (i_o, i_c) in zip(open_time, close_time):
-    for (j_o, j_c) in zip(i_o, i_c):
-        for (k_o, k_c) in zip(j_o, j_c):
-            print(m[k_o], m[k_c], end="|")
+for i_sw in range(num_sw):
+    superCycle = superCycle_dic[i_sw]
+    print("sw" + str(i_sw) + " cycle = " + str(superCycle))
+    for i_flow in range(numFlow_in_sw_dic[i_sw]):
+        nextNode = nextNode_in_sw_dic[i_sw][i_flow]
+        print("nextNode: " + str(nextNode))
+        for i_win in range(numWin_dic[i_sw][i_flow]):
+            real_open_time = m[open_time[i_sw][i_flow][i_win]].as_long() % superCycle
+            real_close_time = m[close_time[i_sw][i_flow][i_win]].as_long() % superCycle
+            print(real_open_time, real_close_time, end="|")
         print("")
     print("")
 
-# for (i_o, i_c) in zip(open_time, close_time):
-#     for (j_o, j_c) in zip(i_o, i_c):
-#         prev_close = 0
-#         for (k_o, k_c) in zip(j_o, j_c):
-#             t_o = m[k_o].as_long()
-#             t_c = m[k_c].as_long()
-#             print("-" * (t_o - prev_close), end="")
-#             print("+" * (t_c - t_o), end="")
-#             prev_close = t_c
-#         print("")
-#     print("")
+print("--------------------")
 
 for each_flow in flow_info:
+    name = each_flow["name"]
     node_list = each_flow["node_list"]
     src_node = node_list[0]
     dst_node = node_list[-1]
@@ -248,17 +245,18 @@ for each_flow in flow_info:
     i_flow_dic = each_flow["i_flow_dic"]
     ocu_time = each_flow["ocu_time"]
     
-    print(m[send_time[src_node]])
+    print(name + ": ")
+    print("send_time: " + str(m[send_time[src_node]].as_long()))
     for i_node in node_list_only_sw:
         superCycle = superCycle_dic[i_node]
         i_flow = i_flow_dic[i_node]
         for i_win in range(numWin_dic[i_node][i_flow]):
-            # real_open_time = m[open_time[i_node][i_flow][i_win]].as_long() % superCycle
-            # real_close_time = m[close_time[i_node][i_flow][i_win]].as_long() % superCycle
-            real_open_time = m[open_time[i_node][i_flow][i_win]].as_long()
-            real_close_time = m[close_time[i_node][i_flow][i_win]].as_long()
+            real_open_time = m[open_time[i_node][i_flow][i_win]].as_long() % superCycle
+            real_close_time = m[close_time[i_node][i_flow][i_win]].as_long() % superCycle
+            # real_open_time = m[open_time[i_node][i_flow][i_win]].as_long()
+            # real_close_time = m[close_time[i_node][i_flow][i_win]].as_long()
 
             print(real_open_time, real_close_time, end="|")
         print("")
-    print(m[recv_time[dst_node]])
+    print("recv_time: " + str(m[recv_time[dst_node]].as_long()))
     print("")
