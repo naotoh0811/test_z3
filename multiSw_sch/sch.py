@@ -2,6 +2,7 @@ from z3 import *
 import math
 from functools import reduce
 import pandas as pd
+import yaml
 
 NOT_DEFINE = 1000
 
@@ -260,3 +261,29 @@ for each_flow in flow_info:
         print("")
     print("recv_time: " + str(m[recv_time[dst_node]].as_long()))
     print("")
+
+yaml_output = []
+for i_sw in range(num_sw):
+    yaml_each_sw = {}
+    superCycle = superCycle_dic[i_sw]
+    yaml_each_sw["name"] = i_sw
+
+    yaml_controls = []
+    for i_flow in range(numFlow_in_sw_dic[i_sw]):
+        nextNode = nextNode_in_sw_dic[i_sw][i_flow]
+        yaml_each_control = {}
+        yaml_each_control["nextNode"] = nextNode
+        yaml_each_control["open_close"] = []
+        for i_win in range(numWin_dic[i_sw][i_flow]):
+            real_open_time = m[open_time[i_sw][i_flow][i_win]].as_long() % superCycle
+            real_close_time = m[close_time[i_sw][i_flow][i_win]].as_long() % superCycle
+            time_list = [real_open_time, real_close_time]
+            yaml_each_control["open_close"].append(time_list)
+        yaml_controls.append(yaml_each_control)
+    yaml_each_sw["control"] = yaml_controls
+
+    yaml_output.append(yaml_each_sw)
+print(yaml_output)
+
+f = open("gcl_sw.yml", "w")
+f.write(yaml.dump(yaml_output))

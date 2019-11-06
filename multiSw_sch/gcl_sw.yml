@@ -1,0 +1,48 @@
+- control:
+  - nextNode: 1
+    open_close:
+    - - 40
+      - 45
+    - - 0
+      - 5
+    - - 20
+      - 25
+  - nextNode: 1
+    open_close:
+    - - 15
+      - 20
+    - - 45
+      - 50
+  name: 0
+- control:
+  - nextNode: 5
+    open_close:
+    - - 14
+      - 19
+    - - 34
+      - 39
+    - - 54
+      - 59
+  - nextNode: 2
+    open_close:
+    - - 0
+      - 5
+    - - 30
+      - 35
+  - nextNode: 2
+    open_close:
+    - - 39
+      - 44
+  name: 1
+- control:
+  - nextNode: 7
+    open_close:
+    - - 24
+      - 29
+    - - 54
+      - 59
+  - nextNode: 8
+    open_close:
+    - - 54
+      - 59
+  name: 2
