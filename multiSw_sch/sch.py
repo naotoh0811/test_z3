@@ -138,6 +138,7 @@ for each_flow in flow_info:
     cycle = each_flow["cycle"]
     i_flow_dic = each_flow["i_flow_dic"]
     ocu_time = each_flow["ocu_time"]
+    deadline = each_flow["deadline"]
     prev_i_node = NOT_DEFINE
     prev_i_flow = NOT_DEFINE
     for i_node in node_list_only_sw:
@@ -170,6 +171,13 @@ for each_flow in flow_info:
             else: # last win
                 # 最悪の場合 (closeの瞬間に転送)を想定
                 s.add(recv_time[dst_node] - close_time[i_node][i_flow][i_win] >= link_delay)
+                # これがないと計算時間が無限になる
+                # 精々2サイクル分くらいで十分か
+                s.add(close_time[i_node][i_flow][i_win] < superCycle*2)
+
+            # exclusivenessの制約付与の際にこれがないと不具合
+            # 正直、適切でない
+            s.add(close_time[i_node][i_flow][i_win] % superCycle != 0)
 
             # 0 < time < superCycle
             # s.add(open_time[i_node][i_flow][i_win] >= 0)
@@ -191,6 +199,9 @@ for each_flow in flow_info:
         prev_i_node = i_node
         prev_i_flow = i_flow
 
+    # deadline
+    s.add(recv_time[dst_node] - send_time[src_node] <= deadline)
+
 # exclusiveness
 for i_sw in range(num_sw): # 0,1,2  sw_dicを作って回したほうがいいか
     superCycle = superCycle_dic[i_sw]
@@ -204,8 +215,10 @@ for i_sw in range(num_sw): # 0,1,2  sw_dicを作って回したほうがいい�
                 if i_flow >= i2_flow or nextNode != nextNode2:
                     continue
                 for i2_win in range(numWin_dic[i_sw][i2_flow]):
-                    s.add(Or(close_time[i_sw][i_flow][i_win] % superCycle <= open_time[i_sw][i2_flow][i2_win] % superCycle, open_time[i_sw][i_flow][i_win] % superCycle >= close_time[i_sw][i2_flow][i2_win] % superCycle))
-                    #print(i_sw, i_flow, nextNode, i2_flow, nextNode2)
+                    s.add(Or( \
+                        close_time[i_sw][i_flow][i_win] % superCycle <= open_time[i_sw][i2_flow][i2_win] % superCycle, \
+                        open_time[i_sw][i_flow][i_win] % superCycle >= close_time[i_sw][i2_flow][i2_win] % superCycle \
+                    ))
 
 
 r = s.check()
@@ -234,3 +247,28 @@ for (i_o, i_c) in zip(open_time, close_time):
 #             prev_close = t_c
 #         print("")
 #     print("")
+
+for each_flow in flow_info:
+    node_list = each_flow["node_list"]
+    src_node = node_list[0]
+    dst_node = node_list[-1]
+    node_list_only_sw = node_list[1:-1]
+    cycle = each_flow["cycle"]
+    i_flow_dic = each_flow["i_flow_dic"]
+    ocu_time = each_flow["ocu_time"]
+    
+    print(m[send_time[src_node]])
+    for i_node in node_list_only_sw:
+        superCycle = superCycle_dic[i_node]
+        i_flow = i_flow_dic[i_node]
+        for i_win in range(numWin_dic[i_node][i_flow]):
+            # real_open_time = m[open_time[i_node][i_flow][i_win]].as_long() % superCycle
+            # real_close_time = m[close_time[i_node][i_flow][i_win]].as_long() % superCycle
+            real_open_time = m[open_time[i_node][i_flow][i_win]].as_long()
+            real_close_time = m[close_time[i_node][i_flow][i_win]].as_long()
+
+            print(real_open_time, real_close_time, end="|")
+        print("")
+    print(m[recv_time[dst_node]])
+    print("")
+    
