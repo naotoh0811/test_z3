@@ -285,15 +285,25 @@ def output_result_yaml_sw(flow_infos, m, output_filename):
     f = open(output_filename, "w")
     f.write(yaml.dump(yaml_output))
 
-def output_result_yaml_cli(flow_list, m, output_filename):
+def output_result_yaml_cli_send(flow_list, m, output_filename):
     yaml_output = []
     for each_flow in flow_list:
         src_node = each_flow["node_list"][0]
+        nextNode = each_flow["node_list"][1]
         cycle = each_flow["cycle"]
         real_send_time = m[send_time[src_node]].as_long()
 
-        yaml_each_cli = {"name": src_node, "cycle": cycle, "send": real_send_time}
+        yaml_each_cli = {"name": src_node, "nextNode": nextNode, "cycle": cycle, "send": real_send_time}
         yaml_output.append(yaml_each_cli)
+
+    f = open(output_filename, "w")
+    f.write(yaml.dump(yaml_output))
+
+def output_yaml_cli_recv(flow_list, output_filename):
+    yaml_output = []
+    for each_flow in flow_list:
+        dst_node = each_flow["node_list"][-1]
+        yaml_output.append({"name": dst_node})
 
     f = open(output_filename, "w")
     f.write(yaml.dump(yaml_output))
@@ -325,4 +335,5 @@ if __name__ == "__main__":
     print("--------------------")
     print_result_each_flow(flow_list, flow_infos, m)
     output_result_yaml_sw(flow_infos, m, 'gcl_sw.yml')
-    output_result_yaml_cli(flow_list, m, 'gcl_cli.yml')
+    output_result_yaml_cli_send(flow_list, m, 'gcl_cli_send.yml')
+    output_yaml_cli_recv(flow_list, 'cli_recv_list.yml')

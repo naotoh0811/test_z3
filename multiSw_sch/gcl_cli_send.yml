@@ -1,9 +1,12 @@
 - cycle: 20
   name: 3
+  nextNode: 0
   send: 30
 - cycle: 30
   name: 4
+  nextNode: 0
   send: 35
 - cycle: 60
   name: 6
+  nextNode: 1
   send: 30
