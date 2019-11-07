@@ -246,7 +246,7 @@ def print_result_each_flow(flow_list, flow_infos, m):
         print("recv_time: " + str(m[recv_time[dst_node]].as_long()))
         print("")
 
-def output_result_yaml(flow_infos, m, output_filename):
+def output_result_yaml_sw(flow_infos, m, output_filename):
     yaml_output = []
     for i_sw in range(flow_infos.num_sw):
         yaml_each_sw = {}
@@ -264,6 +264,7 @@ def output_result_yaml(flow_infos, m, output_filename):
                 one_open_close = [real_open_time, real_close_time]
                 all_open_close.append(one_open_close)
 
+            # if the nextNode already exists in yaml_controls, add times to it
             nextNode = flow_infos.nextNode_in_sw_dic[i_sw][i_flow]
             for i_control, each_control_dic in enumerate(yaml_controls):
                 if nextNode == each_control_dic["nextNode"]:
@@ -280,6 +281,19 @@ def output_result_yaml(flow_infos, m, output_filename):
         yaml_each_sw["control"] = yaml_controls
 
         yaml_output.append(yaml_each_sw)
+
+    f = open(output_filename, "w")
+    f.write(yaml.dump(yaml_output))
+
+def output_result_yaml_cli(flow_list, m, output_filename):
+    yaml_output = []
+    for each_flow in flow_list:
+        src_node = each_flow["node_list"][0]
+        cycle = each_flow["cycle"]
+        real_send_time = m[send_time[src_node]].as_long()
+
+        yaml_each_cli = {"name": src_node, "cycle": cycle, "send": real_send_time}
+        yaml_output.append(yaml_each_cli)
 
     f = open(output_filename, "w")
     f.write(yaml.dump(yaml_output))
@@ -310,5 +324,5 @@ if __name__ == "__main__":
     print_result_each_sw(flow_infos, m)
     print("--------------------")
     print_result_each_flow(flow_list, flow_infos, m)
-    output_result_yaml(flow_infos, m, 'gcl_sw.yml')
-    
+    output_result_yaml_sw(flow_infos, m, 'gcl_sw.yml')
+    output_result_yaml_cli(flow_list, m, 'gcl_cli.yml')

@@ -1,0 +1,9 @@
+- cycle: 20
+  name: 3
+  send: 30
+- cycle: 30
+  name: 4
+  send: 35
+- cycle: 60
+  name: 6
+  send: 30
