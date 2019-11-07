@@ -5,7 +5,7 @@
 - cycle: 30
   name: 4
   nextNode: 0
-  send: 35
+  send: 30
 - cycle: 60
   name: 6
   nextNode: 1

@@ -146,12 +146,6 @@ def add_constraint(flow_list, flow_info, s):
                 # cycle time
                 if i_win != i_last_win: # not last win
                     s.add(open_time[i_node][i_flow][i_win+1] - open_time[i_node][i_flow][i_win] == cycle)
-                else: # last win
-                    # 最悪の場合 (closeの瞬間に転送)を想定
-                    s.add(recv_time[dst_node] - close_time[i_node][i_flow][i_win] >= link_delay)
-                    # これがないと計算時間が無限になる
-                    # 精々2サイクル分くらいで十分か
-                    s.add(close_time[i_node][i_flow][i_win] < superCycle*2)
 
                 # window does not stride over cycle end point
                 # exclusivenessの制約付与の際にこれがないと不具合
