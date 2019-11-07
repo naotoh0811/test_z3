@@ -254,21 +254,32 @@ def output_result_yaml(flow_infos, m, output_filename):
         yaml_each_sw["name"] = i_sw
 
         yaml_controls = []
+        isAdded = False
         for i_flow in range(flow_infos.numFlow_in_sw_dic[i_sw]):
-            nextNode = flow_infos.nextNode_in_sw_dic[i_sw][i_flow]
-            yaml_each_control = {}
-            yaml_each_control["nextNode"] = nextNode
-            yaml_each_control["open_close"] = []
+
+            all_open_close = []
             for i_win in range(flow_infos.numWin_dic[i_sw][i_flow]):
                 real_open_time = m[open_time[i_sw][i_flow][i_win]].as_long() % superCycle
                 real_close_time = m[close_time[i_sw][i_flow][i_win]].as_long() % superCycle
-                time_list = [real_open_time, real_close_time]
-                yaml_each_control["open_close"].append(time_list)
-            yaml_controls.append(yaml_each_control)
+                one_open_close = [real_open_time, real_close_time]
+                all_open_close.append(one_open_close)
+
+            nextNode = flow_infos.nextNode_in_sw_dic[i_sw][i_flow]
+            for i_control, each_control_dic in enumerate(yaml_controls):
+                if nextNode == each_control_dic["nextNode"]:
+                    yaml_controls[i_control]["open_close"] += all_open_close
+                    isAdded = True
+                    break
+
+            if not isAdded:
+                yaml_each_control = {}
+                yaml_each_control["nextNode"] = nextNode
+                yaml_each_control["open_close"] = all_open_close
+                yaml_controls.append(yaml_each_control)
+
         yaml_each_sw["control"] = yaml_controls
 
         yaml_output.append(yaml_each_sw)
-    #print(yaml_output)
 
     f = open(output_filename, "w")
     f.write(yaml.dump(yaml_output))
