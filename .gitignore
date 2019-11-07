@@ -2,4 +2,4 @@ g++.txt
 *.out
 *.o
 .vscode/
-
+__pycache__/
