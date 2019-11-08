@@ -1,5 +1,6 @@
 - control:
   - nextNode: 1
+    nextNode_kind: switch
     open_close:
     - - 40
       - 45
@@ -11,9 +12,11 @@
       - 20
     - - 45
       - 50
+  cycle: 60
   name: 0
 - control:
   - nextNode: 5
+    nextNode_kind: node
     open_close:
     - - 14
       - 19
@@ -22,6 +25,7 @@
     - - 54
       - 59
   - nextNode: 2
+    nextNode_kind: switch
     open_close:
     - - 0
       - 5
@@ -29,16 +33,20 @@
       - 35
     - - 39
       - 44
+  cycle: 60
   name: 1
 - control:
   - nextNode: 7
+    nextNode_kind: node
     open_close:
     - - 24
       - 29
     - - 54
       - 59
   - nextNode: 8
+    nextNode_kind: node
     open_close:
     - - 54
       - 59
+  cycle: 60
   name: 2

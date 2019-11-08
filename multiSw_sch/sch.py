@@ -85,11 +85,18 @@ def gen_nextNode_in_sw_dic(flow_list, numFlow_in_sw_dic):
 
     return nextNode_in_sw_dic
 
+def gen_sw_list(cycleInSw_dic):
+    sw_list = []
+    for key in cycleInSw_dic.keys():
+        sw_list.append(key)
+
+    return sw_list
+
 def define_variables_sw(flow_infos):
     ## define open_time, close_time for sw
     open_time = []
     close_time = []
-    for i_node in range(flow_infos.num_sw):
+    for i_node in flow_infos.sw_list:
         open_time.append([])
         close_time.append([])
         for i_flow in range(flow_infos.numFlow_in_sw_dic[i_node]):
@@ -174,7 +181,7 @@ def add_constraint(flow_list, flow_info, s):
             prev_i_flow = i_flow
 
     # exclusiveness
-    for i_sw in range(flow_infos.num_sw): # 0,1,2  sw_dicを作って回したほうがいいか
+    for i_sw in flow_infos.sw_list: # 0,1,2
         superCycle = flow_infos.superCycle_dic[i_sw]
         for i_flow in range(flow_infos.numFlow_in_sw_dic[i_sw]): # i_sw=0なら0,1,2
             nextNode = flow_infos.nextNode_in_sw_dic[i_sw][i_flow]
@@ -200,7 +207,7 @@ def check_solver(s):
         exit()
 
 def print_result_each_sw(flow_infos, m):
-    for i_sw in range(flow_infos.num_sw):
+    for i_sw in flow_infos.sw_list:
         superCycle = flow_infos.superCycle_dic[i_sw]
         print("sw" + str(i_sw) + " cycle = " + str(superCycle))
         for i_flow in range(flow_infos.numFlow_in_sw_dic[i_sw]):
@@ -242,9 +249,10 @@ def print_result_each_flow(flow_list, flow_infos, m):
 
 def output_result_yaml_sw(flow_infos, m, output_filename):
     yaml_output = []
-    for i_sw in range(flow_infos.num_sw):
+    for i_sw in flow_infos.sw_list:
         yaml_each_sw = {}
         superCycle = flow_infos.superCycle_dic[i_sw]
+        yaml_each_sw["cycle"] = superCycle
         yaml_each_sw["name"] = i_sw
 
         yaml_controls = []
@@ -269,6 +277,7 @@ def output_result_yaml_sw(flow_infos, m, output_filename):
             if not isAdded:
                 yaml_each_control = {}
                 yaml_each_control["nextNode"] = nextNode
+                yaml_each_control["nextNode_kind"] = "switch" if nextNode in flow_infos.sw_list else "node"
                 yaml_each_control["open_close"] = all_open_close
                 yaml_controls.append(yaml_each_control)
 
@@ -311,7 +320,8 @@ class Flow_infos:
         self.superCycle_dic = gen_superCycle_dic(self.cycleInSw_dic) # {0: 60, 1: 60, 2: 30}
         self.numWin_dic = gen_numWin_dic(self.cycleInSw_dic, self.superCycle_dic) # {0: [3, 2, 1], 1: [2, 1], 2: [1]}
         self.numFlow_in_sw_dic = gen_numFlow_in_sw_dic(self.cycleInSw_dic) # {0: 3, 1: 2, 2: 1}
-        self.num_sw = len(self.numFlow_in_sw_dic)
+        self.sw_list = gen_sw_list(self.cycleInSw_dic)
+        self.num_sw = len(self.sw_list)
         self.nextNode_in_sw_dic = gen_nextNode_in_sw_dic(self.flow_list, self.numFlow_in_sw_dic)
 
 
