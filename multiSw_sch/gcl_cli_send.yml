@@ -1,12 +1,22 @@
 - cycle: 20
   name: 3
-  nextNode: 0
+  pass_node_list:
+  - 0
+  - 1
+  - 5
   send: 30
 - cycle: 30
   name: 4
-  nextNode: 0
+  pass_node_list:
+  - 0
+  - 1
+  - 2
+  - 7
   send: 30
 - cycle: 60
   name: 6
-  nextNode: 1
+  pass_node_list:
+  - 1
+  - 2
+  - 8
   send: 30

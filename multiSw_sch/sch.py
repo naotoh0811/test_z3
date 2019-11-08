@@ -283,11 +283,12 @@ def output_result_yaml_cli_send(flow_list, m, output_filename):
     yaml_output = []
     for each_flow in flow_list:
         src_node = each_flow["node_list"][0]
-        nextNode = each_flow["node_list"][1]
+        # nextNode = each_flow["node_list"][1]
+        pass_node_list = each_flow["node_list"][1:]
         cycle = each_flow["cycle"]
         real_send_time = m[send_time[src_node]].as_long()
 
-        yaml_each_cli = {"name": src_node, "nextNode": nextNode, "cycle": cycle, "send": real_send_time}
+        yaml_each_cli = {"name": src_node, "pass_node_list": pass_node_list, "cycle": cycle, "send": real_send_time}
         yaml_output.append(yaml_each_cli)
 
     f = open(output_filename, "w")
