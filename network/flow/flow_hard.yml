@@ -1,60 +1,18 @@
 - cycle: 100
   deadline: 100
-  dst: 10
+  dst: 7
   flow_id: 0
   payload: 46
-  src: 27
+  src: 3
 - cycle: 100
   deadline: 100
-  dst: 21
+  dst: 4
   flow_id: 1
   payload: 46
-  src: 29
+  src: 8
 - cycle: 100
   deadline: 100
-  dst: 24
+  dst: 5
   flow_id: 2
   payload: 46
-  src: 15
-- cycle: 100
-  deadline: 100
-  dst: 19
-  flow_id: 3
-  payload: 46
-  src: 12
-- cycle: 100
-  deadline: 100
-  dst: 20
-  flow_id: 4
-  payload: 46
-  src: 11
-- cycle: 100
-  deadline: 100
-  dst: 28
-  flow_id: 5
-  payload: 46
-  src: 22
-- cycle: 100
-  deadline: 100
-  dst: 18
-  flow_id: 6
-  payload: 46
-  src: 26
-- cycle: 100
-  deadline: 100
-  dst: 25
-  flow_id: 7
-  payload: 46
-  src: 23
-- cycle: 100
-  deadline: 100
-  dst: 17
-  flow_id: 8
-  payload: 46
-  src: 13
-- cycle: 100
-  deadline: 100
-  dst: 14
-  flow_id: 9
-  payload: 46
-  src: 16
+  src: 6

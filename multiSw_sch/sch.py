@@ -173,16 +173,16 @@ def add_constraint(flow_list, flow_info, s):
                 # from src_node
                 s.add(open_time[i_node][i_flow][i_win] - send_time[src_node] >= link_delay)
             else: # not first sw
-                if i_node == node_list_only_sw[-1]: # last sw
-                    # to dst_node
-                    # 最悪の場合 (closeの瞬間に転送)を想定
-                    s.add(recv_time[dst_node] - close_time[i_node][i_flow][i_last_win] >= link_delay)
-                    # これがないと計算時間が無限になる
-                    # 精々2サイクル分くらいで十分か
-                    s.add(close_time[i_node][i_flow][i_last_win] < superCycle*2)
-
                 # next node
                 s.add(open_time[i_node][i_flow][0] - close_time[prev_i_node][prev_i_flow][0] >= link_delay)
+
+            if i_node == node_list_only_sw[-1]: # last sw
+                # to dst_node
+                # 最悪の場合 (closeの瞬間に転送)を想定
+                s.add(recv_time[dst_node] - close_time[i_node][i_flow][i_last_win] >= link_delay)
+                # これがないと計算時間が無限になる
+                # 精々2サイクル分くらいで十分か
+                s.add(close_time[i_node][i_flow][i_last_win] < superCycle*2)
 
             prev_i_node = i_node
             prev_i_flow = i_flow
@@ -244,8 +244,10 @@ def print_result_each_flow(flow_list, flow_infos, m):
             superCycle = flow_infos.superCycle_dic[i_node]
             i_flow = i_flow_dic[i_node]
             for i_win in range(flow_infos.numWin_dic[i_node][i_flow]):
-                real_open_time = m[open_time[i_node][i_flow][i_win]].as_long() % superCycle
-                real_close_time = m[close_time[i_node][i_flow][i_win]].as_long() % superCycle
+                # real_open_time = m[open_time[i_node][i_flow][i_win]].as_long() % superCycle
+                # real_close_time = m[close_time[i_node][i_flow][i_win]].as_long() % superCycle
+                real_open_time = m[open_time[i_node][i_flow][i_win]].as_long()
+                real_close_time = m[close_time[i_node][i_flow][i_win]].as_long()
 
                 print(real_open_time, real_close_time, end="|")
             print("")
@@ -266,8 +268,10 @@ def output_result_yaml_sw(flow_infos, m, output_filename):
 
             all_open_close = []
             for i_win in range(flow_infos.numWin_dic[i_sw][i_flow]):
-                real_open_time = m[open_time[i_sw][i_flow][i_win]].as_long() % superCycle
-                real_close_time = m[close_time[i_sw][i_flow][i_win]].as_long() % superCycle
+                # real_open_time = m[open_time[i_sw][i_flow][i_win]].as_long() % superCycle
+                # real_close_time = m[close_time[i_sw][i_flow][i_win]].as_long() % superCycle
+                real_open_time = m[open_time[i_sw][i_flow][i_win]].as_long()
+                real_close_time = m[close_time[i_sw][i_flow][i_win]].as_long()
                 one_open_close = [real_open_time, real_close_time]
                 all_open_close.append(one_open_close)
 
