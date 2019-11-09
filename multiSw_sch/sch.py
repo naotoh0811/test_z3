@@ -1,9 +1,14 @@
 from z3 import *
 import pandas as pd
 import yaml
+import math
 import lcm
 
 NOT_DEFINE = 1000
+
+light_speed = 5 * (10 ** (-3)) # in us/m
+link_length = 10
+link_bandwidth = 100 # in Mbps
 
 def get_flow_list_from_csv(filename):
     df = pd.read_csv(filename)
@@ -25,7 +30,8 @@ def get_flow_list_from_csv(filename):
                 i_flow_dic_cum[node] = 0
             i_flow_dic[node] = i_flow_dic_cum[node]
 
-        ocu_time = row.ocu_time
+        size = row.size
+        ocu_time = math.ceil(size * 8 / link_bandwidth + light_speed * link_length)
         deadline = row.deadline
 
         flow_list.append({"name": name, "cycle": cycle, "node_list": node_list, "i_flow_dic": i_flow_dic, "ocu_time": ocu_time, "deadline": deadline})
@@ -131,6 +137,7 @@ def add_constraint(flow_list, flow_info, s):
         cycle = each_flow["cycle"]
         i_flow_dic = each_flow["i_flow_dic"]
         ocu_time = each_flow["ocu_time"]
+        link_delay = ocu_time
         deadline = each_flow["deadline"]
         prev_i_node = NOT_DEFINE
         prev_i_flow = NOT_DEFINE
@@ -277,7 +284,7 @@ def output_result_yaml_sw(flow_infos, m, output_filename):
             if not isAdded:
                 yaml_each_control = {}
                 yaml_each_control["nextNode"] = nextNode
-                yaml_each_control["nextNode_kind"] = "switch" if nextNode in flow_infos.sw_list else "node"
+                # yaml_each_control["nextNode_kind"] = "switch" if nextNode in flow_infos.sw_list else "node"
                 yaml_each_control["open_close"] = all_open_close
                 yaml_controls.append(yaml_each_control)
 
@@ -292,10 +299,9 @@ def output_result_yaml_cli_send(flow_list, m, output_filename):
     yaml_output = []
     for each_flow in flow_list:
         src_node = each_flow["node_list"][0]
-        # nextNode = each_flow["node_list"][1]
         pass_node_list = each_flow["node_list"][1:]
         cycle = each_flow["cycle"]
-        real_send_time = m[send_time[src_node]].as_long()
+        real_send_time = m[send_time[src_node]].as_long() % cycle
 
         yaml_each_cli = {"name": src_node, "pass_node_list": pass_node_list, "cycle": cycle, "send": real_send_time}
         yaml_output.append(yaml_each_cli)
@@ -326,9 +332,8 @@ class Flow_infos:
 
 
 if __name__ == "__main__":
-    flow_list = get_flow_list_from_csv("../network/dijkstra/flow_with_path.csv")
+    flow_list = get_flow_list_from_csv("~/workspace/test_z3/network/dijkstra/flow_with_path.csv")
     flow_infos = Flow_infos(flow_list)
-    link_delay = 10
     open_time, close_time = define_variables_sw(flow_infos)
     send_time, recv_time = define_variables_cli(flow_list)
 

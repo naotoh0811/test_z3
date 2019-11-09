@@ -1,22 +1,22 @@
-- cycle: 20
+- cycle: 200
   name: 3
   pass_node_list:
   - 0
   - 1
   - 5
-  send: 30
-- cycle: 30
+  send: 43
+- cycle: 300
   name: 4
   pass_node_list:
   - 0
   - 1
   - 2
   - 7
-  send: 30
-- cycle: 60
+  send: 207
+- cycle: 600
   name: 6
   pass_node_list:
   - 1
   - 2
   - 8
-  send: 30
+  send: 507

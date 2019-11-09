@@ -1,52 +1,47 @@
 - control:
   - nextNode: 1
-    nextNode_kind: switch
     open_close:
-    - - 40
-      - 45
-    - - 0
-      - 5
-    - - 20
-      - 25
-    - - 15
-      - 20
-    - - 45
-      - 50
-  cycle: 60
+    - - 50
+      - 57
+    - - 250
+      - 257
+    - - 450
+      - 457
+    - - 257
+      - 264
+    - - 557
+      - 564
+  cycle: 600
   name: 0
 - control:
   - nextNode: 5
-    nextNode_kind: node
     open_close:
-    - - 14
-      - 19
-    - - 34
-      - 39
-    - - 54
-      - 59
+    - - 64
+      - 71
+    - - 264
+      - 271
+    - - 464
+      - 471
   - nextNode: 2
-    nextNode_kind: switch
     open_close:
-    - - 0
-      - 5
-    - - 30
-      - 35
-    - - 39
-      - 44
-  cycle: 60
+    - - 271
+      - 278
+    - - 571
+      - 578
+    - - 578
+      - 585
+  cycle: 600
   name: 1
 - control:
   - nextNode: 7
-    nextNode_kind: node
     open_close:
-    - - 24
-      - 29
-    - - 54
-      - 59
+    - - 292
+      - 299
+    - - 592
+      - 599
   - nextNode: 8
-    nextNode_kind: node
     open_close:
-    - - 54
-      - 59
-  cycle: 60
+    - - 592
+      - 599
+  cycle: 600
   name: 2

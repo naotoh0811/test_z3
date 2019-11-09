@@ -13,7 +13,9 @@ def gen_csv_from_data(data, csv_filename):
         src = flow['src']
         dst = flow["dst"]
         cycle = flow["cycle"]
-        size = flow["size"]
+        payload = flow["payload"]
+        header = 30
+        size = payload + header if payload + header >= 72 else 72
         deadline = flow["deadline"]
 
         output = subprocess.run(["./main.o", str(src), str(dst)], stdout=subprocess.PIPE)
@@ -37,9 +39,8 @@ def write_first_line(csv_filename):
     with open(csv_filename, 'w'):
         pass
     with open(csv_filename, 'a') as f:
-        f.write("name,cycle,node_list,ocu_time,deadline\n")
+        f.write("name,cycle,node_list,size,deadline\n")
 
 if __name__ == "__main__":
     data = read_yaml('../flow/flow_hard.yml')
-    csv_filename = 'flow_with_path.csv'
-    gen_csv_from_data(data, csv_filename)
+    gen_csv_from_data(data, 'flow_with_path.csv')
