@@ -9,7 +9,7 @@ def read_yaml(filename):
 def gen_csv_from_data(data, csv_filename):
     write_first_line(csv_filename)
     for flow in data:
-        name = flow["name"]
+        flow_id = flow["flow_id"]
         src = flow['src']
         dst = flow["dst"]
         cycle = flow["cycle"]
@@ -26,7 +26,7 @@ def gen_csv_from_data(data, csv_filename):
         node_list_reverse = output.split()
         node_list = list(reversed(node_list_reverse))
 
-        file_output = name + "," + str(cycle) + ","
+        file_output = str(flow_id) + "," + str(cycle) + ","
         for node in node_list:
             file_output += node + " "
         file_output = file_output.rstrip(' ')
@@ -39,7 +39,7 @@ def write_first_line(csv_filename):
     with open(csv_filename, 'w'):
         pass
     with open(csv_filename, 'a') as f:
-        f.write("name,cycle,node_list,size,deadline\n")
+        f.write("flow_id,cycle,node_list,size,deadline\n")
 
 if __name__ == "__main__":
     data = read_yaml('../flow/flow_hard.yml')

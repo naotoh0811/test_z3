@@ -1,22 +1,25 @@
 - cycle: 200
+  flow_id: 0
   name: 3
   pass_node_list:
   - 0
   - 1
   - 5
-  send: 43
+  send_time: 43
 - cycle: 300
+  flow_id: 1
   name: 4
   pass_node_list:
   - 0
   - 1
   - 2
   - 7
-  send: 207
+  send_time: 207
 - cycle: 600
+  flow_id: 2
   name: 6
   pass_node_list:
   - 1
   - 2
   - 8
-  send: 507
+  send_time: 507

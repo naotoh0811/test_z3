@@ -15,7 +15,7 @@ def get_flow_list_from_csv(filename):
     flow_list = []
     i_flow_dic_cum = {}
     for row in df.itertuples():
-        name = row.name
+        flow_id = row.flow_id
         cycle = int(row.cycle)
 
         node_list = row.node_list.split()
@@ -34,7 +34,7 @@ def get_flow_list_from_csv(filename):
         ocu_time = math.ceil(size * 8 / link_bandwidth + light_speed * link_length)
         deadline = row.deadline
 
-        flow_list.append({"name": name, "cycle": cycle, "node_list": node_list, "i_flow_dic": i_flow_dic, "ocu_time": ocu_time, "deadline": deadline})
+        flow_list.append({"flow_id": flow_id, "cycle": cycle, "node_list": node_list, "i_flow_dic": i_flow_dic, "ocu_time": ocu_time, "deadline": deadline})
 
     return flow_list
 
@@ -229,7 +229,7 @@ def print_result_each_sw(flow_infos, m):
 
 def print_result_each_flow(flow_list, flow_infos, m):
     for each_flow in flow_list:
-        name = each_flow["name"]
+        flow_id = each_flow["flow_id"]
         node_list = each_flow["node_list"]
         src_node = node_list[0]
         dst_node = node_list[-1]
@@ -238,20 +238,18 @@ def print_result_each_flow(flow_list, flow_infos, m):
         i_flow_dic = each_flow["i_flow_dic"]
         ocu_time = each_flow["ocu_time"]
         
-        print(name + ": ")
-        print("send_time: " + str(m[send_time[src_node]].as_long()))
+        print("flow_id: " + str(flow_id))
+        print("send_time: " + str(m[send_time[src_node]].as_long() % cycle))
         for i_node in node_list_only_sw:
             superCycle = flow_infos.superCycle_dic[i_node]
             i_flow = i_flow_dic[i_node]
             for i_win in range(flow_infos.numWin_dic[i_node][i_flow]):
                 real_open_time = m[open_time[i_node][i_flow][i_win]].as_long() % superCycle
                 real_close_time = m[close_time[i_node][i_flow][i_win]].as_long() % superCycle
-                # real_open_time = m[open_time[i_node][i_flow][i_win]].as_long()
-                # real_close_time = m[close_time[i_node][i_flow][i_win]].as_long()
 
                 print(real_open_time, real_close_time, end="|")
             print("")
-        print("recv_time: " + str(m[recv_time[dst_node]].as_long()))
+        print("recv_time: " + str(m[recv_time[dst_node]].as_long() % cycle))
         print("")
 
 def output_result_yaml_sw(flow_infos, m, output_filename):
@@ -284,7 +282,6 @@ def output_result_yaml_sw(flow_infos, m, output_filename):
             if not isAdded:
                 yaml_each_control = {}
                 yaml_each_control["nextNode"] = nextNode
-                # yaml_each_control["nextNode_kind"] = "switch" if nextNode in flow_infos.sw_list else "node"
                 yaml_each_control["open_close"] = all_open_close
                 yaml_controls.append(yaml_each_control)
 
@@ -292,22 +289,23 @@ def output_result_yaml_sw(flow_infos, m, output_filename):
 
         yaml_output.append(yaml_each_sw)
 
-    f = open(output_filename, "w")
-    f.write(yaml.dump(yaml_output))
+    with open(output_filename, "w") as f:
+        f.write(yaml.dump(yaml_output))
 
 def output_result_yaml_cli_send(flow_list, m, output_filename):
     yaml_output = []
     for each_flow in flow_list:
+        flow_id = each_flow["flow_id"]
         src_node = each_flow["node_list"][0]
         pass_node_list = each_flow["node_list"][1:]
         cycle = each_flow["cycle"]
         real_send_time = m[send_time[src_node]].as_long() % cycle
 
-        yaml_each_cli = {"name": src_node, "pass_node_list": pass_node_list, "cycle": cycle, "send": real_send_time}
+        yaml_each_cli = {"flow_id": flow_id, "name": src_node, "pass_node_list": pass_node_list, "cycle": cycle, "send_time": real_send_time}
         yaml_output.append(yaml_each_cli)
 
-    f = open(output_filename, "w")
-    f.write(yaml.dump(yaml_output))
+    with open(output_filename, "w") as f:
+        f.write(yaml.dump(yaml_output))
 
 def output_yaml_cli_recv(flow_list, output_filename):
     yaml_output = []
@@ -315,8 +313,8 @@ def output_yaml_cli_recv(flow_list, output_filename):
         dst_node = each_flow["node_list"][-1]
         yaml_output.append({"name": dst_node})
 
-    f = open(output_filename, "w")
-    f.write(yaml.dump(yaml_output))
+    with open(output_filename, "w") as f:
+        f.write(yaml.dump(yaml_output))
 
 class Flow_infos:
     def __init__(self, flow_list):
@@ -332,7 +330,7 @@ class Flow_infos:
 
 
 if __name__ == "__main__":
-    flow_list = get_flow_list_from_csv("~/workspace/test_z3/network/dijkstra/flow_with_path.csv")
+    flow_list = get_flow_list_from_csv("../network/dijkstra/flow_with_path.csv")
     flow_infos = Flow_infos(flow_list)
     open_time, close_time = define_variables_sw(flow_infos)
     send_time, recv_time = define_variables_cli(flow_list)
