@@ -144,6 +144,7 @@ def add_constraint(flow_list, flow_info, s):
 
         # 0 > time
         s.add(send_time[src_node] >= 0)
+        # s.add(send_time[src_node] <= cycle)
         # deadline
         s.add(recv_time[dst_node] - send_time[src_node] <= deadline-1)
 
@@ -171,7 +172,10 @@ def add_constraint(flow_list, flow_info, s):
 
             if i_node == node_list_only_sw[0]: # first sw
                 # from src_node
-                s.add(open_time[i_node][i_flow][i_win] - send_time[src_node] >= link_delay)
+                # 本来はi_last_winでなく0であるべきだが、なぜか0だとunsatになりがち。
+                # おそらくi_last_winでも同じ解を得られる。
+                s.add(open_time[i_node][i_flow][i_last_win] - send_time[src_node] >= link_delay)
+                # s.add(open_time[i_node][i_flow][0] - send_time[src_node] >= link_delay)
             else: # not first sw
                 # next node
                 s.add(open_time[i_node][i_flow][0] - close_time[prev_i_node][prev_i_flow][0] >= link_delay)
@@ -182,7 +186,7 @@ def add_constraint(flow_list, flow_info, s):
                 s.add(recv_time[dst_node] - close_time[i_node][i_flow][i_last_win] >= link_delay)
                 # これがないと計算時間が無限になる
                 # 精々2サイクル分くらいで十分か
-                s.add(close_time[i_node][i_flow][i_last_win] < superCycle*2)
+                s.add(close_time[i_node][i_flow][i_last_win] < superCycle*3)
 
             prev_i_node = i_node
             prev_i_flow = i_flow
@@ -238,22 +242,23 @@ def print_result_each_flow(flow_list, flow_infos, m):
         i_flow_dic = each_flow["i_flow_dic"]
         ocu_time = each_flow["ocu_time"]
         
-        print("flow_id: " + str(flow_id))
-        # print("send_time: " + str(m[send_time[src_node]].as_long() % cycle))
-        print("send_time: " + str(m[send_time[src_node]].as_long()))
+        print("flow_id: " + str(flow_id) + ", cycle: " + str(cycle) + ", node_list: " + str(node_list))
+        print("send_time: " + str(m[send_time[src_node]].as_long() % cycle))
+        # print("send_time: " + str(m[send_time[src_node]].as_long()))
         for i_node in node_list_only_sw:
             superCycle = flow_infos.superCycle_dic[i_node]
             i_flow = i_flow_dic[i_node]
+            print('sw{} (cycle: {}) -> '.format(i_node, superCycle), end="")
             for i_win in range(flow_infos.numWin_dic[i_node][i_flow]):
-                # real_open_time = m[open_time[i_node][i_flow][i_win]].as_long() % superCycle
-                # real_close_time = m[close_time[i_node][i_flow][i_win]].as_long() % superCycle
-                real_open_time = m[open_time[i_node][i_flow][i_win]].as_long()
-                real_close_time = m[close_time[i_node][i_flow][i_win]].as_long()
+                real_open_time = m[open_time[i_node][i_flow][i_win]].as_long() % superCycle
+                real_close_time = m[close_time[i_node][i_flow][i_win]].as_long() % superCycle
+                # real_open_time = m[open_time[i_node][i_flow][i_win]].as_long()
+                # real_close_time = m[close_time[i_node][i_flow][i_win]].as_long()
 
                 print(real_open_time, real_close_time, end="|")
             print("")
-        # print("recv_time: " + str(m[recv_time[dst_node]].as_long() % cycle))
-        print("recv_time: " + str(m[recv_time[dst_node]].as_long()))
+        print("recv_time: " + str(m[recv_time[dst_node]].as_long() % cycle))
+        # print("recv_time: " + str(m[recv_time[dst_node]].as_long()))
         print("")
 
 def output_result_yaml_sw(flow_infos, m, output_filename):
