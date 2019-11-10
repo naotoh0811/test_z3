@@ -239,7 +239,8 @@ def print_result_each_flow(flow_list, flow_infos, m):
         ocu_time = each_flow["ocu_time"]
         
         print("flow_id: " + str(flow_id))
-        print("send_time: " + str(m[send_time[src_node]].as_long() % cycle))
+        # print("send_time: " + str(m[send_time[src_node]].as_long() % cycle))
+        print("send_time: " + str(m[send_time[src_node]].as_long()))
         for i_node in node_list_only_sw:
             superCycle = flow_infos.superCycle_dic[i_node]
             i_flow = i_flow_dic[i_node]
@@ -251,7 +252,8 @@ def print_result_each_flow(flow_list, flow_infos, m):
 
                 print(real_open_time, real_close_time, end="|")
             print("")
-        print("recv_time: " + str(m[recv_time[dst_node]].as_long() % cycle))
+        # print("recv_time: " + str(m[recv_time[dst_node]].as_long() % cycle))
+        print("recv_time: " + str(m[recv_time[dst_node]].as_long()))
         print("")
 
 def output_result_yaml_sw(flow_infos, m, output_filename):
@@ -268,10 +270,8 @@ def output_result_yaml_sw(flow_infos, m, output_filename):
 
             all_open_close = []
             for i_win in range(flow_infos.numWin_dic[i_sw][i_flow]):
-                # real_open_time = m[open_time[i_sw][i_flow][i_win]].as_long() % superCycle
-                # real_close_time = m[close_time[i_sw][i_flow][i_win]].as_long() % superCycle
-                real_open_time = m[open_time[i_sw][i_flow][i_win]].as_long()
-                real_close_time = m[close_time[i_sw][i_flow][i_win]].as_long()
+                real_open_time = m[open_time[i_sw][i_flow][i_win]].as_long() % superCycle
+                real_close_time = m[close_time[i_sw][i_flow][i_win]].as_long() % superCycle
                 one_open_close = [real_open_time, real_close_time]
                 all_open_close.append(one_open_close)
 
@@ -288,6 +288,8 @@ def output_result_yaml_sw(flow_infos, m, output_filename):
                 yaml_each_control["nextNode"] = nextNode
                 yaml_each_control["open_close"] = all_open_close
                 yaml_controls.append(yaml_each_control)
+
+            isAdded = False
 
         yaml_each_sw["control"] = yaml_controls
 
