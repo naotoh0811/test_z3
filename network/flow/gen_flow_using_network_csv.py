@@ -14,7 +14,7 @@ def get_cli_list_from_csv(filename):
     sw_list = [int(i) for i in sw_list]
     return cli_list, sw_list
 
-def gen_flow(flow_num, node_filename, output_filename):
+def gen_flow(num_flow, node_filename, output_filename):
     cli_list, sw_list = get_cli_list_from_csv(node_filename)
 
     sw_num = len(sw_list)
@@ -23,14 +23,14 @@ def gen_flow(flow_num, node_filename, output_filename):
     light_speed = 5 * (10 ** -3)
 
     cli_num = len(cli_list)
-    #flow_num = 10
-    if flow_num > cli_num // 2:
-        print("WARNING: flow_num is too large. Now set flow_num to {}".format(cli_num // 2))
-        flow_num = cli_num // 2
+    #num_flow = 10
+    if num_flow > cli_num // 2:
+        print("WARNING: num_flow is too large. Now set num_flow to {}".format(cli_num // 2))
+        num_flow = cli_num // 2
 
     flow_dic_list = []
     flow_id = 0
-    for i in range(flow_num):
+    for i in range(num_flow):
         src_node = random.choice(cli_list)
         cli_list = [val for val in cli_list if val != src_node]
         dst_node = random.choice(cli_list)
@@ -56,19 +56,19 @@ def gen_flow(flow_num, node_filename, output_filename):
     with open(output_filename, "w") as f:
         f.write(yaml.dump(flow_dic_list))
 
-def main(flow_num):
+def main(num_flow):
     home_dir = os.path.expanduser('~')
     gen_flow( \
-        flow_num, \
+        num_flow, \
         '{}/workspace/test_z3/network/network/node.csv'.format(home_dir), \
         '{}/workspace/test_z3/network/flow/flow_hard.yml'.format(home_dir))
 
 
 if __name__ == "__main__":
-    flow_num = 3
+    num_flow = 3
     if len(sys.argv) == 2:
-        flow_num = int(sys.argv[1])
+        num_flow = int(sys.argv[1])
     else:
-        print("WARNING: arg is invalid. Now set flow_num to 3.")
+        print("WARNING: arg is invalid. Now set num_flow to 3.")
 
-    main(flow_num)
+    main(num_flow)

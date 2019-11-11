@@ -1,33 +1,55 @@
 - control:
   - nextNode: 1
     open_close:
-    - - 114
-      - 121
-    - - 14
-      - 21
-  - nextNode: 4
-    open_close:
-    - - 170
-      - 177
-  cycle: 200
+    - - 185
+      - 192
+    - - 585
+      - 592
+    - - 985
+      - 992
+    - - 1192
+      - 1199
+    - - 592
+      - 599
+  cycle: 1200
   name: 0
 - control:
+  - nextNode: 2
+    open_close:
+    - - 0
+      - 7
+    - - 400
+      - 407
+    - - 800
+      - 807
+    - - 156
+      - 163
+    - - 756
+      - 763
   - nextNode: 6
     open_close:
-    - - 92
-      - 99
-    - - 192
-      - 199
-  - nextNode: 0
-    open_close:
-    - - 192
-      - 199
-  cycle: 200
+    - - 363
+      - 370
+    - - 763
+      - 770
+    - - 1163
+      - 1170
+  cycle: 1200
   name: 1
 - control:
   - nextNode: 8
     open_close:
-    - - 0
-      - 7
-  cycle: 100
+    - - 178
+      - 185
+    - - 578
+      - 585
+    - - 978
+      - 985
+  - nextNode: 7
+    open_close:
+    - - 170
+      - 177
+    - - 770
+      - 777
+  cycle: 1200
   name: 2

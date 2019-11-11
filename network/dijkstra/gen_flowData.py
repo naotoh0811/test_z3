@@ -1,11 +1,26 @@
 import subprocess
 import yaml
 import os.path
+import network.dijkstra.dijkstra as dijkstra
 
 def read_yaml(filename):
     f = open(filename, "r+")
     data = yaml.load(f, yaml.SafeLoader)
     return data
+
+def get_path_by_dijkstra_cpp(src, dst):
+    home_dir = os.path.expanduser('~')
+    output = subprocess.run( \
+        ['{}/workspace/test_z3/network/dijkstra/main.o'.format(home_dir), str(src), str(dst)], \
+        stdout=subprocess.PIPE)
+    # convert to str
+    output = output.stdout.decode("utf8")
+    # delete \n
+    output = output.rstrip('\n')
+    node_list_reverse = output.split()
+    node_list = list(reversed(node_list_reverse))
+
+    return node_list
 
 def gen_csv_from_data(data, csv_filename):
     write_first_line(csv_filename)
@@ -19,16 +34,10 @@ def gen_csv_from_data(data, csv_filename):
         size = payload + header if payload + header >= 72 else 72
         deadline = flow["deadline"]
 
-        home_dir = os.path.expanduser('~')
-        output = subprocess.run( \
-            ['{}/workspace/test_z3/network/dijkstra/main.o'.format(home_dir), str(src), str(dst)], \
-            stdout=subprocess.PIPE)
-        # convert to str
-        output = output.stdout.decode("utf8")
-        # delete \n
-        output = output.rstrip('\n')
-        node_list_reverse = output.split()
-        node_list = list(reversed(node_list_reverse))
+        # get path using src, dst
+        # node_list = get_path_by_dijkstra_cpp(src, dst)
+        node_list = dijkstra.main(src, dst)
+        node_list = [str(i) for i in node_list]
 
         file_output = str(flow_id) + "," + str(cycle) + ","
         for node in node_list:
