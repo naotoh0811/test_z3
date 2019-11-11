@@ -2,6 +2,7 @@ import pandas as pd
 import random
 import yaml
 import math
+import sys
 
 def get_cli_list_from_csv(filename):
     df = pd.read_csv(filename)
@@ -12,7 +13,7 @@ def get_cli_list_from_csv(filename):
     sw_list = [int(i) for i in sw_list]
     return cli_list, sw_list
 
-def gen_flow(node_filename, output_filename):
+def gen_flow(flow_num, node_filename, output_filename):
     cli_list, sw_list = get_cli_list_from_csv(node_filename)
 
     sw_num = len(sw_list)
@@ -21,7 +22,7 @@ def gen_flow(node_filename, output_filename):
     light_speed = 5 * (10 ** -3)
 
     cli_num = len(cli_list)
-    flow_num = 10
+    #flow_num = 10
     if flow_num > cli_num // 2:
         print("WARNING: flow_num is too large. Now reset flow_num to {}".format(cli_num // 2))
         flow_num = cli_num // 2
@@ -49,4 +50,9 @@ def gen_flow(node_filename, output_filename):
         f.write(yaml.dump(flow_dic_list))
 
 if __name__ == "__main__":
-    gen_flow('../network/node.csv', 'flow_hard.yml')
+    flow_num = 10
+    if len(sys.argv) != 2:
+        print("ERROR: arg is invalid")
+        exit()
+    flow_num = int(sys.argv[1])
+    gen_flow(flow_num, '../network/node.csv', 'flow_hard.yml')

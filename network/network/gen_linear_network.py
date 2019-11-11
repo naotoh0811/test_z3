@@ -1,3 +1,5 @@
+import sys
+
 def gen_network_csv(num_sw, csv_filename):
     output = "nodeFrom,nodeTo,cost\n"
     for i in range(num_sw):
@@ -38,4 +40,9 @@ def gen_csv(num_sw, network_csv_filename, node_csv_filename):
 
 
 if __name__ == "__main__":
-    gen_csv(5, 'network.csv', 'node.csv')
+    num_sw = 3
+    if len(sys.argv) != 2:
+        print("ERROR: arg is invalid")
+        exit()
+    num_sw = int(sys.argv[1])
+    gen_csv(num_sw, 'network.csv', 'node.csv')
