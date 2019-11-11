@@ -1,1 +1,95 @@
-[]
+- control:
+  - nextNode: 1
+    open_close:
+    - - 157
+      - 164
+    - - 257
+      - 264
+    - - 57
+      - 64
+    - - 264
+      - 271
+  cycle: 300
+  name: 0
+- control:
+  - nextNode: 8
+    open_close:
+    - - 0
+      - 7
+  - nextNode: 2
+    open_close:
+    - - 0
+      - 7
+    - - 100
+      - 107
+    - - 200
+      - 207
+    - - 300
+      - 307
+    - - 400
+      - 407
+    - - 500
+      - 507
+    - - 278
+      - 285
+    - - 578
+      - 585
+  cycle: 600
+  name: 1
+- control:
+  - nextNode: 3
+    open_close:
+    - - 14
+      - 21
+    - - 114
+      - 121
+    - - 214
+      - 221
+  - nextNode: 9
+    open_close:
+    - - 156
+      - 163
+  - nextNode: 10
+    open_close:
+    - - 292
+      - 299
+  cycle: 300
+  name: 2
+- control:
+  - nextNode: 11
+    open_close:
+    - - 35
+      - 42
+    - - 135
+      - 142
+    - - 235
+      - 242
+  - nextNode: 4
+    open_close:
+    - - 292
+      - 299
+    - - 92
+      - 99
+    - - 192
+      - 199
+  - nextNode: 2
+    open_close:
+    - - 292
+      - 299
+  cycle: 300
+  name: 3
+- control:
+  - nextNode: 14
+    open_close:
+    - - 92
+      - 99
+    - - 192
+      - 199
+    - - 292
+      - 299
+  - nextNode: 3
+    open_close:
+    - - 278
+      - 285
+  cycle: 300
+  name: 4

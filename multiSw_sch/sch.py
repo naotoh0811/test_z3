@@ -5,6 +5,7 @@ import math
 import lcm
 
 NOT_DEFINE = 1000
+UNSAT = 99
 
 light_speed = 5 * (10 ** (-3)) # in us/m
 link_length = 10
@@ -34,7 +35,13 @@ def get_flow_list_from_csv(filename):
         ocu_time = math.ceil(size * 8 / link_bandwidth + light_speed * link_length)
         deadline = row.deadline
 
-        flow_list.append({"flow_id": flow_id, "cycle": cycle, "node_list": node_list, "i_flow_dic": i_flow_dic, "ocu_time": ocu_time, "deadline": deadline})
+        flow_list.append({ \
+            "flow_id": flow_id, \
+            "cycle": cycle, \
+            "node_list": node_list, \
+            "i_flow_dic": i_flow_dic, \
+            "ocu_time": ocu_time, \
+            "deadline": deadline})
 
     return flow_list
 
@@ -128,7 +135,12 @@ def define_variables_cli(flow_list):
 
     return send_time, recv_time
 
-def add_constraint(flow_list, flow_info, s):
+def add_constraint(flow_list, flow_infos, times_for_gcl, s):
+    open_time = times_for_gcl.open_time
+    close_time = times_for_gcl.close_time
+    send_time = times_for_gcl.send_time
+    recv_time = times_for_gcl.recv_time
+
     for each_flow in flow_list:
         node_list = each_flow["node_list"]
         src_node = node_list[0]
@@ -215,9 +227,12 @@ def check_solver(s):
         return s.model()
     else:
         print(r)
-        exit()
+        return UNSAT
 
-def print_result_each_sw(flow_infos, m):
+def print_result_each_sw(flow_infos, times_for_gcl, m):
+    open_time = times_for_gcl.open_time
+    close_time = times_for_gcl.close_time
+
     for i_sw in flow_infos.sw_list:
         superCycle = flow_infos.superCycle_dic[i_sw]
         print("sw" + str(i_sw) + " cycle = " + str(superCycle))
@@ -231,7 +246,12 @@ def print_result_each_sw(flow_infos, m):
             print("")
         print("")
 
-def print_result_each_flow(flow_list, flow_infos, m):
+def print_result_each_flow(flow_list, flow_infos, times_for_gcl, m):
+    open_time = times_for_gcl.open_time
+    close_time = times_for_gcl.close_time
+    send_time = times_for_gcl.send_time
+    recv_time = times_for_gcl.recv_time
+
     for each_flow in flow_list:
         flow_id = each_flow["flow_id"]
         node_list = each_flow["node_list"]
@@ -261,7 +281,10 @@ def print_result_each_flow(flow_list, flow_infos, m):
         # print("recv_time: " + str(m[recv_time[dst_node]].as_long()))
         print("")
 
-def output_result_yaml_sw(flow_infos, m, output_filename):
+def output_result_yaml_sw(flow_infos, times_for_gcl, m, output_filename):
+    open_time = times_for_gcl.open_time
+    close_time = times_for_gcl.close_time
+
     yaml_output = []
     for i_sw in flow_infos.sw_list:
         yaml_each_sw = {}
@@ -303,7 +326,9 @@ def output_result_yaml_sw(flow_infos, m, output_filename):
     with open(output_filename, "w") as f:
         f.write(yaml.dump(yaml_output))
 
-def output_result_yaml_cli_send(flow_list, m, output_filename):
+def output_result_yaml_cli_send(flow_list, times_for_gcl, m, output_filename):
+    send_time = times_for_gcl.send_time
+
     yaml_output = []
     for each_flow in flow_list:
         flow_id = each_flow["flow_id"]
@@ -312,7 +337,12 @@ def output_result_yaml_cli_send(flow_list, m, output_filename):
         cycle = each_flow["cycle"]
         real_send_time = m[send_time[src_node]].as_long() % cycle
 
-        yaml_each_cli = {"flow_id": flow_id, "name": src_node, "pass_node_list": pass_node_list, "cycle": cycle, "send_time": real_send_time}
+        yaml_each_cli = { \
+            "flow_id": flow_id, \
+            "name": src_node, \
+            "pass_node_list": pass_node_list, \
+            "cycle": cycle, \
+            "send_time": real_send_time}
         yaml_output.append(yaml_each_cli)
 
     with open(output_filename, "w") as f:
@@ -329,7 +359,7 @@ def output_yaml_cli_recv(flow_list, output_filename):
 
 class Flow_infos:
     def __init__(self, flow_list):
-        self.flow_list = flow_list;
+        self.flow_list = flow_list
 
         self.cycleInSw_dic = gen_cycleInSw_dic(self.flow_list) # {0: [20, 30, 60], 1: [30, 60], 2: [30]}
         self.superCycle_dic = gen_superCycle_dic(self.cycleInSw_dic) # {0: 60, 1: 60, 2: 30}
@@ -339,20 +369,36 @@ class Flow_infos:
         self.num_sw = len(self.sw_list)
         self.nextNode_in_sw_dic = gen_nextNode_in_sw_dic(self.flow_list, self.numFlow_in_sw_dic)
 
+class Times_for_gcl:
+    def __init__(self, open_time, close_time, send_time, recv_time):
+        self.open_time = open_time
+        self.close_time = close_time
+        self.send_time = send_time
+        self.recv_time = recv_time
 
-if __name__ == "__main__":
+def main():
     flow_list = get_flow_list_from_csv("../network/dijkstra/flow_with_path.csv")
     flow_infos = Flow_infos(flow_list)
     open_time, close_time = define_variables_sw(flow_infos)
     send_time, recv_time = define_variables_cli(flow_list)
+    times_for_gcl = Times_for_gcl(open_time, close_time, send_time, recv_time)
 
     s = Solver()
-    add_constraint(flow_list, flow_infos, s)
+    add_constraint(flow_list, flow_infos, times_for_gcl, s)
     m = check_solver(s)
+    if m == UNSAT:
+        return 1
 
-    print_result_each_sw(flow_infos, m)
+    print_result_each_sw(flow_infos, times_for_gcl, m)
     print("--------------------")
-    print_result_each_flow(flow_list, flow_infos, m)
-    output_result_yaml_sw(flow_infos, m, 'gcl_sw.yml')
-    output_result_yaml_cli_send(flow_list, m, 'gcl_cli_send.yml')
+    print_result_each_flow(flow_list, flow_infos, times_for_gcl, m)
+    output_result_yaml_sw(flow_infos, times_for_gcl, m, 'gcl_sw.yml')
+    output_result_yaml_cli_send(flow_list, times_for_gcl, m, 'gcl_cli_send.yml')
     output_yaml_cli_recv(flow_list, 'cli_recv_list.yml')
+
+    return 0
+
+
+if __name__ == "__main__":
+    return_main = main()
+    print(return_main)
