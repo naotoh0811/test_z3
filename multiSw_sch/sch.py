@@ -3,6 +3,7 @@ import pandas as pd
 import yaml
 import math
 import lcm
+import os.path
 
 NOT_DEFINE = 1000
 UNSAT = 99
@@ -377,7 +378,8 @@ class Times_for_gcl:
         self.recv_time = recv_time
 
 def main():
-    flow_list = get_flow_list_from_csv("../network/dijkstra/flow_with_path.csv")
+    home_dir = os.path.expanduser('~')
+    flow_list = get_flow_list_from_csv('{}/workspace/test_z3/network/dijkstra/flow_with_path.csv'.format(home_dir))
     flow_infos = Flow_infos(flow_list)
     open_time, close_time = define_variables_sw(flow_infos)
     send_time, recv_time = define_variables_cli(flow_list)
@@ -392,9 +394,12 @@ def main():
     print_result_each_sw(flow_infos, times_for_gcl, m)
     print("--------------------")
     print_result_each_flow(flow_list, flow_infos, times_for_gcl, m)
-    output_result_yaml_sw(flow_infos, times_for_gcl, m, 'gcl_sw.yml')
-    output_result_yaml_cli_send(flow_list, times_for_gcl, m, 'gcl_cli_send.yml')
-    output_yaml_cli_recv(flow_list, 'cli_recv_list.yml')
+    output_result_yaml_sw(flow_infos, times_for_gcl, m, \
+        '{}/workspace/test_z3/multiSw_sch/gcl_sw.yml'.format(home_dir))
+    output_result_yaml_cli_send(flow_list, times_for_gcl, m, \
+        '{}/workspace/test_z3/multiSw_sch/gcl_cli_send.yml'.format(home_dir))
+    output_yaml_cli_recv(flow_list, \
+        '{}/workspace/test_z3/multiSw_sch/cli_recv_list.yml'.format(home_dir))
 
     return 0
 

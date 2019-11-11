@@ -1,5 +1,6 @@
 import subprocess
 import yaml
+import os.path
 
 def read_yaml(filename):
     f = open(filename, "r+")
@@ -18,7 +19,10 @@ def gen_csv_from_data(data, csv_filename):
         size = payload + header if payload + header >= 72 else 72
         deadline = flow["deadline"]
 
-        output = subprocess.run(["./main.o", str(src), str(dst)], stdout=subprocess.PIPE)
+        home_dir = os.path.expanduser('~')
+        output = subprocess.run( \
+            ['{}/workspace/test_z3/network/dijkstra/main.o'.format(home_dir), str(src), str(dst)], \
+            stdout=subprocess.PIPE)
         # convert to str
         output = output.stdout.decode("utf8")
         # delete \n
@@ -41,6 +45,11 @@ def write_first_line(csv_filename):
     with open(csv_filename, 'a') as f:
         f.write("flow_id,cycle,node_list,size,deadline\n")
 
+def main():
+    home_dir = os.path.expanduser('~')
+    data = read_yaml('{}/workspace/test_z3/network/flow/flow_hard.yml'.format(home_dir))
+    gen_csv_from_data(data, '{}/workspace/test_z3/network/dijkstra/flow_with_path.csv'.format(home_dir))
+
+
 if __name__ == "__main__":
-    data = read_yaml('../flow/flow_hard.yml')
-    gen_csv_from_data(data, 'flow_with_path.csv')
+    main()

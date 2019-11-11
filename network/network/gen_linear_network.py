@@ -1,4 +1,5 @@
 import sys
+import os.path
 
 def gen_network_csv(num_sw, csv_filename):
     output = "nodeFrom,nodeTo,cost\n"
@@ -38,6 +39,13 @@ def gen_csv(num_sw, network_csv_filename, node_csv_filename):
     gen_network_csv(num_sw, network_csv_filename)
     gen_node_csv(num_sw, node_csv_filename)
 
+def main(num_sw):
+    home_dir = os.path.expanduser('~')
+    gen_csv( \
+        num_sw, \
+        '{}/workspace/test_z3/network/network/network.csv'.format(home_dir), \
+        '{}/workspace/test_z3/network/network/node.csv'.format(home_dir))
+
 
 if __name__ == "__main__":
     num_sw = 3
@@ -45,4 +53,5 @@ if __name__ == "__main__":
         num_sw = int(sys.argv[1])
     else:
         print("WARNING: arg is invalid. Now set num_sw to 3.")
-    gen_csv(num_sw, 'network.csv', 'node.csv')
+
+    main(num_sw)
