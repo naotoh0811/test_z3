@@ -2,11 +2,13 @@ from z3 import *
 import pandas as pd
 import yaml
 import math
-import lcm
 import os.path
 
+import lcm
+
 NOT_DEFINE = 1000
-UNSAT = 99
+UNSAT = 1
+SAT = 0
 
 light_speed = 5 * (10 ** (-3)) # in us/m
 link_length = 10
@@ -389,7 +391,7 @@ def main():
     add_constraint(flow_list, flow_infos, times_for_gcl, s)
     m = check_solver(s)
     if m == UNSAT:
-        return 1
+        return UNSAT
 
     print_result_each_sw(flow_infos, times_for_gcl, m)
     print("--------------------")
@@ -401,9 +403,9 @@ def main():
     output_yaml_cli_recv(flow_list, \
         '{}/workspace/test_z3/multiSw_sch/cli_recv_list.yml'.format(home_dir))
 
-    return 0
+    return SAT
 
 
 if __name__ == "__main__":
-    return_main = main()
-    print(return_main)
+    sat_or_unsat = main()
+    print(sat_or_unsat)

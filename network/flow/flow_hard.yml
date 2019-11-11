@@ -1,18 +1,18 @@
-- cycle: 400
+- cycle: 200
   deadline: 200
-  dst: 8
+  dst: 7
   flow_id: 0
   payload: 46
-  src: 5
-- cycle: 400
+  src: 4
+- cycle: 100
   deadline: 200
-  dst: 6
+  dst: 8
   flow_id: 1
   payload: 46
   src: 3
-- cycle: 600
+- cycle: 300
   deadline: 200
-  dst: 7
+  dst: 6
   flow_id: 2
   payload: 46
-  src: 4
+  src: 5
