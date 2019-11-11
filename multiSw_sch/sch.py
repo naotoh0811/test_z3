@@ -100,11 +100,11 @@ def gen_sw_list(cycleInSw_dic):
 
 def define_variables_sw(flow_infos):
     ## define open_time, close_time for sw
-    open_time = []
-    close_time = []
+    open_time = {}
+    close_time = {}
     for i_node in flow_infos.sw_list:
-        open_time.append([])
-        close_time.append([])
+        open_time[i_node] = []
+        close_time[i_node] = []
         for i_flow in range(flow_infos.numFlow_in_sw_dic[i_node]):
             val_name_open = "open_time[" + str(i_node) + "][" + str(i_flow) + "]"
             val_name_close = "close_time[" + str(i_node) + "][" + str(i_flow) + "]"

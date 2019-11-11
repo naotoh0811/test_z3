@@ -41,8 +41,8 @@ def gen_csv(num_sw, network_csv_filename, node_csv_filename):
 
 if __name__ == "__main__":
     num_sw = 3
-    if len(sys.argv) != 2:
-        print("ERROR: arg is invalid")
-        exit()
-    num_sw = int(sys.argv[1])
+    if len(sys.argv) == 2:
+        num_sw = int(sys.argv[1])
+    else:
+        print("WARNING: arg is invalid. Now set num_sw to 3.")
     gen_csv(num_sw, 'network.csv', 'node.csv')

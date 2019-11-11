@@ -1,3 +1,13 @@
+# generate network/network.csv, node.csv
+echo Now generating network.csv, node.csv
+cd ~/workspace/test_z3/network/network/
+python3 gen_linear_network.py 3
+
+# generate flow/flow_hard.yml using network/node.csv
+echo Now generating flow_hard.yml
+cd ~/workspace/test_z3/network/flow/
+python3 gen_flow_using_network_csv.py 6
+
 # generate dijkstra/flow_with_path.csv using network/network.csv, network/node.csv, flow/flow_hard.yml
 echo Now generating flow_with_path.csv
 cd ~/workspace/test_z3/network/dijkstra/
