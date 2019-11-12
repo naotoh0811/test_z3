@@ -1,53 +1,81 @@
 - control:
   - nextNode: 1
     open_close:
-    - - 0
-      - 7
-    - - 78
-      - 85
-    - - 178
-      - 185
-  cycle: 200
-  name: 0
-- control:
-  - nextNode: 2
+    - - 350
+      - 357
+  - nextNode: 5
     open_close:
-    - - 414
-      - 421
-    - - 14
-      - 21
-    - - 214
-      - 221
-    - - 92
-      - 99
-    - - 192
-      - 199
-    - - 292
-      - 299
     - - 392
       - 399
-    - - 492
-      - 499
-    - - 592
-      - 599
-  - nextNode: 6
-    open_close:
-    - - 292
-      - 299
-    - - 592
-      - 599
-  cycle: 600
-  name: 1
+  cycle: 400
+  name: 0
 - control:
   - nextNode: 7
     open_close:
-    - - 178
-      - 185
-  - nextNode: 8
+    - - 192
+      - 199
+    - - 392
+      - 399
+  - nextNode: 2
     open_close:
-    - - 56
-      - 63
-    - - 156
-      - 163
-  cycle: 200
+    - - 157
+      - 164
+    - - 357
+      - 364
+    - - 364
+      - 371
+  - nextNode: 0
+    open_close:
+    - - 378
+      - 385
+  cycle: 400
+  name: 1
+- control:
+  - nextNode: 1
+    open_close:
+    - - 157
+      - 164
+    - - 357
+      - 364
+    - - 364
+      - 371
+  - nextNode: 9
+    open_close:
+    - - 192
+      - 199
+    - - 392
+      - 399
+  - nextNode: 3
+    open_close:
+    - - 378
+      - 385
+  cycle: 400
   name: 2
+- control:
+  - nextNode: 2
+    open_close:
+    - - 143
+      - 150
+    - - 343
+      - 350
+  - nextNode: 12
+    open_close:
+    - - 14
+      - 21
+  - nextNode: 4
+    open_close:
+    - - 392
+      - 399
+  cycle: 400
+  name: 3
+- control:
+  - nextNode: 3
+    open_close:
+    - - 0
+      - 7
+  - nextNode: 14
+    open_close:
+    - - 128
+      - 135
+  cycle: 400
+  name: 4

@@ -36,7 +36,8 @@ def gen_flow(num_flow, node_filename, output_filename):
         dst_node = random.choice(cli_list)
         cli_list = [val for val in cli_list if val != dst_node]
 
-        cycle = random.choice([100, 200, 300, 400, 600])
+        # cycle = random.choice([100, 200, 300, 400, 600])
+        cycle = random.choice([100, 200, 400])
         payload = 46
         min_deadline = \
             math.ceil((payload + 30) * 8 / link_bandwidth + light_speed * 10) * max_link_num
