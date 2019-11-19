@@ -48,6 +48,31 @@ def get_flow_list_from_csv(filename):
 
     return flow_list
 
+def get_flow_list_from_yaml(filename):
+    f = open(filename, "r+")
+    flow_list_from_yaml = yaml.load(f, yaml.SafeLoader)
+
+    i_flow_dic_cum = {}
+    for each_flow in flow_list_from_yaml:
+        node_list = each_flow["node_list"]
+
+        i_flow_dic = {}
+        node_list_only_sw = node_list[1:-1]
+        for node in node_list_only_sw:
+            if node in i_flow_dic_cum:
+                i_flow_dic_cum[node] += 1
+            else:
+                i_flow_dic_cum[node] = 0
+            i_flow_dic[node] = i_flow_dic_cum[node]
+
+        size = each_flow["size"]
+        ocu_time = math.ceil(size * 8 / link_bandwidth + light_speed * link_length)
+
+        each_flow["i_flow_dic"] = i_flow_dic
+        each_flow["ocu_time"] = ocu_time
+
+    return flow_list_from_yaml
+
 def gen_cycleInSw_dic(flow_list):
     num_flow = len(flow_list)
     cycleInSw_dic = {}
@@ -381,7 +406,7 @@ class Times_for_gcl:
 
 def main():
     home_dir = os.path.expanduser('~')
-    flow_list = get_flow_list_from_csv('{}/workspace/test_z3/network/dijkstra/flow_with_path.csv'.format(home_dir))
+    flow_list = get_flow_list_from_yaml('{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir))
     flow_infos = Flow_infos(flow_list)
     open_time, close_time = define_variables_sw(flow_infos)
     send_time, recv_time = define_variables_cli(flow_list)

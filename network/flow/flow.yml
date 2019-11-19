@@ -1,25 +1,48 @@
-- name : flow1
-  src : 3
-  dst : 5
-  cycle : 20
-  payload : 46
-  val_ini : 10
-  tuf :
-    - [3, linear, 0]
-    - [5, linear, -5]
-- name : flow2
-  src : 4
-  dst : 7
-  cycle : 30
-  payload : 46
-  val_ini : 15
-  tuf :
-    - [3, step, -]
-- name : flow3
-  src : 6
-  dst : 8
-  cycle : 60
-  payload : 46
-  val_ini : 10
-  tuf :
-    - [-, exp, -3]
+- cycle: 200
+  deadline: 200
+  dst: 6
+  flow_id: 0
+  payload: 46
+  src: 12
+- cycle: 100
+  dec_point: 100
+  dst: 8
+  flow_id: 1
+  payload: 46
+  src: 5
+  tuf:
+  - - 0
+    - 100
+    - linear
+    - 0
+  - - 100
+    - 200
+    - linear
+    - -1
+- cycle: 100
+  deadline: 200
+  dst: 11
+  flow_id: 2
+  payload: 46
+  src: 14
+- cycle: 200
+  dec_point: 100
+  dst: 13
+  flow_id: 3
+  payload: 46
+  src: 10
+  tuf:
+  - - 0
+    - 100
+    - linear
+    - 0
+  - - 100
+    - 200
+    - linear
+    - -1
+- cycle: 100
+  deadline: 200
+  dst: 9
+  flow_id: 4
+  payload: 46
+  src: 7

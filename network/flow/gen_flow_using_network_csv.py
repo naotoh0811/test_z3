@@ -56,14 +56,16 @@ def gen_flow(num_flow, node_filename, output_filename):
         else: # soft flow
             pass
 
-            tuf_list = [[0, 100, "linear", 0], [100, 200, "linear", -1]]
+            dec_point = 100
+            tuf_list = [[0, dec_point, "linear", 0], [dec_point, 200, "linear", -1]]
             flow_dic = { \
                 "flow_id": i, \
                 "src": src_node, \
                 "dst": dst_node, \
                 "cycle": cycle, \
                 "payload": payload, \
-                "tuf": tuf_list}
+                "tuf": tuf_list, \
+                "dec_point": dec_point}
 
         flow_dic_list.append(flow_dic)
 
@@ -75,7 +77,7 @@ def main(num_flow):
     gen_flow( \
         num_flow, \
         '{}/workspace/test_z3/network/network/node.csv'.format(home_dir), \
-        '{}/workspace/test_z3/network/flow/flow_hard.yml'.format(home_dir))
+        '{}/workspace/test_z3/network/flow/flow.yml'.format(home_dir))
 
 
 if __name__ == "__main__":

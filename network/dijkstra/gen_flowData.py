@@ -1,7 +1,7 @@
 import subprocess
 import yaml
 import os.path
-import network.dijkstra.dijkstra as dijkstra
+import dijkstra
 
 def read_yaml(filename):
     f = open(filename, "r+")
@@ -22,31 +22,45 @@ def get_path_by_dijkstra_cpp(src, dst):
 
     return node_list
 
-def gen_csv_from_data(data, csv_filename):
-    write_first_line(csv_filename)
-    for flow in data:
-        flow_id = flow["flow_id"]
-        src = flow['src']
-        dst = flow["dst"]
-        cycle = flow["cycle"]
-        payload = flow["payload"]
+def gen_csv_from_data(data, yaml_filename_hard, yaml_filename_soft):
+    flow_dic_list_hard = []
+    flow_dic_list_soft = []
+    for each_flow in data:
+        flow_id = each_flow["flow_id"]
+        src = each_flow['src']
+        dst = each_flow["dst"]
+        cycle = each_flow["cycle"]
+        payload = each_flow["payload"]
         header = 30
         size = payload + header if payload + header >= 72 else 72
-        deadline = flow["deadline"]
 
-        # get path using src, dst
-        # node_list = get_path_by_dijkstra_cpp(src, dst)
         node_list = dijkstra.main(src, dst)
-        node_list = [str(i) for i in node_list]
 
-        file_output = str(flow_id) + "," + str(cycle) + ","
-        for node in node_list:
-            file_output += node + " "
-        file_output = file_output.rstrip(' ')
-        file_output += "," + str(size) + "," + str(deadline) + "\n"
+        if "deadline" in each_flow: # hard flow
+            deadline = each_flow["deadline"]
+            flow_dic = { \
+                "flow_id": flow_id, \
+                "cycle": cycle, \
+                "node_list": node_list, \
+                "size": size, \
+                "deadline": deadline}
+            flow_dic_list_hard.append(flow_dic)
+        else: # soft flow
+            dec_point = each_flow["dec_point"]
+            tuf = each_flow["tuf"]
+            flow_dic = { \
+                "flow_id": flow_id, \
+                "cycle": cycle, \
+                "node_list": node_list, \
+                "size": size, \
+                "dec_point": dec_point, \
+                "tuf": tuf}
+            flow_dic_list_soft.append(flow_dic)
 
-        with open(csv_filename, 'a') as f:
-            f.write(file_output)
+    with open(yaml_filename_hard, "w") as f:
+        f.write(yaml.dump(flow_dic_list_hard))
+    with open(yaml_filename_soft, "w") as f:
+        f.write(yaml.dump(flow_dic_list_soft))
 
 def write_first_line(csv_filename):
     with open(csv_filename, 'w'):
@@ -56,8 +70,10 @@ def write_first_line(csv_filename):
 
 def main():
     home_dir = os.path.expanduser('~')
-    data = read_yaml('{}/workspace/test_z3/network/flow/flow_hard.yml'.format(home_dir))
-    gen_csv_from_data(data, '{}/workspace/test_z3/network/dijkstra/flow_with_path.csv'.format(home_dir))
+    data = read_yaml('{}/workspace/test_z3/network/flow/flow.yml'.format(home_dir))
+    gen_csv_from_data(data, \
+    '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir), \
+    '{}/workspace/test_z3/network/dijkstra/flow_with_path_soft.yml'.format(home_dir))
 
 
 if __name__ == "__main__":
