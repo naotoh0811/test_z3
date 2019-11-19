@@ -5,6 +5,7 @@ import math
 import sys
 import os.path
 
+
 def get_cli_list_from_csv(filename):
     df = pd.read_csv(filename)
     for row in df.itertuples():
@@ -29,7 +30,6 @@ def gen_flow(num_flow, node_filename, output_filename):
         num_flow = cli_num // 2
 
     flow_dic_list = []
-    flow_id = 0
     for i in range(num_flow):
         src_node = random.choice(cli_list)
         cli_list = [val for val in cli_list if val != src_node]
@@ -39,20 +39,33 @@ def gen_flow(num_flow, node_filename, output_filename):
         # cycle = random.choice([100, 200, 300, 400, 600])
         cycle = random.choice([100, 200, 400])
         payload = 46
-        min_deadline = \
-            math.ceil((payload + 30) * 8 / link_bandwidth + light_speed * 10) * max_link_num
-        deadline = random.randint(min_deadline, 100)
-        deadline = random.randint(min_deadline*2, min_deadline*3)
-        deadline = 200
-        flow_dic = { \
-            "flow_id": flow_id, \
-            "src": src_node, \
-            "dst": dst_node, \
-            "cycle": cycle, \
-            "payload": payload, \
-            "deadline": deadline}
+
+        if i % 2 == 0: # hard flow
+            min_deadline = \
+                math.ceil((payload + 30) * 8 / link_bandwidth + light_speed * 10) * max_link_num
+            # deadline = random.randint(min_deadline, 100)
+            # deadline = random.randint(min_deadline*2, min_deadline*3)
+            deadline = 200
+            flow_dic = { \
+                "flow_id": i, \
+                "src": src_node, \
+                "dst": dst_node, \
+                "cycle": cycle, \
+                "payload": payload, \
+                "deadline": deadline}
+        else: # soft flow
+            pass
+
+            tuf_list = [[0, 100, "linear", 0], [100, 200, "linear", -1]]
+            flow_dic = { \
+                "flow_id": i, \
+                "src": src_node, \
+                "dst": dst_node, \
+                "cycle": cycle, \
+                "payload": payload, \
+                "tuf": tuf_list}
+
         flow_dic_list.append(flow_dic)
-        flow_id += 1
 
     with open(output_filename, "w") as f:
         f.write(yaml.dump(flow_dic_list))
