@@ -1,34 +1,7 @@
 - cycle: 200
-  deadline: 200
-  dst: 6
+  dec_point: 100
+  dst: 14
   flow_id: 0
-  payload: 46
-  src: 12
-- cycle: 100
-  dec_point: 100
-  dst: 8
-  flow_id: 1
-  payload: 46
-  src: 5
-  tuf:
-  - - 0
-    - 100
-    - linear
-    - 0
-  - - 100
-    - 200
-    - linear
-    - -1
-- cycle: 100
-  deadline: 200
-  dst: 11
-  flow_id: 2
-  payload: 46
-  src: 14
-- cycle: 200
-  dec_point: 100
-  dst: 13
-  flow_id: 3
   payload: 46
   src: 10
   tuf:
@@ -36,13 +9,55 @@
     - 100
     - linear
     - 0
+    - 100
   - - 100
     - 200
     - linear
     - -1
-- cycle: 100
+    - 200
+- cycle: 200
   deadline: 200
-  dst: 9
+  dst: 5
+  flow_id: 1
+  payload: 46
+  src: 9
+- cycle: 100
+  dec_point: 100
+  dst: 7
+  flow_id: 2
+  payload: 46
+  src: 12
+  tuf:
+  - - 0
+    - 100
+    - linear
+    - 0
+    - 102
+  - - 100
+    - 200
+    - linear
+    - -1
+    - 200
+- cycle: 400
+  deadline: 200
+  dst: 13
+  flow_id: 3
+  payload: 46
+  src: 11
+- cycle: 400
+  dec_point: 100
+  dst: 8
   flow_id: 4
   payload: 46
-  src: 7
+  src: 6
+  tuf:
+  - - 0
+    - 100
+    - linear
+    - 0
+    - 104
+  - - 100
+    - 200
+    - linear
+    - -1
+    - 200

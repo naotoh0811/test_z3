@@ -40,7 +40,7 @@ def gen_flow(num_flow, node_filename, output_filename):
         cycle = random.choice([100, 200, 400])
         payload = 46
 
-        if i % 2 == 0: # hard flow
+        if i % 2 == 1: # hard flow
             min_deadline = \
                 math.ceil((payload + 30) * 8 / link_bandwidth + light_speed * 10) * max_link_num
             # deadline = random.randint(min_deadline, 100)
@@ -57,7 +57,7 @@ def gen_flow(num_flow, node_filename, output_filename):
             pass
 
             dec_point = 100
-            tuf_list = [[0, dec_point, "linear", 0], [dec_point, 200, "linear", -1]]
+            tuf_list = [[0, dec_point, "linear", 0, 100+i], [dec_point, 200, "linear", -1, 200]]
             flow_dic = { \
                 "flow_id": i, \
                 "src": src_node, \

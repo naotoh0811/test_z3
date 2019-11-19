@@ -7,8 +7,8 @@ import os.path
 import lcm
 
 NOT_DEFINE = 1000
-UNSAT = 1
-SAT = 0
+UNSAT = -2
+SAT = -1
 
 light_speed = 5 * (10 ** (-3)) # in us/m
 link_length = 10
@@ -72,6 +72,28 @@ def get_flow_list_from_yaml(filename):
         each_flow["ocu_time"] = ocu_time
 
     return flow_list_from_yaml
+
+def get_flow_list_from_external_flow_list(external_flow_list):
+    i_flow_dic_cum = {}
+    for each_flow in external_flow_list:
+        node_list = each_flow["node_list"]
+
+        i_flow_dic = {}
+        node_list_only_sw = node_list[1:-1]
+        for node in node_list_only_sw:
+            if node in i_flow_dic_cum:
+                i_flow_dic_cum[node] += 1
+            else:
+                i_flow_dic_cum[node] = 0
+            i_flow_dic[node] = i_flow_dic_cum[node]
+
+        size = each_flow["size"]
+        ocu_time = math.ceil(size * 8 / link_bandwidth + light_speed * link_length)
+
+        each_flow["i_flow_dic"] = i_flow_dic
+        each_flow["ocu_time"] = ocu_time
+
+    return external_flow_list
 
 def gen_cycleInSw_dic(flow_list):
     num_flow = len(flow_list)
@@ -178,7 +200,10 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
         i_flow_dic = each_flow["i_flow_dic"]
         ocu_time = each_flow["ocu_time"]
         link_delay = ocu_time
-        deadline = each_flow["deadline"]
+        if "deadline" in each_flow: # hard flow
+            deadline = each_flow["deadline"]
+        else: # soft flow
+            deadline = each_flow["dec_point"]
         prev_i_node = NOT_DEFINE
         prev_i_flow = NOT_DEFINE
 
@@ -254,7 +279,7 @@ def check_solver(s):
     if r == sat:
         return s.model()
     else:
-        print(r)
+        # print(r)
         return UNSAT
 
 def print_result_each_sw(flow_infos, times_for_gcl, m):
@@ -404,9 +429,8 @@ class Times_for_gcl:
         self.send_time = send_time
         self.recv_time = recv_time
 
-def main():
-    home_dir = os.path.expanduser('~')
-    flow_list = get_flow_list_from_yaml('{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir))
+def main(external_flow_list):
+    flow_list = get_flow_list_from_external_flow_list(external_flow_list)
     flow_infos = Flow_infos(flow_list)
     open_time, close_time = define_variables_sw(flow_infos)
     send_time, recv_time = define_variables_cli(flow_list)
@@ -418,9 +442,10 @@ def main():
     if m == UNSAT:
         return UNSAT
 
-    print_result_each_sw(flow_infos, times_for_gcl, m)
-    print("--------------------")
-    print_result_each_flow(flow_list, flow_infos, times_for_gcl, m)
+    # print_result_each_sw(flow_infos, times_for_gcl, m)
+    # print("--------------------")
+    # print_result_each_flow(flow_list, flow_infos, times_for_gcl, m)
+    home_dir = os.path.expanduser('~')
     output_result_yaml_sw(flow_infos, times_for_gcl, m, \
         '{}/workspace/test_z3/multiSw_sch/gcl_sw.yml'.format(home_dir))
     output_result_yaml_cli_send(flow_list, times_for_gcl, m, \
@@ -432,5 +457,8 @@ def main():
 
 
 if __name__ == "__main__":
-    sat_or_unsat = main()
+    home_dir = os.path.expanduser('~')
+    flow_with_path_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir)
+    flow_list = get_flow_list_from_yaml(flow_with_path_filename)
+    sat_or_unsat = main(flow_list)
     print(sat_or_unsat)
