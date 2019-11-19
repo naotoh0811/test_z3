@@ -1,9 +1,9 @@
-- cycle: 200
+- cycle: 100
   dec_point: 100
-  dst: 14
+  dst: 12
   flow_id: 0
   payload: 46
-  src: 10
+  src: 6
   tuf:
   - - 0
     - 100
@@ -15,18 +15,18 @@
     - linear
     - -1
     - 200
-- cycle: 200
+- cycle: 100
   deadline: 200
-  dst: 5
+  dst: 14
   flow_id: 1
   payload: 46
-  src: 9
+  src: 8
 - cycle: 100
   dec_point: 100
-  dst: 7
+  dst: 9
   flow_id: 2
   payload: 46
-  src: 12
+  src: 11
   tuf:
   - - 0
     - 100
@@ -38,18 +38,18 @@
     - linear
     - -1
     - 200
-- cycle: 400
+- cycle: 100
   deadline: 200
-  dst: 13
+  dst: 10
   flow_id: 3
   payload: 46
-  src: 11
-- cycle: 400
+  src: 5
+- cycle: 200
   dec_point: 100
-  dst: 8
+  dst: 13
   flow_id: 4
   payload: 46
-  src: 6
+  src: 7
   tuf:
   - - 0
     - 100

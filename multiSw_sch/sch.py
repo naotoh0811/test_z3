@@ -3,8 +3,9 @@ import pandas as pd
 import yaml
 import math
 import os.path
-
-import lcm
+home_dir = os.path.expanduser('~')
+sys.path.append('{}/workspace/test_z3'.format(home_dir))
+import multiSw_sch.lcm as lcm
 
 NOT_DEFINE = 1000
 UNSAT = -2

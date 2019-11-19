@@ -1,7 +1,10 @@
 import subprocess
 import yaml
 import os.path
-import dijkstra
+import sys
+home_dir = os.path.expanduser('~')
+sys.path.append('{}/workspace/test_z3'.format(home_dir))
+import network.dijkstra.dijkstra as dijkstra
 
 def read_yaml(filename):
     f = open(filename, "r+")
