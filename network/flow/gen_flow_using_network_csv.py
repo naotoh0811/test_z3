@@ -54,10 +54,13 @@ def gen_flow(num_flow, node_filename, output_filename):
                 "payload": payload, \
                 "deadline": deadline}
         else: # soft flow
-            pass
+            first_val = random.randint(80, 120)
+            dec_point = random.randint(90, 110)
+            x_intercept = random.randint(190, 200)
+            slope = first_val / (dec_point - x_intercept)
+            y_intercept = -slope * x_intercept
 
-            dec_point = 100
-            tuf_list = [[0, dec_point, "linear", 0, 100+i], [dec_point, 200, "linear", -1, 200]]
+            tuf_list = [[0, dec_point, "linear", 0, first_val], [dec_point, x_intercept, "linear", slope, y_intercept]]
             flow_dic = { \
                 "flow_id": i, \
                 "src": src_node, \
