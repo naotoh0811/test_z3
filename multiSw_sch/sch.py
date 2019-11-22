@@ -54,6 +54,7 @@ def get_flow_list_from_yaml(filename):
     flow_list_from_yaml = yaml.load(f, yaml.SafeLoader)
 
     i_flow_dic_cum = {}
+    size_list = []
     for each_flow in flow_list_from_yaml:
         node_list = each_flow["node_list"]
 
@@ -67,10 +68,13 @@ def get_flow_list_from_yaml(filename):
             i_flow_dic[node] = i_flow_dic_cum[node]
 
         size = each_flow["size"]
+        size_list.append(size)
         ocu_time = math.ceil(size * 8 / link_bandwidth + light_speed * link_length)
 
         each_flow["i_flow_dic"] = i_flow_dic
         each_flow["ocu_time"] = ocu_time
+    
+    max_size = max(size_list)
 
     return flow_list_from_yaml
 
@@ -462,4 +466,4 @@ if __name__ == "__main__":
     flow_with_path_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir)
     flow_list = get_flow_list_from_yaml(flow_with_path_filename)
     sat_or_unsat = main(flow_list)
-    print(sat_or_unsat)
+    print("SAT" if sat_or_unsat == SAT else "UNSAT")

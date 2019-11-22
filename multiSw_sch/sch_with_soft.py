@@ -48,7 +48,7 @@ def calc_pseudo_slope(flow_list_soft):
         each_flow["pseudo_slope"] = pseudo_slope
     
     sorted_flow_list_soft = sorted(flow_list_soft, reverse=True, key=lambda x:x["pseudo_slope"])
-    pprint.pprint(sorted_flow_list_soft)
+    # pprint.pprint(sorted_flow_list_soft)
 
     return sorted_flow_list_soft
 
