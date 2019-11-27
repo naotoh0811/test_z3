@@ -400,6 +400,7 @@ def output_result_yaml_cli_send(flow_list, times_for_gcl, m, output_filename):
             "name": src_node, \
             "pass_node_list": pass_node_list, \
             "cycle": cycle, \
+            "priority": 7, \
             "send_time": real_send_time}
         yaml_output.append(yaml_each_cli)
 
