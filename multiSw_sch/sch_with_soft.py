@@ -14,32 +14,51 @@ SAT = -1
 def repeat_schedule_with_soft(flow_with_path_hard_filename, flow_with_path_soft_filename):
     # get flow_lsit from yaml
     # i_flow_dic in these lists are not valid. Don't reference it.
-    flow_list_hard = sch.get_flow_list_from_yaml(flow_with_path_hard_filename)
-    flow_list_soft = sch.get_flow_list_from_yaml(flow_with_path_soft_filename)
+    onlyHard = False
+    onlySoft = False
+    if os.path.exists(flow_with_path_hard_filename):
+        flow_list_hard = sch.get_flow_list_from_yaml(flow_with_path_hard_filename)
+    else:
+        onlySoft = True
+    if os.path.exists(flow_with_path_soft_filename):
+        flow_list_soft = sch.get_flow_list_from_yaml(flow_with_path_soft_filename)
+    else:
+        onlyHard = True
+    if onlyHard and onlySoft:
+        print('ERROR: Maybe flow_with_path is not exist.')
 
-    sorted_flow_list_soft = calc_pseudo_slope(flow_list_soft)
+    # calculate pseudo slope and rearrange
+    if not onlyHard:
+        sorted_flow_list_soft = calc_pseudo_slope(flow_list_soft)
 
     # schedule only hard
-    sat_or_unsat = sch.main(flow_list_hard)
-    if sat_or_unsat == UNSAT:
-        return UNSAT
+    if not onlySoft:
+        sat_or_unsat = sch.main(flow_list_hard)
+        if sat_or_unsat == UNSAT:
+            return UNSAT, []
+        elif onlyHard: # onlyHard and SAT
+            return SAT, []
     
     # schedule with soft
-    sorted_flow_list_low_prio = []
-    flow_list_hard_with_soft = flow_list_hard
-    for i_repeat in range(len(sorted_flow_list_soft)):
-        flow_list_hard_with_soft.append(sorted_flow_list_soft[i_repeat])
-        sat_or_unsat = sch.main(flow_list_hard_with_soft)
-        print('flow_hard + flow_soft[0]~[{}] -> '.format(i_repeat), end="")
-        print('sat' if sat_or_unsat == SAT else 'unsat')
+    if not onlyHard:
+        sorted_flow_list_low_prio = []
+        if onlySoft:
+            flow_list_hard_with_soft = []
+        else:
+            flow_list_hard_with_soft = flow_list_hard
+        for i_repeat in range(len(sorted_flow_list_soft)):
+            flow_list_hard_with_soft.append(sorted_flow_list_soft[i_repeat])
+            sat_or_unsat = sch.main(flow_list_hard_with_soft)
+            print('flow_hard + flow_soft[0]~[{}] -> '.format(i_repeat), end="")
+            print('sat' if sat_or_unsat == SAT else 'unsat')
 
-        if sat_or_unsat == UNSAT:
-            i_last_flow = i_repeat - 1
-            sorted_flow_list_low_prio = sorted_flow_list_soft[i_last_flow + 1:]
-            return i_last_flow, sorted_flow_list_low_prio
+            if sat_or_unsat == UNSAT:
+                i_last_flow = i_repeat - 1
+                sorted_flow_list_low_prio = sorted_flow_list_soft[i_last_flow + 1:]
+                return i_last_flow, sorted_flow_list_low_prio
 
-    i_last_flow = i_repeat
-    return i_last_flow, sorted_flow_list_low_prio
+        i_last_flow = i_repeat
+        return i_last_flow, sorted_flow_list_low_prio
 
 def calc_pseudo_slope(flow_list_soft):
     for each_flow in flow_list_soft:
@@ -73,7 +92,7 @@ def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename):
 
         yaml_output.append(yaml_each_cli)
 
-        prio -= 1
+        prio = max(prio - 1, 0)
 
     with open(output_filename, "a") as f:
         f.write(yaml.dump(yaml_output))

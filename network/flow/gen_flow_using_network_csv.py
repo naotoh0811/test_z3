@@ -15,7 +15,7 @@ def get_cli_list_from_csv(filename):
     sw_list = [int(i) for i in sw_list]
     return cli_list, sw_list
 
-def gen_flow(num_flow, node_filename, output_filename):
+def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
     cli_list, sw_list = get_cli_list_from_csv(node_filename)
 
     sw_num = len(sw_list)
@@ -40,20 +40,7 @@ def gen_flow(num_flow, node_filename, output_filename):
         cycle = random.choice([100, 200, 400])
         payload = 46
 
-        if i % 2 == 1: # hard flow
-            min_deadline = \
-                math.ceil((payload + 30) * 8 / link_bandwidth + light_speed * 10) * max_link_num
-            # deadline = random.randint(min_deadline, 100)
-            # deadline = random.randint(min_deadline*2, min_deadline*3)
-            deadline = 200
-            flow_dic = { \
-                "flow_id": i, \
-                "src": src_node, \
-                "dst": dst_node, \
-                "cycle": cycle, \
-                "payload": payload, \
-                "deadline": deadline}
-        else: # soft flow
+        if i < num_flow_soft: # soft flow
             first_val = random.randint(80, 120)
             dec_point = random.randint(90, 110)
             x_intercept = random.randint(190, 200)
@@ -69,25 +56,41 @@ def gen_flow(num_flow, node_filename, output_filename):
                 "payload": payload, \
                 "tuf": tuf_list, \
                 "dec_point": dec_point}
+        else: # hard flow
+            min_deadline = \
+                math.ceil((payload + 30) * 8 / link_bandwidth + light_speed * 10) * max_link_num
+            # deadline = random.randint(min_deadline, 100)
+            # deadline = random.randint(min_deadline*2, min_deadline*3)
+            deadline = 200
+            flow_dic = { \
+                "flow_id": i, \
+                "src": src_node, \
+                "dst": dst_node, \
+                "cycle": cycle, \
+                "payload": payload, \
+                "deadline": deadline}
 
         flow_dic_list.append(flow_dic)
 
     with open(output_filename, "w") as f:
         f.write(yaml.dump(flow_dic_list))
 
-def main(num_flow):
+def main(num_flow, num_flow_soft):
     home_dir = os.path.expanduser('~')
     gen_flow( \
         num_flow, \
+        num_flow_soft, \
         '{}/workspace/test_z3/network/network/node.csv'.format(home_dir), \
         '{}/workspace/test_z3/network/flow/flow.yml'.format(home_dir))
 
 
 if __name__ == "__main__":
     num_flow = 3
-    if len(sys.argv) == 2:
+    num_flow_soft = 2
+    if len(sys.argv) == 3:
         num_flow = int(sys.argv[1])
+        num_flow_soft = int(sys.argv[2])
     else:
-        print("WARNING: arg is invalid. Now set num_flow to 3.")
+        print("WARNING: arg is invalid. Now set num_flow to 3, num_flow_soft to 2.")
 
-    main(num_flow)
+    main(num_flow, num_flow_soft)

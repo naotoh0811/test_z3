@@ -1,6 +1,6 @@
 import subprocess
 import yaml
-import os.path
+import os
 import sys
 home_dir = os.path.expanduser('~')
 sys.path.append('{}/workspace/test_z3'.format(home_dir))
@@ -25,7 +25,7 @@ def get_path_by_dijkstra_cpp(src, dst):
 
     return node_list
 
-def gen_csv_from_data(data, yaml_filename_hard, yaml_filename_soft):
+def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
     flow_dic_list_hard = []
     flow_dic_list_soft = []
     for each_flow in data:
@@ -60,10 +60,19 @@ def gen_csv_from_data(data, yaml_filename_hard, yaml_filename_soft):
                 "tuf": tuf}
             flow_dic_list_soft.append(flow_dic)
 
-    with open(yaml_filename_hard, "w") as f:
-        f.write(yaml.dump(flow_dic_list_hard))
-    with open(yaml_filename_soft, "w") as f:
-        f.write(yaml.dump(flow_dic_list_soft))
+    if flow_dic_list_hard == []:
+        if os.path.exists(yaml_filename_hard):
+            os.remove(yaml_filename_hard)
+    else:
+        with open(yaml_filename_hard, "w") as f:
+            f.write(yaml.dump(flow_dic_list_hard))
+
+    if flow_dic_list_soft == []:
+        if os.path.exists(yaml_filename_soft):
+            os.remove(yaml_filename_soft)
+    else:
+        with open(yaml_filename_soft, "w") as f:
+            f.write(yaml.dump(flow_dic_list_soft))
 
 def write_first_line(csv_filename):
     with open(csv_filename, 'w'):
@@ -74,7 +83,7 @@ def write_first_line(csv_filename):
 def main():
     home_dir = os.path.expanduser('~')
     data = read_yaml('{}/workspace/test_z3/network/flow/flow.yml'.format(home_dir))
-    gen_csv_from_data(data, \
+    gen_flowWithPath_from_data(data, \
     '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir), \
     '{}/workspace/test_z3/network/dijkstra/flow_with_path_soft.yml'.format(home_dir))
 
