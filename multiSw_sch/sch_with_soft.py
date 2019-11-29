@@ -3,6 +3,7 @@ import sys
 import subprocess
 import pprint
 import yaml
+import time
 home_dir = os.path.expanduser('~')
 sys.path.append('{}/workspace/test_z3'.format(home_dir))
 import multiSw_sch.sch as sch
@@ -49,10 +50,12 @@ def repeat_schedule_with_soft(flow_with_path_hard_filename, flow_with_path_soft_
         for i_repeat in range(len(sorted_flow_list_soft)):
             flow_list_hard_with_soft.append(sorted_flow_list_soft[i_repeat])
             sat_or_unsat = sch.main(flow_list_hard_with_soft)
-            print('flow_hard + flow_soft[0]~[{}] -> '.format(i_repeat), end="")
-            print('sat' if sat_or_unsat == SAT else 'unsat')
+            # print('flow_hard + flow_soft[0]~[{}] -> '.format(i_repeat), end="")
+            # print('sat' if sat_or_unsat == SAT else 'unsat')
 
             if sat_or_unsat == UNSAT:
+                if onlySoft and i_repeat == 0:
+                    return UNSAT, []
                 i_last_flow = i_repeat - 1
                 sorted_flow_list_low_prio = sorted_flow_list_soft[i_last_flow + 1:]
                 return i_last_flow, sorted_flow_list_low_prio
@@ -103,18 +106,27 @@ def main():
     flow_with_path_hard_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir)
     flow_with_path_soft_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_soft.yml'.format(home_dir)
 
+    start_time = time.time()
+
+    # schedule with hard, soft
     i_last_flow, sorted_flow_list_low_prio = \
         repeat_schedule_with_soft(flow_with_path_hard_filename, flow_with_path_soft_filename)
-    if i_last_flow == UNSAT:
-        print('can not schedule')
-    elif i_last_flow == -1:
-        print('can schedule only hard')
-    else:
-        print('can schedule with flow_soft[0]~[{}]'.format(i_last_flow))
+
+    elapsed_time = time.time() - start_time
+    # print('elapsed_time: {}'.format(elapsed_time))
+
+    # if i_last_flow == UNSAT:
+    #     print('can not schedule')
+    # elif i_last_flow == -1:
+    #     print('can schedule only hard')
+    # else:
+    #     print('can schedule with flow_soft[0]~[{}]'.format(i_last_flow))
 
     if len(sorted_flow_list_low_prio) != 0:
         output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, \
             '{}/workspace/test_z3/multiSw_sch/gcl_cli_send.yml'.format(home_dir))
+
+    return i_last_flow, elapsed_time
 
 
 if __name__ == "__main__":
