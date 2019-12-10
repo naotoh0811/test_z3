@@ -15,7 +15,7 @@ light_speed = 5 * (10 ** (-3)) # in us/m
 link_length = 10
 link_bandwidth = 100 # in Mbps
 
-def get_flow_list_from_csv(filename):
+def get_flow_list_from_csv(filename): # not used
     df = pd.read_csv(filename)
     flow_list = []
     i_flow_dic_cum = {}
@@ -74,8 +74,6 @@ def get_flow_list_from_yaml(filename):
         each_flow["i_flow_dic"] = i_flow_dic
         each_flow["ocu_time"] = ocu_time
     
-    max_size = max(size_list)
-
     return flow_list_from_yaml
 
 def get_flow_list_from_external_flow_list(external_flow_list):
@@ -393,6 +391,7 @@ def output_result_yaml_cli_send(flow_list, times_for_gcl, m, output_filename):
         src_node = each_flow["node_list"][0]
         pass_node_list = each_flow["node_list"][1:]
         cycle = each_flow["cycle"]
+        size = each_flow["size"]
         real_send_time = m[send_time[src_node]].as_long() % cycle
 
         yaml_each_cli = { \
@@ -400,6 +399,7 @@ def output_result_yaml_cli_send(flow_list, times_for_gcl, m, output_filename):
             "name": src_node, \
             "pass_node_list": pass_node_list, \
             "cycle": cycle, \
+            "size": size, \
             "priority": 7, \
             "send_time": real_send_time}
         yaml_output.append(yaml_each_cli)

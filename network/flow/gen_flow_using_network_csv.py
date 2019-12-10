@@ -38,11 +38,12 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
 
         # cycle = random.choice([100, 200, 300, 400, 600])
         cycle = random.choice([100, 200, 400])
-        payload = 46
+        payload = 100
 
         if i < num_flow_soft: # soft flow
-            first_val = random.randint(80, 120)
-            dec_point = random.randint(90, 110)
+            # first_val = random.randint(80, 120)
+            first_val = 100
+            dec_point = random.randint(50, 80)
             x_intercept = random.randint(190, 200)
             slope = first_val / (dec_point - x_intercept)
             y_intercept = -slope * x_intercept

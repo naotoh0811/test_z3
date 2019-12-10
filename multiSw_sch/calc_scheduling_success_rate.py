@@ -12,8 +12,8 @@ import network.dijkstra.gen_flowData as gen_flowData
 import multiSw_sch.sch as sch
 
 NOT_DEFINE = 1000
-UNSAT = 1
-SAT = 0
+UNSAT = -2
+SAT = -1
 
 def from_gen_network_to_sch(num_sw, num_flow):
     gen_linear_network.main(num_sw)

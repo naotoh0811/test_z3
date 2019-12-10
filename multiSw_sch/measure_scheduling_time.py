@@ -20,11 +20,12 @@ REPEAT = 30
 def gen_result_list():
     result_list = []
     # for num_sw in range(2, 11): # 2 -- 10
-    for num_sw in range(2, 11):
+    # for num_sw in range(2, 21):
+    for num_sw in range(10, 11):
         print("now num_sw = {}".format(num_sw))
         num_flow = num_sw
-        # for num_flow_soft in range(num_flow + 1): # 0 -- num_flow
-        for num_flow_soft in range(math.ceil(num_flow/2), math.ceil(num_flow/2+1)):
+        for num_flow_soft in range(num_flow + 1): # 0 -- num_flow
+        # for num_flow_soft in range(math.ceil(num_flow/2), math.ceil(num_flow/2) + 1):
             sat_cnt = 0
             elapsed_time_list = []
             for i in range(REPEAT):
@@ -34,11 +35,6 @@ def gen_result_list():
                 elapsed_time_list.append(elapsed_time)
 
             sat_rate = (sat_cnt / REPEAT) * 100
-            # min_elapsed_time = min(elapsed_time_list)
-            # per25_elapsed_time = np.percentile(elapsed_time_list, 25)
-            # per50_elapsed_time = np.percentile(elapsed_time_list, 50)
-            # per75_elapsed_time = np.percentile(elapsed_time_list, 75)
-            # max_elapsed_time = max(elapsed_time_list)
 
             result_list.append({
                 "num_sw": num_sw, \
@@ -46,11 +42,6 @@ def gen_result_list():
                 "num_flow_hard": num_flow - num_flow_soft, \
                 "num_flow_soft": num_flow_soft, \
                 "sat_rate": sat_rate, \
-                # "elapsed_time": {"min": min_elapsed_time, \
-                #                 "per25": per25_elapsed_time, \
-                #                 "per50": per50_elapsed_time, \
-                #                 "per75": per75_elapsed_time, \
-                #                 "max": max_elapsed_time}
                 "elapsed_time": elapsed_time_list
             })
 
@@ -64,7 +55,8 @@ def gen_result_pdf(result_list):
     for result in result_list:
         elapsed_time_list_list.append(result["elapsed_time"])
         sat_rate_list.append(result["sat_rate"])
-        label_list.append(result["num_sw"])
+        # label_list.append(result["num_sw"])
+        label_list.append(result["num_flow_soft"])
 
     fig, ax1 = plt.subplots()
     ax2 = ax1.twinx()
@@ -80,7 +72,8 @@ def gen_result_pdf(result_list):
     pprint.pprint(bp)
 
     # set label
-    ax1.set_xlabel('Number of switches')
+    # ax1.set_xlabel('Number of switches')
+    ax1.set_xlabel('Number of soft real-time flows')
     ax1.set_ylabel('Calculation time [s]')
     ax2.set_ylabel('Success rate [%]')
 

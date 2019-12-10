@@ -12,6 +12,8 @@ NOT_DEFINE = 1000
 UNSAT = -2
 SAT = -1
 
+home_dir = os.path.expanduser('~')
+
 def repeat_schedule_with_soft(flow_with_path_hard_filename, flow_with_path_soft_filename):
     # get flow_lsit from yaml
     # i_flow_dic in these lists are not valid. Don't reference it.
@@ -19,14 +21,19 @@ def repeat_schedule_with_soft(flow_with_path_hard_filename, flow_with_path_soft_
     onlySoft = False
     if os.path.exists(flow_with_path_hard_filename):
         flow_list_hard = sch.get_flow_list_from_yaml(flow_with_path_hard_filename)
+        size_hard = len(flow_list_hard)
+        print('size_hard: {}'.format(size_hard), end=' ')
     else:
         onlySoft = True
     if os.path.exists(flow_with_path_soft_filename):
         flow_list_soft = sch.get_flow_list_from_yaml(flow_with_path_soft_filename)
+        size_soft = len(flow_list_soft)
+        print('size_soft: {}'.format(size_soft), end=' ')
     else:
         onlyHard = True
     if onlyHard and onlySoft:
         print('ERROR: Maybe flow_with_path is not exist.')
+    print('| ', end='')
 
     # calculate pseudo slope and rearrange
     if not onlyHard:
@@ -54,8 +61,12 @@ def repeat_schedule_with_soft(flow_with_path_hard_filename, flow_with_path_soft_
             # print('sat' if sat_or_unsat == SAT else 'unsat')
 
             if sat_or_unsat == UNSAT:
+                # if onlySoft and can not schedule even first flow, gcl_cli_send.yml is not updated.
+                # so delete old gcl_cli_send_yml
                 if onlySoft and i_repeat == 0:
-                    return UNSAT, []
+                    gcl_cli_send_filename = '{}/workspace/test_z3/multiSw_sch/gcl_cli_send.yml'.format(home_dir)
+                    if os.path.exists(gcl_cli_send_filename):
+                        os.remove(gcl_cli_send_filename)
                 i_last_flow = i_repeat - 1
                 sorted_flow_list_low_prio = sorted_flow_list_soft[i_last_flow + 1:]
                 return i_last_flow, sorted_flow_list_low_prio
@@ -90,6 +101,7 @@ def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename):
             "name": each_flow["node_list"][0], \
             "pass_node_list": each_flow["node_list"][1:], \
             "cycle": each_flow["cycle"], \
+            "size": each_flow["size"], \
             "priority": prio, \
             "send_time": 10}
 
@@ -102,7 +114,6 @@ def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename):
     # pprint.pprint(sorted_flow_list_low_prio)
 
 def main():
-    home_dir = os.path.expanduser('~')
     flow_with_path_hard_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir)
     flow_with_path_soft_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_soft.yml'.format(home_dir)
 
@@ -115,12 +126,12 @@ def main():
     elapsed_time = time.time() - start_time
     # print('elapsed_time: {}'.format(elapsed_time))
 
-    # if i_last_flow == UNSAT:
-    #     print('can not schedule')
-    # elif i_last_flow == -1:
-    #     print('can schedule only hard')
-    # else:
-    #     print('can schedule with flow_soft[0]~[{}]'.format(i_last_flow))
+    if i_last_flow == UNSAT:
+        print('can not schedule')
+    elif i_last_flow == -1:
+        print('can schedule only hard')
+    else:
+        print('can schedule with flow_soft[0]~[{}]'.format(i_last_flow))
 
     if len(sorted_flow_list_low_prio) != 0:
         output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, \
