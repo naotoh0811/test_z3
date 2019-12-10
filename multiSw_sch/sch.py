@@ -188,6 +188,13 @@ def define_variables_cli(flow_list):
 
     return send_time, recv_time
 
+def get_deemed_deadline(tuf, deemed_rate):
+    first_val = tuf[0][4]
+    deemed_val = first_val * deemed_rate
+    deemed_deadline = (deemed_val - tuf[1][4]) / tuf[1][3]
+
+    return deemed_deadline
+
 def add_constraint(flow_list, flow_infos, times_for_gcl, s):
     open_time = times_for_gcl.open_time
     close_time = times_for_gcl.close_time
@@ -206,7 +213,10 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
         if "deadline" in each_flow: # hard flow
             deadline = each_flow["deadline"]
         else: # soft flow
-            deadline = each_flow["dec_point"]
+            # deadline = each_flow["dec_point"]
+            deemed_rate = 0.9
+            tuf = each_flow["tuf"]
+            deadline = get_deemed_deadline(tuf, deemed_rate)
         prev_i_node = NOT_DEFINE
         prev_i_flow = NOT_DEFINE
 

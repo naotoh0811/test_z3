@@ -38,7 +38,7 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
 
         # cycle = random.choice([100, 200, 300, 400, 600])
         cycle = random.choice([100, 200, 400])
-        payload = 100
+        payload = 100 # min: 46
 
         if i < num_flow_soft: # soft flow
             # first_val = random.randint(80, 120)
@@ -47,6 +47,7 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
             x_intercept = random.randint(190, 200)
             slope = first_val / (dec_point - x_intercept)
             y_intercept = -slope * x_intercept
+            cycle = 20
 
             tuf_list = [[0, dec_point, "linear", 0, first_val], [dec_point, x_intercept, "linear", slope, y_intercept]]
             flow_dic = { \
