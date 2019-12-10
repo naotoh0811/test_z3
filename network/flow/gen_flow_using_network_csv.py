@@ -47,7 +47,7 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
             x_intercept = random.randint(190, 200)
             slope = first_val / (dec_point - x_intercept)
             y_intercept = -slope * x_intercept
-            cycle = 20
+            cycle = 50
 
             tuf_list = [[0, dec_point, "linear", 0, first_val], [dec_point, x_intercept, "linear", slope, y_intercept]]
             flow_dic = { \

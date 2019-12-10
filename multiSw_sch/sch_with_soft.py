@@ -92,7 +92,7 @@ def calc_pseudo_slope(flow_list_soft):
 
     return sorted_flow_list_soft
 
-def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename):
+def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, notPrioritize=False):
     prio = 6
     yaml_output = []
     for each_flow in sorted_flow_list_low_prio:
@@ -107,13 +107,14 @@ def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename):
 
         yaml_output.append(yaml_each_cli)
 
-        prio = max(prio - 1, 0)
+        if not notPrioritize:
+            prio = max(prio - 1, 0)
 
     with open(output_filename, "a") as f:
         f.write(yaml.dump(yaml_output))
     # pprint.pprint(sorted_flow_list_low_prio)
 
-def main():
+def main(notPrioritize):
     flow_with_path_hard_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir)
     flow_with_path_soft_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_soft.yml'.format(home_dir)
 
@@ -134,13 +135,15 @@ def main():
         print('can schedule with flow_soft[0]~[{}]'.format(i_last_flow))
 
     if len(sorted_flow_list_low_prio) != 0:
-        output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, \
-            '{}/workspace/test_z3/multiSw_sch/gcl_cli_send.yml'.format(home_dir))
+        output_filename = '{}/workspace/test_z3/multiSw_sch/gcl_cli_send.yml'.format(home_dir)
+        # output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename)
+        output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, notPrioritize)
 
     return i_last_flow, elapsed_time
 
 
 if __name__ == "__main__":
-    i_last_flow, elapsed_time = main()
+    notPrioritize = True if len(sys.argv)>1 and sys.argv[1] == 'True' else False
+    i_last_flow, elapsed_time = main(notPrioritize)
     if i_last_flow == UNSAT:
         raise Exception('Can not schedule even if only HARD.')
