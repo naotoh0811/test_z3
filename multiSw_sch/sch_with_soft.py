@@ -141,4 +141,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    i_last_flow, elapsed_time = main()
+    if i_last_flow == UNSAT:
+        raise Exception('Can not schedule even if only HARD.')
