@@ -1,4 +1,5 @@
-import os.path
+import os
+import glob
 import sys
 import subprocess
 import pprint
@@ -7,6 +8,7 @@ import time
 home_dir = os.path.expanduser('~')
 sys.path.append('{}/workspace/test_z3'.format(home_dir))
 import multiSw_sch.sch as sch
+import multiSw_sch.gen_window_graph as gen_window_graph
 
 NOT_DEFINE = 1000
 UNSAT = -2
@@ -138,6 +140,13 @@ def main(notPrioritize):
         output_filename = '{}/workspace/test_z3/multiSw_sch/gcl_cli_send.yml'.format(home_dir)
         # output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename)
         output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, notPrioritize)
+
+    # remove old pdf files
+    for pdf_file in glob.glob(home_dir + '/workspace/test_z3/multiSw_sch/window_sw*.pdf'):
+        if os.path.isfile(pdf_file):
+            os.remove(pdf_file)
+    # generate window graph
+    gen_window_graph.main()
 
     return i_last_flow, elapsed_time
 

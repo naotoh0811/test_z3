@@ -71,7 +71,7 @@ def get_flow_list_from_yaml(filename):
         size_list.append(size)
         ocu_time = math.ceil(size * 8 / link_bandwidth + light_speed * link_length)
 
-        each_flow["i_flow_dic"] = i_flow_dic
+        each_flow["i_flow_dic"] = i_flow_dic # {0: 0, 1: 2, 2: 0}
         each_flow["ocu_time"] = ocu_time
     
     return flow_list_from_yaml
@@ -157,6 +157,15 @@ def gen_sw_list(cycleInSw_dic):
         sw_list.append(key)
 
     return sw_list
+
+def get_flow_id_from_i_sw_and_i_flow(flow_list, i_sw, i_flow):
+    for each_flow in flow_list:
+        i_flow_dic = each_flow["i_flow_dic"]
+        if i_sw in i_flow_dic:
+            if i_flow_dic[i_sw] == i_flow:
+                return each_flow["flow_id"]
+
+    raise Exception('Can not find flow.')
 
 def define_variables_sw(flow_infos):
     ## define open_time, close_time for sw
@@ -347,7 +356,7 @@ def print_result_each_flow(flow_list, flow_infos, times_for_gcl, m):
         # print("recv_time: " + str(m[recv_time[dst_node]].as_long()))
         print("")
 
-def output_result_yaml_sw(flow_infos, times_for_gcl, m, output_filename):
+def output_result_yaml_sw(flow_infos, flow_list, times_for_gcl, m, output_filename):
     open_time = times_for_gcl.open_time
     close_time = times_for_gcl.close_time
 
@@ -361,12 +370,13 @@ def output_result_yaml_sw(flow_infos, times_for_gcl, m, output_filename):
         yaml_controls = []
         isAdded = False
         for i_flow in range(flow_infos.numFlow_in_sw_dic[i_sw]):
+            flow_id = get_flow_id_from_i_sw_and_i_flow(flow_list, i_sw, i_flow)
 
             all_open_close = []
             for i_win in range(flow_infos.numWin_dic[i_sw][i_flow]):
                 real_open_time = m[open_time[i_sw][i_flow][i_win]].as_long() % superCycle
                 real_close_time = m[close_time[i_sw][i_flow][i_win]].as_long() % superCycle
-                one_open_close = [real_open_time, real_close_time]
+                one_open_close = [real_open_time, real_close_time, flow_id]
                 all_open_close.append(one_open_close)
 
             # if the nextNode already exists in yaml_controls, add times to it
@@ -462,7 +472,7 @@ def main(external_flow_list):
     # print("--------------------")
     # print_result_each_flow(flow_list, flow_infos, times_for_gcl, m)
     home_dir = os.path.expanduser('~')
-    output_result_yaml_sw(flow_infos, times_for_gcl, m, \
+    output_result_yaml_sw(flow_infos, flow_list, times_for_gcl, m, \
         '{}/workspace/test_z3/multiSw_sch/gcl_sw.yml'.format(home_dir))
     output_result_yaml_cli_send(flow_list, times_for_gcl, m, \
         '{}/workspace/test_z3/multiSw_sch/gcl_cli_send.yml'.format(home_dir))
