@@ -32,19 +32,19 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
     flow_dic_list = []
     for i in range(num_flow):
         src_node = random.choice(cli_list)
-        cli_list = [val for val in cli_list if val != src_node]
+        cli_list = [node for node in cli_list if node != src_node]
         dst_node = random.choice(cli_list)
-        cli_list = [val for val in cli_list if val != dst_node]
+        cli_list = [node for node in cli_list if node != dst_node]
 
         # cycle = random.choice([100, 200, 300, 400, 600])
         cycle = random.choice([100, 200, 400])
-        payload = 100 # min: 46
+        payload = random.randint(100, 120) # 46 -- 1500
 
         if i < num_flow_soft: # soft flow
-            # first_val = random.randint(80, 120)
-            first_val = 100
-            dec_point = random.randint(50, 80)
-            x_intercept = random.randint(190, 200)
+            first_val = random.randint(80, 120)
+            # first_val = 100
+            dec_point = random.randint(80, 100)
+            x_intercept = random.randint(120, 130)
             slope = first_val / (dec_point - x_intercept)
             y_intercept = -slope * x_intercept
             cycle = 50

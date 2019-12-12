@@ -223,7 +223,7 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
             deadline = each_flow["deadline"]
         else: # soft flow
             # deadline = each_flow["dec_point"]
-            deemed_rate = 0.9
+            deemed_rate = 1
             tuf = each_flow["tuf"]
             deadline = get_deemed_deadline(tuf, deemed_rate)
         prev_i_node = NOT_DEFINE
@@ -231,7 +231,7 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
 
         # 0 > time
         s.add(send_time[src_node] >= 0)
-        # s.add(send_time[src_node] <= cycle)
+        s.add(send_time[src_node] <= cycle) # 無くても条件は変わらないが、計算量削減のため上限を設ける
         # deadline
         s.add(recv_time[dst_node] - send_time[src_node] <= deadline-1)
 
@@ -261,8 +261,8 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
                 # from src_node
                 # 本来はi_last_winでなく0であるべきだが、なぜか0だとunsatになりがち。
                 # おそらくi_last_winでも同じ解を得られる。
-                s.add(open_time[i_node][i_flow][i_last_win] - send_time[src_node] >= link_delay)
-                # s.add(open_time[i_node][i_flow][0] - send_time[src_node] >= link_delay)
+                # s.add(open_time[i_node][i_flow][i_last_win] - send_time[src_node] >= link_delay)
+                s.add(open_time[i_node][i_flow][0] - send_time[src_node] >= link_delay)
             else: # not first sw
                 # next node
                 s.add(open_time[i_node][i_flow][0] - close_time[prev_i_node][prev_i_flow][0] >= link_delay)
@@ -272,8 +272,8 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
                 # 最悪の場合 (closeの瞬間に転送)を想定
                 s.add(recv_time[dst_node] - close_time[i_node][i_flow][i_last_win] >= link_delay)
                 # これがないと計算時間が無限になる
-                # 精々2サイクル分くらいで十分か
-                s.add(close_time[i_node][i_flow][i_last_win] < superCycle*3)
+                # 精々10サイクル分くらいで十分か
+                s.add(close_time[i_node][i_flow][i_last_win] < superCycle*10)
 
             prev_i_node = i_node
             prev_i_flow = i_flow
@@ -338,22 +338,22 @@ def print_result_each_flow(flow_list, flow_infos, times_for_gcl, m):
         ocu_time = each_flow["ocu_time"]
         
         print("flow_id: " + str(flow_id) + ", cycle: " + str(cycle) + ", node_list: " + str(node_list))
-        print("send_time: " + str(m[send_time[src_node]].as_long() % cycle))
-        # print("send_time: " + str(m[send_time[src_node]].as_long()))
+        # print("send_time: " + str(m[send_time[src_node]].as_long() % cycle))
+        print("send_time: " + str(m[send_time[src_node]].as_long()))
         for i_node in node_list_only_sw:
             superCycle = flow_infos.superCycle_dic[i_node]
             i_flow = i_flow_dic[i_node]
             print('sw{} (cycle: {}) -> '.format(i_node, superCycle), end="")
             for i_win in range(flow_infos.numWin_dic[i_node][i_flow]):
-                real_open_time = m[open_time[i_node][i_flow][i_win]].as_long() % superCycle
-                real_close_time = m[close_time[i_node][i_flow][i_win]].as_long() % superCycle
-                # real_open_time = m[open_time[i_node][i_flow][i_win]].as_long()
-                # real_close_time = m[close_time[i_node][i_flow][i_win]].as_long()
+                # real_open_time = m[open_time[i_node][i_flow][i_win]].as_long() % superCycle
+                # real_close_time = m[close_time[i_node][i_flow][i_win]].as_long() % superCycle
+                real_open_time = m[open_time[i_node][i_flow][i_win]].as_long()
+                real_close_time = m[close_time[i_node][i_flow][i_win]].as_long()
 
                 print(real_open_time, real_close_time, end="|")
             print("")
-        print("recv_time: " + str(m[recv_time[dst_node]].as_long() % cycle))
-        # print("recv_time: " + str(m[recv_time[dst_node]].as_long()))
+        # print("recv_time: " + str(m[recv_time[dst_node]].as_long() % cycle))
+        print("recv_time: " + str(m[recv_time[dst_node]].as_long()))
         print("")
 
 def output_result_yaml_sw(flow_infos, flow_list, times_for_gcl, m, output_filename):

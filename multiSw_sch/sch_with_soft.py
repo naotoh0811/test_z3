@@ -16,39 +16,53 @@ SAT = -1
 
 home_dir = os.path.expanduser('~')
 
-def repeat_schedule_with_soft(flow_with_path_hard_filename, flow_with_path_soft_filename):
-    # get flow_lsit from yaml
+def check_existence_and_get_flow_list(flow_with_path_hard_filename, flow_with_path_soft_filename):
+    # get flow_list from yaml
     # i_flow_dic in these lists are not valid. Don't reference it.
     onlyHard = False
     onlySoft = False
     if os.path.exists(flow_with_path_hard_filename):
         flow_list_hard = sch.get_flow_list_from_yaml(flow_with_path_hard_filename)
-        size_hard = len(flow_list_hard)
-        print('size_hard: {}'.format(size_hard), end=' ')
+        num_hard = len(flow_list_hard)
+        print('num_hard: {}'.format(num_hard), end=' ')
     else:
         onlySoft = True
     if os.path.exists(flow_with_path_soft_filename):
         flow_list_soft = sch.get_flow_list_from_yaml(flow_with_path_soft_filename)
-        size_soft = len(flow_list_soft)
-        print('size_soft: {}'.format(size_soft), end=' ')
+        num_soft = len(flow_list_soft)
+        print('num_soft: {}'.format(num_soft), end=' ')
     else:
         onlyHard = True
     if onlyHard and onlySoft:
         print('ERROR: Maybe flow_with_path is not exist.')
     print('| ', end='')
 
+    return flow_list_hard, flow_list_soft, onlyHard, onlySoft
+
+def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft, notPrioritize=False):
     # calculate pseudo slope and rearrange
     if not onlyHard:
         sorted_flow_list_soft = calc_pseudo_slope(flow_list_soft)
 
+    start_time = time.time()
+
     # schedule only hard
     if not onlySoft:
         sat_or_unsat = sch.main(flow_list_hard)
+        sch_time_only_hard = time.time() - start_time
         if sat_or_unsat == UNSAT:
-            return UNSAT, []
+            return UNSAT, [], 0, 0
         elif onlyHard: # onlyHard and SAT
-            return SAT, []
+            return SAT, [], sch_time_only_hard, 0
+    else: # onlySoft
+        sch_time_only_hard = 0
     
+    # if don't schedule soft flows
+    if notPrioritize:
+        return -1, flow_list_soft, sch_time_only_hard, 0
+    
+    start_time = time.time()
+
     # schedule with soft
     if not onlyHard:
         sorted_flow_list_low_prio = []
@@ -61,6 +75,7 @@ def repeat_schedule_with_soft(flow_with_path_hard_filename, flow_with_path_soft_
             sat_or_unsat = sch.main(flow_list_hard_with_soft)
             # print('flow_hard + flow_soft[0]~[{}] -> '.format(i_repeat), end="")
             # print('sat' if sat_or_unsat == SAT else 'unsat')
+            # print("--------------------")
 
             if sat_or_unsat == UNSAT:
                 # if onlySoft and can not schedule even first flow, gcl_cli_send.yml is not updated.
@@ -71,10 +86,15 @@ def repeat_schedule_with_soft(flow_with_path_hard_filename, flow_with_path_soft_
                         os.remove(gcl_cli_send_filename)
                 i_last_flow = i_repeat - 1
                 sorted_flow_list_low_prio = sorted_flow_list_soft[i_last_flow + 1:]
-                return i_last_flow, sorted_flow_list_low_prio
+
+                sch_time_with_soft = time.time() - start_time
+
+                return i_last_flow, sorted_flow_list_low_prio, sch_time_only_hard, sch_time_with_soft
 
         i_last_flow = i_repeat
-        return i_last_flow, sorted_flow_list_low_prio
+        sch_time_with_soft = time.time() - start_time
+
+        return i_last_flow, sorted_flow_list_low_prio, sch_time_only_hard, sch_time_with_soft
 
 def calc_pseudo_slope(flow_list_soft):
     for each_flow in flow_list_soft:
@@ -116,18 +136,20 @@ def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, no
         f.write(yaml.dump(yaml_output))
     # pprint.pprint(sorted_flow_list_low_prio)
 
+def output_params_to_csv():
+    pass
+
 def main(notPrioritize):
     flow_with_path_hard_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir)
     flow_with_path_soft_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_soft.yml'.format(home_dir)
 
-    start_time = time.time()
+    # get flow list
+    flow_list_hard, flow_list_soft, onlyHard, onlySoft = check_existence_and_get_flow_list( \
+        flow_with_path_hard_filename, flow_with_path_soft_filename)
 
-    # schedule with hard, soft
-    i_last_flow, sorted_flow_list_low_prio = \
-        repeat_schedule_with_soft(flow_with_path_hard_filename, flow_with_path_soft_filename)
-
-    elapsed_time = time.time() - start_time
-    # print('elapsed_time: {}'.format(elapsed_time))
+    # schedule with hard and soft
+    i_last_flow, sorted_flow_list_low_prio, sch_time_only_hard, sch_time_with_soft = \
+        repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft, notPrioritize)
 
     if i_last_flow == UNSAT:
         print('can not schedule')
@@ -148,11 +170,14 @@ def main(notPrioritize):
     # generate window graph
     gen_window_graph.main()
 
-    return i_last_flow, elapsed_time
+    # output flow and scheduling information to csv
+    output_params_to_csv()
+
+    return i_last_flow, sch_time_only_hard, sch_time_with_soft
 
 
 if __name__ == "__main__":
     notPrioritize = True if len(sys.argv)>1 and sys.argv[1] == 'True' else False
-    i_last_flow, elapsed_time = main(notPrioritize)
+    i_last_flow, sch_time_only_hard, sch_time_with_soft = main(notPrioritize)
     if i_last_flow == UNSAT:
         raise Exception('Can not schedule even if only HARD.')

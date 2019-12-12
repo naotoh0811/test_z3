@@ -7,21 +7,21 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 home_dir = os.path.expanduser('~')
 sys.path.append('{}/workspace/test_z3'.format(home_dir))
-import multiSw_sch.gen_netwrok_and_flow as gen_netwrok_and_flow
+import multiSw_sch.gen_network_and_flow as gen_netwrok_and_flow
 import multiSw_sch.sch_with_soft as sch_with_soft
 
 NOT_DEFINE = 1000
 UNSAT = -2
 SAT = -1
 
-REPEAT = 30
+REPEAT = 10
 
 
 def gen_result_list():
     result_list = []
     # for num_sw in range(2, 11): # 2 -- 10
     # for num_sw in range(2, 21):
-    for num_sw in range(10, 11):
+    for num_sw in range(5, 6):
         print("now num_sw = {}".format(num_sw))
         num_flow = num_sw
         for num_flow_soft in range(num_flow + 1): # 0 -- num_flow
@@ -30,7 +30,7 @@ def gen_result_list():
             elapsed_time_list = []
             for i in range(REPEAT):
                 gen_netwrok_and_flow.main(num_sw, num_flow, num_flow_soft)
-                i_last_flow, elapsed_time = sch_with_soft.main()
+                i_last_flow, elapsed_time = sch_with_soft.main(False)
                 sat_cnt = sat_cnt + 1 if i_last_flow >= SAT else sat_cnt
                 elapsed_time_list.append(elapsed_time)
 
@@ -69,7 +69,6 @@ def gen_result_pdf(result_list):
     # set legend
     # cf. http://oregengo.hatenablog.com/entry/2016/09/17/193909
     ax1.legend([bp['boxes'][0], [p][0][0]], ['Calculation time', 'Success rate'], loc='upper right')
-    pprint.pprint(bp)
 
     # set label
     # ax1.set_xlabel('Number of switches')

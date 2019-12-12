@@ -60,7 +60,7 @@ def gen_graph_for_each_sw(each_sw):
     mpl.rcParams['axes.xmargin'] = 0
     mpl.rcParams['axes.ymargin'] = 0
 
-    # plot
+    # plot for each gate
     for i_gate, each_control in enumerate(control):
         nextNode = each_control["nextNode"]
         open_close = each_control["open_close"]
@@ -68,12 +68,9 @@ def gen_graph_for_each_sw(each_sw):
         # add text on left-outside
         ax.text(-0.1, (1/9)*(1.5+2*i_gate), 'to {}'.format(nextNode), transform=ax.transAxes)
 
-        # open_close_list = []
         for each_time in open_close:
             open_time = each_time[0]
             close_time = each_time[1]
-            # open_close = (open_time, close_time)
-            # open_close_list.append(open_close)
             flow_id = each_time[2]
             color = color_list[flow_id]
             flow_name = 'flow{}'.format(flow_id)
@@ -98,7 +95,8 @@ def make_pdf(pdf_filename):
     pp = PdfPages(pdf_filename)
     pp.savefig()
     pp.close()
-    plt.clf()
+    # plt.clf()
+    plt.close()
 
 def main():
     gcl_yaml_filename = home_dir + '/workspace/test_z3/multiSw_sch/gcl_sw.yml'
