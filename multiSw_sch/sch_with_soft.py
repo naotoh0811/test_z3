@@ -136,8 +136,9 @@ def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, no
         f.write(yaml.dump(yaml_output))
     # pprint.pprint(sorted_flow_list_low_prio)
 
-def output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_last_flow, sch_time_only_hard, sch_time_with_soft):
-    output_filename = '{}/IEEE8021Q_test/results/params_and_results.csv'.format(home_dir)
+def output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_last_flow, sch_time_only_hard, sch_time_with_soft, notPrioritize):
+    output_filename = \
+        '{}/IEEE8021Q_test/results/params_and_results{}.csv'.format(home_dir, '_np' if notPrioritize else '')
     if not os.path.isfile(output_filename):
         with open(output_filename, 'w') as f:
             output_csv = ''
@@ -155,6 +156,8 @@ def output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_l
         f.write('{},{},{},{},{},{},{},'.format( \
             bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_last_flow, sch_time_only_hard, sch_time_with_soft \
         ))
+        if i_last_flow == UNSAT:
+            f.write('-,-\n')
 
 def get_bandwidth_from_flow_list(flow_list_hard):
     cum_bandwidth = 0
@@ -205,7 +208,7 @@ def main(notPrioritize):
     num_hard = len(flow_list_hard)
     num_soft = len(flow_list_soft)
     # output flow and scheduling information to csv
-    output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_last_flow, sch_time_only_hard, sch_time_with_soft)
+    output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_last_flow, sch_time_only_hard, sch_time_with_soft, notPrioritize)
 
     return i_last_flow, sch_time_only_hard, sch_time_with_soft
 
