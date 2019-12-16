@@ -136,8 +136,36 @@ def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, no
         f.write(yaml.dump(yaml_output))
     # pprint.pprint(sorted_flow_list_low_prio)
 
-def output_params_to_csv():
-    pass
+def output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_last_flow, sch_time_only_hard, sch_time_with_soft):
+    output_filename = '{}/IEEE8021Q_test/results/params_and_results.csv'.format(home_dir)
+    if not os.path.isfile(output_filename):
+        with open(output_filename, 'w') as f:
+            output_csv = ''
+            output_csv += 'bandwidth_hard,'
+            output_csv += 'bandwidth_soft,'
+            output_csv += 'num_hard,'
+            output_csv += 'num_soft,'
+            output_csv += 'i_last_flow,'
+            output_csv += 'sch_time_only_hard,'
+            output_csv += 'sch_time_only_soft,'
+            output_csv += 'maen_val_rate,'
+            output_csv += 'burst_rate\n'
+            f.write(output_csv)
+    with open(output_filename, 'a') as f:
+        f.write('{},{},{},{},{},{},{},'.format( \
+            bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_last_flow, sch_time_only_hard, sch_time_with_soft \
+        ))
+
+def get_bandwidth_from_flow_list(flow_list_hard):
+    cum_bandwidth = 0
+    for each_flow in flow_list_hard:
+        cycle = each_flow["cycle"]
+        size = each_flow["size"]
+        bandwidth = (size * 8) / cycle # in Mbps
+        cum_bandwidth += bandwidth
+    
+    return cum_bandwidth
+
 
 def main(notPrioritize):
     flow_with_path_hard_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir)
@@ -170,8 +198,14 @@ def main(notPrioritize):
     # generate window graph
     gen_window_graph.main()
 
+    # get bandwidth
+    bandwidth_hard = get_bandwidth_from_flow_list(flow_list_hard)
+    bandwidth_soft = get_bandwidth_from_flow_list(flow_list_soft)
+    # get number of flow
+    num_hard = len(flow_list_hard)
+    num_soft = len(flow_list_soft)
     # output flow and scheduling information to csv
-    output_params_to_csv()
+    output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_last_flow, sch_time_only_hard, sch_time_with_soft)
 
     return i_last_flow, sch_time_only_hard, sch_time_with_soft
 
