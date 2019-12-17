@@ -6,6 +6,7 @@ import pprint
 import yaml
 import time
 import copy
+import random
 home_dir = os.path.expanduser('~')
 sys.path.append('{}/workspace/test_z3'.format(home_dir))
 import multiSw_sch.sch as sch
@@ -16,6 +17,11 @@ import results.calc_value as calc_value
 NOT_DEFINE = 1000
 UNSAT = -2
 SAT = -1
+
+# kind_prioritize
+SORT = 0
+RANDOM = 1
+NONE = 2
 
 light_speed = 5 * (10 ** (-3)) # in us/m
 link_length = 10
@@ -44,7 +50,7 @@ def check_existence_and_get_flow_list(flow_with_path_hard_filename, flow_with_pa
 
     return flow_list_hard, flow_list_soft, onlyHard, onlySoft
 
-def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft, notPrioritize=False):
+def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft, kind_prioritize=SORT):
     # calculate pseudo slope and rearrange
     if not onlyHard:
         # sorted_flow_list_soft = calc_pseudo_slope(flow_list_soft)
@@ -64,7 +70,7 @@ def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft
         sch_time_only_hard = 0
     
     # if don't schedule soft flows
-    if notPrioritize:
+    if kind_prioritize == NONE:
         return -1, flow_list_soft, sch_time_only_hard, 0
     
     start_time = time.time()
@@ -137,14 +143,18 @@ def calc_minLatency_val(flow_list_soft):
         each_flow["minLatency_val"] = minLatency_val
 
     sorted_flow_list_soft = sorted(flow_list_soft, reverse=True, key=lambda x:x["minLatency_val"])
-    pprint.pprint(sorted_flow_list_soft)
+    # pprint.pprint(sorted_flow_list_soft)
 
     return sorted_flow_list_soft
 
-def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, notPrioritize=False):
+def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, kind_prioritize=SORT):
     prio = 6
     yaml_output = []
     for each_flow in sorted_flow_list_low_prio:
+        # random choice of prio
+        if kind_prioritize == RANDOM:
+            prio = random.randint(0, 6)
+
         yaml_each_cli = { \
             "flow_id": each_flow["flow_id"], \
             "name": each_flow["node_list"][0], \
@@ -156,16 +166,21 @@ def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, no
 
         yaml_output.append(yaml_each_cli)
 
-        if not notPrioritize:
+        if kind_prioritize == SORT:
             prio = max(prio - 1, 0)
 
     with open(output_filename, "a") as f:
         f.write(yaml.dump(yaml_output))
     # pprint.pprint(sorted_flow_list_low_prio)
 
-def output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_last_flow, sch_time_only_hard, sch_time_with_soft, notPrioritize):
+def output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_last_flow, sch_time_only_hard, sch_time_with_soft, kind_prioritize):
+    file_suffix = ''
+    if kind_prioritize == RANDOM:
+        file_suffix = '_rnd'
+    elif kind_prioritize == NONE:
+        file_suffix = '_np'
     output_filename = \
-        '{}/IEEE8021Q_test/results/params_and_results{}.csv'.format(home_dir, '_np' if notPrioritize else '')
+        '{}/IEEE8021Q_test/results/params_and_results{}.csv'.format(home_dir, file_suffix)
     if not os.path.isfile(output_filename):
         with open(output_filename, 'w') as f:
             output_csv = ''
@@ -197,7 +212,7 @@ def get_bandwidth_from_flow_list(flow_list_hard):
     return cum_bandwidth
 
 
-def main(notPrioritize):
+def main(kind_prioritize):
     flow_with_path_hard_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir)
     flow_with_path_soft_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_soft.yml'.format(home_dir)
 
@@ -207,7 +222,7 @@ def main(notPrioritize):
 
     # schedule with hard and soft
     i_last_flow, sorted_flow_list_low_prio, sch_time_only_hard, sch_time_with_soft = \
-        repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft, notPrioritize)
+        repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft, kind_prioritize)
 
     if i_last_flow == UNSAT:
         print('can not schedule')
@@ -219,7 +234,7 @@ def main(notPrioritize):
     if len(sorted_flow_list_low_prio) != 0:
         output_filename = '{}/workspace/test_z3/multiSw_sch/gcl_cli_send.yml'.format(home_dir)
         # output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename)
-        output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, notPrioritize)
+        output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, kind_prioritize)
 
     # remove old pdf files
     for pdf_file in glob.glob(home_dir + '/workspace/test_z3/multiSw_sch/window_sw*.pdf'):
@@ -235,13 +250,19 @@ def main(notPrioritize):
     num_hard = len(flow_list_hard)
     num_soft = len(flow_list_soft)
     # output flow and scheduling information to csv
-    output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_last_flow, sch_time_only_hard, sch_time_with_soft, notPrioritize)
+    output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_last_flow, sch_time_only_hard, sch_time_with_soft, kind_prioritize)
 
     return i_last_flow, sch_time_only_hard, sch_time_with_soft
 
 
 if __name__ == "__main__":
-    notPrioritize = True if len(sys.argv)>1 and sys.argv[1] == 'True' else False
-    i_last_flow, sch_time_only_hard, sch_time_with_soft = main(notPrioritize)
+    kind_prioritize = SORT
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'RANDOM':
+            kind_prioritize = RANDOM
+        elif sys.argv[1] == 'NONE':
+            kind_prioritize = NONE
+            
+    i_last_flow, sch_time_only_hard, sch_time_with_soft = main(kind_prioritize)
     if i_last_flow == UNSAT:
         raise Exception('Can not schedule even if only HARD.')
