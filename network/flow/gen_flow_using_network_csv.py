@@ -37,7 +37,7 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
         cli_list = [node for node in cli_list if node != dst_node]
 
         # cycle = random.choice([100, 200, 300, 400, 600])
-        cycle = random.choice([100, 200, 400])
+        cycle = random.choice([50, 100, 200, 400])
         payload = random.randint(100, 120) # 46 -- 1500
 
         if i < num_flow_soft: # soft flow
@@ -47,7 +47,6 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
             x_intercept = random.randint(120, 130)
             slope = first_val / (dec_point - x_intercept)
             y_intercept = -slope * x_intercept
-            cycle = 50
 
             tuf_list = [[0, dec_point, "linear", 0, first_val], [dec_point, x_intercept, "linear", slope, y_intercept]]
             flow_dic = { \
@@ -59,8 +58,8 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
                 "tuf": tuf_list, \
                 "dec_point": dec_point}
         else: # hard flow
-            min_deadline = \
-                math.ceil((payload + 30) * 8 / link_bandwidth + light_speed * 10) * max_link_num
+            # min_deadline = \
+            #     math.ceil((payload + 30) * 8 / link_bandwidth + light_speed * 10) * max_link_num
             # deadline = random.randint(min_deadline, 100)
             # deadline = random.randint(min_deadline*2, min_deadline*3)
             deadline = 200

@@ -5,16 +5,21 @@ import subprocess
 import pprint
 import yaml
 import time
+import copy
 home_dir = os.path.expanduser('~')
 sys.path.append('{}/workspace/test_z3'.format(home_dir))
 import multiSw_sch.sch as sch
 import multiSw_sch.gen_window_graph as gen_window_graph
+sys.path.append('{}/IEEE8021Q_test'.format(home_dir))
+import results.calc_value as calc_value
 
 NOT_DEFINE = 1000
 UNSAT = -2
 SAT = -1
 
-home_dir = os.path.expanduser('~')
+light_speed = 5 * (10 ** (-3)) # in us/m
+link_length = 10
+link_bandwidth = 100 # in Mbps
 
 def check_existence_and_get_flow_list(flow_with_path_hard_filename, flow_with_path_soft_filename):
     # get flow_list from yaml
@@ -42,7 +47,8 @@ def check_existence_and_get_flow_list(flow_with_path_hard_filename, flow_with_pa
 def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft, notPrioritize=False):
     # calculate pseudo slope and rearrange
     if not onlyHard:
-        sorted_flow_list_soft = calc_pseudo_slope(flow_list_soft)
+        # sorted_flow_list_soft = calc_pseudo_slope(flow_list_soft)
+        sorted_flow_list_soft = calc_minLatency_val(flow_list_soft)
 
     start_time = time.time()
 
@@ -69,7 +75,7 @@ def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft
         if onlySoft:
             flow_list_hard_with_soft = []
         else:
-            flow_list_hard_with_soft = flow_list_hard
+            flow_list_hard_with_soft = copy.deepcopy(flow_list_hard)
         for i_repeat in range(len(sorted_flow_list_soft)):
             flow_list_hard_with_soft.append(sorted_flow_list_soft[i_repeat])
             sat_or_unsat = sch.main(flow_list_hard_with_soft)
@@ -114,6 +120,27 @@ def calc_pseudo_slope(flow_list_soft):
 
     return sorted_flow_list_soft
 
+def calc_minLatency_val(flow_list_soft):
+    for each_flow in flow_list_soft:
+        # calculate minLatency latency
+        num_hop = len(each_flow["node_list"]) - 1
+        size = each_flow["size"]
+        minLatency_latency = (size * 8 / link_bandwidth + light_speed * link_length) * num_hop
+
+        # get TUF
+        tuf = each_flow["tuf"]
+
+        # calculate minLatency value
+        minLatency_val = calc_value.calc_value_using_tuf(minLatency_latency, tuf)
+
+        # add minLatency value to dict
+        each_flow["minLatency_val"] = minLatency_val
+
+    sorted_flow_list_soft = sorted(flow_list_soft, reverse=True, key=lambda x:x["minLatency_val"])
+    pprint.pprint(sorted_flow_list_soft)
+
+    return sorted_flow_list_soft
+
 def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, notPrioritize=False):
     prio = 6
     yaml_output = []
@@ -149,7 +176,7 @@ def output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_l
             output_csv += 'i_last_flow,'
             output_csv += 'sch_time_only_hard,'
             output_csv += 'sch_time_only_soft,'
-            output_csv += 'maen_val_rate,'
+            output_csv += 'mean_val_rate,'
             output_csv += 'burst_rate\n'
             f.write(output_csv)
     with open(output_filename, 'a') as f:
