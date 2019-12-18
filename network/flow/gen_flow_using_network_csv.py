@@ -41,8 +41,8 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
         payload = random.randint(100, 120) # 46 -- 1500
 
         if i < num_flow_soft: # soft flow
-            first_val = random.randint(80, 120)
-            # first_val = 100
+            # first_val = random.randint(80, 120)
+            first_val = 100
             dec_point = random.randint(80, 100)
             x_intercept = random.randint(120, 130)
             slope = first_val / (dec_point - x_intercept)

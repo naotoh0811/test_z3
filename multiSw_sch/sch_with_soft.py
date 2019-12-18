@@ -192,6 +192,7 @@ def output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_l
             output_csv += 'sch_time_only_hard,'
             output_csv += 'sch_time_only_soft,'
             output_csv += 'mean_val_rate,'
+            output_csv += 'stdev_val_rate,'
             output_csv += 'burst_rate\n'
             f.write(output_csv)
     with open(output_filename, 'a') as f:
@@ -199,7 +200,7 @@ def output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_l
             bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_last_flow, sch_time_only_hard, sch_time_with_soft \
         ))
         if i_last_flow == UNSAT:
-            f.write('-,-\n')
+            f.write('-,-,-\n')
 
 def get_bandwidth_from_flow_list(flow_list_hard):
     cum_bandwidth = 0
