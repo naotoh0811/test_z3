@@ -13,7 +13,7 @@ SAT = -1
 
 light_speed = 5 * (10 ** (-3)) # in us/m
 link_length = 10
-link_bandwidth = 100 # in Mbps
+link_bandwidth = 1000 # in Mbps
 
 def get_flow_list_from_csv(filename): # not used
     df = pd.read_csv(filename)
@@ -222,7 +222,6 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
         if "deadline" in each_flow: # hard flow
             deadline = each_flow["deadline"]
         else: # soft flow
-            # deadline = each_flow["dec_point"]
             deemed_rate = 1
             tuf = each_flow["tuf"]
             deadline = get_deemed_deadline(tuf, deemed_rate)
@@ -273,7 +272,7 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
                 s.add(recv_time[dst_node] - close_time[i_node][i_flow][i_last_win] >= link_delay)
                 # これがないと計算時間が無限になる
                 # 精々10サイクル分くらいで十分か
-                s.add(close_time[i_node][i_flow][i_last_win] < superCycle*10)
+                s.add(close_time[i_node][i_flow][i_last_win] < superCycle*100)
 
             prev_i_node = i_node
             prev_i_flow = i_flow

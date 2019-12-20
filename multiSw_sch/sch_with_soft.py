@@ -25,7 +25,7 @@ NONE = 2
 
 light_speed = 5 * (10 ** (-3)) # in us/m
 link_length = 10
-link_bandwidth = 100 # in Mbps
+link_bandwidth = 1000 # in Mbps
 
 def check_existence_and_get_flow_list(flow_with_path_hard_filename, flow_with_path_soft_filename):
     # get flow_list from yaml
@@ -50,11 +50,12 @@ def check_existence_and_get_flow_list(flow_with_path_hard_filename, flow_with_pa
 
     return flow_list_hard, flow_list_soft, onlyHard, onlySoft
 
-def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft, kind_prioritize=SORT):
+def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft, kind_prioritize=SORT, reverse=False):
     # calculate pseudo slope and rearrange
     if not onlyHard:
-        # sorted_flow_list_soft = calc_pseudo_slope(flow_list_soft)
-        sorted_flow_list_soft = calc_minLatency_val(flow_list_soft)
+        # sorted_flow_list_soft = sort_list_by_pseudo_slope(flow_list_soft)
+        # sorted_flow_list_soft = sort_list_by_minLatency_val(flow_list_soft)
+        sorted_flow_list_soft = sort_list_by_bandwidth(flow_list_soft, reverse)
 
     start_time = time.time()
 
@@ -108,7 +109,7 @@ def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft
 
         return i_last_flow, sorted_flow_list_low_prio, sch_time_only_hard, sch_time_with_soft
 
-def calc_pseudo_slope(flow_list_soft):
+def sort_list_by_pseudo_slope(flow_list_soft):
     for each_flow in flow_list_soft:
         first_tuf = each_flow["tuf"][0]
         first_val = first_tuf[4]
@@ -126,23 +127,35 @@ def calc_pseudo_slope(flow_list_soft):
 
     return sorted_flow_list_soft
 
-def calc_minLatency_val(flow_list_soft):
+def sort_list_by_minLatency_val(flow_list_soft):
     for each_flow in flow_list_soft:
         # calculate minLatency latency
         num_hop = len(each_flow["node_list"]) - 1
         size = each_flow["size"]
-        minLatency_latency = (size * 8 / link_bandwidth + light_speed * link_length) * num_hop
+        minLatency = (size * 8 / link_bandwidth + light_speed * link_length) * num_hop
 
         # get TUF
         tuf = each_flow["tuf"]
 
         # calculate minLatency value
-        minLatency_val = calc_value.calc_value_using_tuf(minLatency_latency, tuf)
+        minLatency_val = calc_value.calc_value_using_tuf(minLatency, tuf)
 
         # add minLatency value to dict
         each_flow["minLatency_val"] = minLatency_val
 
     sorted_flow_list_soft = sorted(flow_list_soft, reverse=True, key=lambda x:x["minLatency_val"])
+    # pprint.pprint(sorted_flow_list_soft)
+
+    return sorted_flow_list_soft
+
+def sort_list_by_bandwidth(flow_list_soft, reverse):
+    for each_flow in flow_list_soft:
+        size = each_flow["size"]
+        cycle = each_flow["cycle"]
+        bandwidth = (size * 8) / cycle # in Mbps
+        each_flow["bandwidth"] = bandwidth
+
+    sorted_flow_list_soft = sorted(flow_list_soft, reverse=reverse, key=lambda x:x["bandwidth"])
     # pprint.pprint(sorted_flow_list_soft)
 
     return sorted_flow_list_soft
@@ -202,9 +215,9 @@ def output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_l
         if i_last_flow == UNSAT:
             f.write('-,-,-\n')
 
-def get_bandwidth_from_flow_list(flow_list_hard):
+def get_bandwidth_from_flow_list(flow_list):
     cum_bandwidth = 0
-    for each_flow in flow_list_hard:
+    for each_flow in flow_list:
         cycle = each_flow["cycle"]
         size = each_flow["size"]
         bandwidth = (size * 8) / cycle # in Mbps
@@ -213,7 +226,7 @@ def get_bandwidth_from_flow_list(flow_list_hard):
     return cum_bandwidth
 
 
-def main(kind_prioritize):
+def main(kind_prioritize, reverse):
     flow_with_path_hard_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir)
     flow_with_path_soft_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_soft.yml'.format(home_dir)
 
@@ -223,7 +236,7 @@ def main(kind_prioritize):
 
     # schedule with hard and soft
     i_last_flow, sorted_flow_list_low_prio, sch_time_only_hard, sch_time_with_soft = \
-        repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft, kind_prioritize)
+        repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft, kind_prioritize, reverse)
 
     if i_last_flow == UNSAT:
         print('can not schedule')
@@ -264,6 +277,11 @@ if __name__ == "__main__":
         elif sys.argv[1] == 'NONE':
             kind_prioritize = NONE
             
-    i_last_flow, sch_time_only_hard, sch_time_with_soft = main(kind_prioritize)
+    reverse = False
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'True':
+            reverse = True
+
+    i_last_flow, sch_time_only_hard, sch_time_with_soft = main(kind_prioritize, reverse)
     if i_last_flow == UNSAT:
         raise Exception('Can not schedule even if only HARD.')

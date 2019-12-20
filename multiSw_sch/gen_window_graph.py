@@ -99,7 +99,7 @@ def gen_graph_for_each_sw(each_sw):
     ax.legend(handler_list_forLegend, label_list_forLegend)
 
     plt.tight_layout()
-    pdf_filename = 'window_sw{}.pdf'.format(name)
+    pdf_filename = '{}/workspace/test_z3/multiSw_sch/pdf/window_sw{}.pdf'.format(home_dir, name)
     make_pdf(pdf_filename)
 
 def make_pdf(pdf_filename):
