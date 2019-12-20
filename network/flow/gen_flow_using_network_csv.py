@@ -53,8 +53,8 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
         print("WARNING: num_flow is too large. Now set num_flow to {}".format(cli_num // 2))
         num_flow = cli_num // 2
 
-    # node_pair_list = get_node_pair_random(cli_list, num_flow)
-    node_pair_list = get_node_pair_static(cli_list, num_flow)
+    node_pair_list = get_node_pair_random(cli_list, num_flow)
+    # node_pair_list = get_node_pair_static(cli_list, num_flow)
 
     flow_dic_list = []
     for i in range(num_flow):
