@@ -46,6 +46,7 @@ def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
         node_list = dijkstra.main(src, dst)
         num_hop = len(node_list) - 1
         minLatency = ((payload + 30) * 8 / link_bandwidth + light_speed * 10) * num_hop
+        minData_transferLatency = (46 + 30) * 8 / link_bandwidth
 
         if each_flow["kind"] == 'hard': # hard flow
             # set deadline
@@ -62,8 +63,11 @@ def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
         else: # soft flow
             # set TUF
             first_val = 100
-            dec_point = random.randint(math.ceil(minLatency*2), math.ceil(minLatency*3))
-            x_intercept = random.randint(math.ceil(minLatency*4.3), math.ceil(minLatency*4.5))
+            # dec_point = random.randint(math.ceil(minLatency*2), math.ceil(minLatency*3))
+            dec_point = minLatency
+            # x_intercept = random.randint(math.ceil(minLatency*4.3), math.ceil(minLatency*4.5))
+            x_intercept = \
+                dec_point + minData_transferLatency * minData_transferLatency * random.randint(5, 10)
             slope = first_val / (dec_point - x_intercept)
             y_intercept = -slope * x_intercept
             tuf_list = [ \

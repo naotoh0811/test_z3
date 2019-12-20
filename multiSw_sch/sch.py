@@ -222,15 +222,16 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
         if "deadline" in each_flow: # hard flow
             deadline = each_flow["deadline"]
         else: # soft flow
-            deemed_rate = 1
+            deemed_rate = 0.7
             tuf = each_flow["tuf"]
             deadline = get_deemed_deadline(tuf, deemed_rate)
+            # print('dec_point: {}, deemed_deadline: {}, x_intercept: {}'.format(tuf[0][1], deadline, tuf[1][1]))
         prev_i_node = NOT_DEFINE
         prev_i_flow = NOT_DEFINE
 
         # 0 > time
         s.add(send_time[src_node] >= 0)
-        s.add(send_time[src_node] <= cycle) # 無くても条件は変わらないが、計算量削減のため上限を設ける
+        # s.add(send_time[src_node] <= cycle) # 無くても条件は変わらないが、計算量削減のため上限を設ける
         # deadline
         s.add(recv_time[dst_node] - send_time[src_node] <= deadline-1)
 
@@ -272,7 +273,8 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
                 s.add(recv_time[dst_node] - close_time[i_node][i_flow][i_last_win] >= link_delay)
                 # これがないと計算時間が無限になる
                 # 精々10サイクル分くらいで十分か
-                s.add(close_time[i_node][i_flow][i_last_win] < superCycle*100)
+                # s.add(close_time[i_node][i_flow][i_last_win] < superCycle*30)
+                s.add(recv_time[dst_node] < superCycle*30)
 
             prev_i_node = i_node
             prev_i_flow = i_flow

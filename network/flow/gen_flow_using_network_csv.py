@@ -4,6 +4,7 @@ import yaml
 import math
 import sys
 import os.path
+import copy
 
 
 def get_cli_list_from_csv(filename):
@@ -14,6 +15,29 @@ def get_cli_list_from_csv(filename):
     cli_list = [int(i) for i in cli_list]
     sw_list = [int(i) for i in sw_list]
     return cli_list, sw_list
+
+def get_node_pair_random(cli_list, num_flow):
+    remaining_cli_list = copy.deepcopy(cli_list)
+
+    node_pair_list = []
+    for i in range(num_flow):
+        src_node = random.choice(remaining_cli_list)
+        remaining_cli_list = [node for node in remaining_cli_list if node != src_node]
+        dst_node = random.choice(remaining_cli_list)
+        remaining_cli_list = [node for node in remaining_cli_list if node != dst_node]
+
+        node_pair_list.append((src_node, dst_node))
+    
+    return node_pair_list
+
+def get_node_pair_static(cli_list, num_flow):
+    src_node = cli_list[0]
+    dst_node = cli_list[0] + 4
+    node_pair_list = []
+    for i in range(num_flow):
+        node_pair_list.append((src_node, dst_node))
+
+    return node_pair_list
 
 def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
     cli_list, sw_list = get_cli_list_from_csv(node_filename)
@@ -29,12 +53,13 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
         print("WARNING: num_flow is too large. Now set num_flow to {}".format(cli_num // 2))
         num_flow = cli_num // 2
 
+    # node_pair_list = get_node_pair_random(cli_list, num_flow)
+    node_pair_list = get_node_pair_static(cli_list, num_flow)
+
     flow_dic_list = []
     for i in range(num_flow):
-        src_node = random.choice(cli_list)
-        cli_list = [node for node in cli_list if node != src_node]
-        dst_node = random.choice(cli_list)
-        cli_list = [node for node in cli_list if node != dst_node]
+        # set src/dst node
+        (src_node, dst_node) = node_pair_list[i]
 
         # cycle = random.choice([100, 200, 300, 400, 600])
         # cycle = random.choice([50, 100, 200, 400])
