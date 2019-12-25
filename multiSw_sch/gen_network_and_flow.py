@@ -12,20 +12,22 @@ import network.dijkstra.gen_flowData as gen_flowData
 import multiSw_sch.sch as sch
 
 
-def main(num_sw, num_flow, num_flow_soft):
-    gen_linear_network.main(num_sw)
+def main(num_sw, num_cli_for_each_sw, num_flow, num_flow_soft):
+    gen_linear_network.main(num_sw, num_cli_for_each_sw)
     gen_flow_using_network_csv.main(num_flow, num_flow_soft)
     gen_flowData.main()
 
 if __name__ == "__main__":
     num_sw = 5
+    num_cli_for_each_sw = 2
     num_flow = 5
     num_flow_soft = 3
-    if len(sys.argv) == 4:
+    if len(sys.argv) == 5:
         num_sw = int(sys.argv[1])
-        num_flow = int(sys.argv[2])
-        num_flow_soft = int(sys.argv[3])
+        num_cli_for_each_sw = int(sys.argv[2])
+        num_flow = int(sys.argv[3])
+        num_flow_soft = int(sys.argv[4])
     else:
-        print("WARNING: arg is invalid. Now set num_sw to 5, num_flow to 5, num_flow_soft to 3.")
+        print("WARNING: arg is invalid. Now set num_sw to 5, num_cli_for_each_sw to 2, num_flow to 5, num_flow_soft to 3.")
 
-    main(num_sw, num_flow, num_flow_soft)
+    main(num_sw, num_cli_for_each_sw, num_flow, num_flow_soft)

@@ -67,7 +67,7 @@ def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
             dec_point = minLatency
             # x_intercept = random.randint(math.ceil(minLatency*4.3), math.ceil(minLatency*4.5))
             x_intercept = \
-                dec_point + minData_transferLatency * minData_transferLatency * random.randint(5, 10)
+                dec_point + minData_transferLatency * random.randint(5, 10)
             slope = first_val / (dec_point - x_intercept)
             y_intercept = -slope * x_intercept
             tuf_list = [ \
