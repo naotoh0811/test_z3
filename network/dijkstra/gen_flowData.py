@@ -62,7 +62,8 @@ def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
             flow_dic_list_hard.append(flow_dic)
         else: # soft flow
             # set TUF
-            first_val = 100
+            # first_val = 100
+            first_val = random.randint(50, 150)
             # dec_point = random.randint(math.ceil(minLatency*2), math.ceil(minLatency*3))
             dec_point = minLatency
             # x_intercept = random.randint(math.ceil(minLatency*4.3), math.ceil(minLatency*4.5))

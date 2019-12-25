@@ -54,8 +54,8 @@ def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft
     # calculate pseudo slope and rearrange
     if not onlyHard:
         # sorted_flow_list_soft = sort_list_by_pseudo_slope(flow_list_soft)
-        sorted_flow_list_soft = sort_list_by_slope(flow_list_soft)
-        # sorted_flow_list_soft = sort_list_by_minLatency_val(flow_list_soft)
+        # sorted_flow_list_soft = sort_list_by_slope(flow_list_soft)
+        sorted_flow_list_soft = sort_list_by_minLatency_val(flow_list_soft)
         # sorted_flow_list_soft = sort_list_by_bandwidth(flow_list_soft, reverse)
 
     start_time = time.time()
