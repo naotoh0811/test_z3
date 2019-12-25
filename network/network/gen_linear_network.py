@@ -16,7 +16,6 @@ def gen_network_csv(num_sw, num_cli_for_each_sw, csv_filename):
 def gen_node_csv(num_sw, num_cli_for_each_sw, csv_filename):
     i_sw_last = num_sw - 1
     i_cli_first = num_sw
-    # i_cli_last = 3 * num_sw - 1
     i_cli_last = (num_cli_for_each_sw + 1) * num_sw - 1
 
     sw_list = list(range(0, i_sw_last+1))

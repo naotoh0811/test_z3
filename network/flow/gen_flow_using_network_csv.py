@@ -6,6 +6,8 @@ import sys
 import os.path
 import copy
 
+link_bandwidth = 1000 # in Mbps
+light_speed = 5 * (10 ** -3)
 
 def get_cli_list_from_csv(filename):
     df = pd.read_csv(filename)
@@ -32,29 +34,41 @@ def get_node_pair_random(cli_list, num_flow):
 
 def get_node_pair_static(cli_list, num_flow):
     src_node = cli_list[0]
-    dst_node = cli_list[0] + 4
+    dst_node = cli_list[0 + 4]
     node_pair_list = []
     for i in range(num_flow):
         node_pair_list.append((src_node, dst_node))
 
     return node_pair_list
 
+def get_node_pair_samePath(cli_list, num_flow, num_sw, num_pass_sw):
+    num_cli_for_each_sw = int(len(cli_list) / num_sw)
+    if num_flow > num_cli_for_each_sw:
+        raise Exception('num_flow exceeds num_cli_for_each_sw.')
+    if num_pass_sw > num_sw:
+        raise Exception('num_pass_sw exceeds num_sw.')
+    
+    node_pair_list = []
+    for i in range(num_flow):
+        src_node = cli_list[0 + i]
+        dst_node = cli_list[0 + i + num_cli_for_each_sw * (num_pass_sw - 1)]
+        node_pair_list.append((src_node, dst_node))
+    
+    return node_pair_list
+
 def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
     cli_list, sw_list = get_cli_list_from_csv(node_filename)
 
-    sw_num = len(sw_list)
-    max_link_num = sw_num + 1
-    link_bandwidth = 1000 # in Mbps
-    light_speed = 5 * (10 ** -3)
+    num_sw = len(sw_list)
 
-    cli_num = len(cli_list)
-    #num_flow = 10
-    if num_flow > cli_num // 2:
-        print("WARNING: num_flow is too large. Now set num_flow to {}".format(cli_num // 2))
-        num_flow = cli_num // 2
+    num_cli = len(cli_list)
+    if num_flow > num_cli // 2:
+        print("WARNING: num_flow is too large. Now set num_flow to {}".format(num_cli // 2))
+        num_flow = num_cli // 2
 
-    node_pair_list = get_node_pair_random(cli_list, num_flow)
-    # node_pair_list = get_node_pair_static(cli_list, num_flow)
+    # node_pair_list = get_node_pair_random(cli_list, num_flow)
+    num_pass_sw = 2
+    node_pair_list = get_node_pair_samePath(cli_list, num_flow, num_sw, num_pass_sw)
 
     flow_dic_list = []
     for i in range(num_flow):
@@ -63,7 +77,7 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
 
         # cycle = random.choice([100, 200, 300, 400, 600])
         # cycle = random.choice([50, 100, 200, 400])
-        payload = random.randint(100, 120) # 46 -- 1500
+        payload = random.randint(1300, 1500) # 46 -- 1500
 
         if i < num_flow_soft: # soft flow
             cycle = random.choice([50, 100])

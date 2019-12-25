@@ -54,8 +54,9 @@ def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft
     # calculate pseudo slope and rearrange
     if not onlyHard:
         # sorted_flow_list_soft = sort_list_by_pseudo_slope(flow_list_soft)
+        sorted_flow_list_soft = sort_list_by_slope(flow_list_soft)
         # sorted_flow_list_soft = sort_list_by_minLatency_val(flow_list_soft)
-        sorted_flow_list_soft = sort_list_by_bandwidth(flow_list_soft, reverse)
+        # sorted_flow_list_soft = sort_list_by_bandwidth(flow_list_soft, reverse)
 
     start_time = time.time()
 
@@ -127,6 +128,11 @@ def sort_list_by_pseudo_slope(flow_list_soft):
 
     return sorted_flow_list_soft
 
+def sort_list_by_slope(flow_list_soft):
+    sorted_flow_list_soft = sorted(flow_list_soft, reverse=False, key=lambda x:x["tuf"][1][3])
+
+    return sorted_flow_list_soft
+
 def sort_list_by_minLatency_val(flow_list_soft):
     for each_flow in flow_list_soft:
         # calculate minLatency latency
@@ -163,24 +169,31 @@ def sort_list_by_bandwidth(flow_list_soft, reverse):
 def output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, kind_prioritize=SORT):
     prio = 6
     yaml_output = []
+    i = 0
     for each_flow in sorted_flow_list_low_prio:
         # random choice of prio
         if kind_prioritize == RANDOM:
             prio = random.randint(0, 6)
 
+        cycle = each_flow["cycle"]
+        # send_time = random.randint(10, cycle - 5)
+        send_time = (10 + 10 * i) % cycle
+
         yaml_each_cli = { \
             "flow_id": each_flow["flow_id"], \
             "name": each_flow["node_list"][0], \
             "pass_node_list": each_flow["node_list"][1:], \
-            "cycle": each_flow["cycle"], \
+            "cycle": cycle, \
             "size": each_flow["size"], \
             "priority": prio, \
-            "send_time": 10}
+            "send_time": send_time}
 
         yaml_output.append(yaml_each_cli)
 
         if kind_prioritize == SORT:
             prio = max(prio - 1, 0)
+        
+        i += 1
 
     with open(output_filename, "a") as f:
         f.write(yaml.dump(yaml_output))
