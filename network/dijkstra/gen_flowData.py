@@ -10,6 +10,7 @@ import network.dijkstra.dijkstra as dijkstra
 
 link_bandwidth = 1000 # in Mbps
 light_speed = 5 * (10 ** -3)
+header = 30
 
 def read_yaml(filename):
     f = open(filename, "r+")
@@ -30,6 +31,9 @@ def get_path_by_dijkstra_cpp(src, dst): # not used
 
     return node_list
 
+def get_transferLatency(payload):
+    return (payload + header) * 8 / link_bandwidth + light_speed * 10
+
 def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
     flow_dic_list_hard = []
     flow_dic_list_soft = []
@@ -39,18 +43,18 @@ def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
         dst = each_flow["dst"]
         cycle = each_flow["cycle"]
         payload = each_flow["payload"]
-        header = 30
         size = payload + header if payload + header >= 72 else 72
 
         # get node_list by using dijkstra
         node_list = dijkstra.main(src, dst)
         num_hop = len(node_list) - 1
-        minLatency = ((payload + 30) * 8 / link_bandwidth + light_speed * 10) * num_hop
-        minData_transferLatency = (46 + 30) * 8 / link_bandwidth
+        minLatency = get_transferLatency(payload) * num_hop
+        minData_transferLatency = get_transferLatency(46)
 
         if each_flow["kind"] == 'hard': # hard flow
             # set deadline
-            deadline = random.randint(math.ceil(minLatency*4), math.ceil(minLatency*4))
+            # deadline = random.randint(math.ceil(minLatency*4), math.ceil(minLatency*4))
+            deadline = math.ceil(minLatency*2)
 
             flow_dic = { \
                 "flow_id": flow_id, \
@@ -63,12 +67,14 @@ def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
         else: # soft flow
             # set TUF
             # first_val = 100
-            first_val = random.randint(50, 150)
+            first_val = random.randint(30, 200)
             # dec_point = random.randint(math.ceil(minLatency*2), math.ceil(minLatency*3))
             dec_point = minLatency
             # x_intercept = random.randint(math.ceil(minLatency*4.3), math.ceil(minLatency*4.5))
-            x_intercept = \
-                dec_point + minData_transferLatency * random.randint(20, 22)
+            # x_intercept = \
+            #     dec_point + minData_transferLatency * random.randint(10, 50) # dec_point + (6~30)
+            x_intercept = dec_point + \
+                get_transferLatency(1500) * random.randint(1, 5) # dec_point + (12~60)
             slope = first_val / (dec_point - x_intercept)
             y_intercept = -slope * x_intercept
             tuf_list = [ \

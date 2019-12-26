@@ -67,7 +67,7 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
         num_flow = num_cli // 2
 
     # node_pair_list = get_node_pair_random(cli_list, num_flow)
-    num_pass_sw = 2
+    num_pass_sw = 5
     node_pair_list = get_node_pair_samePath(cli_list, num_flow, num_sw, num_pass_sw)
 
     flow_dic_list = []
@@ -77,7 +77,7 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
 
         # cycle = random.choice([100, 200, 300, 400, 600])
         # cycle = random.choice([50, 100, 200, 400])
-        payload = random.randint(1300, 1500) # 46 -- 1500
+        payload = random.randint(1500, 1500) # 46 -- 1500
 
         if i < num_flow_soft: # soft flow
             cycle = random.choice([50, 100])
