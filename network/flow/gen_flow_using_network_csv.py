@@ -9,7 +9,7 @@ import copy
 link_bandwidth = 1000 # in Mbps
 light_speed = 5 * (10 ** -3)
 
-def get_cli_list_from_csv(filename):
+def get_node_list_from_csv(filename):
     df = pd.read_csv(filename)
     for row in df.itertuples():
         cli_list = row.cli.split()
@@ -57,7 +57,7 @@ def get_node_pair_samePath(cli_list, num_flow, num_sw, num_pass_sw):
     return node_pair_list
 
 def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
-    cli_list, sw_list = get_cli_list_from_csv(node_filename)
+    cli_list, sw_list = get_node_list_from_csv(node_filename)
 
     num_sw = len(sw_list)
 
@@ -93,7 +93,7 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
                 # "dec_point": dec_point \
             }
         else: # hard flow
-            cycle = random.choice([200, 400])
+            cycle = random.choice([400, 400])
 
             flow_dic = { \
                 "flow_id": i, \

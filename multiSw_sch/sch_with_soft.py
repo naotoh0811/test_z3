@@ -11,6 +11,7 @@ home_dir = os.path.expanduser('~')
 sys.path.append('{}/workspace/test_z3'.format(home_dir))
 import multiSw_sch.sch as sch
 import multiSw_sch.gen_window_graph as gen_window_graph
+import network.flow.gen_flow_using_network_csv as gen_flow_using_network_csv
 sys.path.append('{}/IEEE8021Q_test'.format(home_dir))
 import results.calc_value as calc_value
 
@@ -55,7 +56,7 @@ def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft
     if not onlyHard:
         # sorted_flow_list_soft = sort_list_by_pseudo_slope(flow_list_soft)
         # sorted_flow_list_soft = sort_list_by_slope(flow_list_soft)
-        sorted_flow_list_soft = sort_list_by_minLatency_val(flow_list_soft)
+        sorted_flow_list_soft = sort_list_by_minLatency_val(flow_list_soft, flow_list_hard)
         # sorted_flow_list_soft = sort_list_by_bandwidth(flow_list_soft, reverse)
 
     start_time = time.time()
@@ -133,26 +134,68 @@ def sort_list_by_slope(flow_list_soft):
 
     return sorted_flow_list_soft
 
-def sort_list_by_minLatency_val(flow_list_soft):
-    for each_flow in flow_list_soft:
-        # calculate minLatency latency
-        num_hop = len(each_flow["node_list"]) - 1
-        size = each_flow["size"]
-        minLatency = (size * 8 / link_bandwidth + light_speed * link_length) * num_hop
+def sort_list_by_minLatency_val(flow_list_soft, flow_list_hard):
+    # get sw_list
+    node_csv_filename = '{}/workspace/test_z3/network/network/node.csv'.format(home_dir)
+    cli_list, sw_list = gen_flow_using_network_csv.get_node_list_from_csv(node_csv_filename)
 
-        # get TUF
-        tuf = each_flow["tuf"]
+    # initialize residual bandwidth
+    residual_link_bandwidth_dic = {}
+    for each_sw in sw_list[:-1]:
+        residual_link_bandwidth_dic[each_sw] = link_bandwidth
 
-        # calculate minLatency value
-        minLatency_val = calc_value.calc_value_using_tuf(minLatency, tuf)
+    # get pass node of hard flow and subtract from residual bandwidth
+    for each_flow in flow_list_hard:
+        bandwidth = each_flow["size"] * 8 / each_flow["cycle"]
+        pass_sw_list = each_flow["node_list"][1:-1]
+        for each_sw in pass_sw_list[:-1]:
+            residual_link_bandwidth_dic[each_sw] -= bandwidth
+    
+    # sort
+    sorted_flow_list_soft_on_all = copy.deepcopy(flow_list_soft)
+    sorted_flow_list_soft_on_residual = []
+    for i  in range(len(flow_list_soft) - 1):
+        # calculate minLatency_val
+        for each_flow in sorted_flow_list_soft_on_all:
+            size = each_flow["size"]
+            pass_sw_list = each_flow["node_list"][1:-1]
 
-        # add minLatency value to dict
-        each_flow["minLatency_val"] = minLatency_val
+            # calculate minLatency
+            ## from src node
+            minLatency = size * 8 / link_bandwidth + light_speed * link_length
+            for each_sw in pass_sw_list[:-1]:
+                ## from each_sw to next sw
+                minLatency += size * 8 / residual_link_bandwidth_dic[each_sw] + light_speed * link_length
+            ## to dst node
+            minLatency += size * 8 / link_bandwidth + light_speed * link_length
 
-    sorted_flow_list_soft = sorted(flow_list_soft, reverse=True, key=lambda x:x["minLatency_val"])
-    # pprint.pprint(sorted_flow_list_soft)
+            # get TUF
+            tuf = each_flow["tuf"]
 
-    return sorted_flow_list_soft
+            # calculate minLatency value
+            minLatency_val = calc_value.calc_value_using_tuf(minLatency, tuf)
+
+            # add minLatency value to dict
+            each_flow["minLatency_val"] = minLatency_val
+
+        # sort by minLatency_val
+        sorted_flow_list_soft_on_all = \
+            sorted(sorted_flow_list_soft_on_all, reverse=True, key=lambda x:x["minLatency_val"])
+
+        # pop and append highest flow
+        highest_flow = sorted_flow_list_soft_on_all.pop(0)
+        sorted_flow_list_soft_on_residual.append(highest_flow)
+
+        # update residual bandwidth
+        bandwidth_highest = highest_flow["size"] * 8 / highest_flow["cycle"]
+        pass_sw_list_highest = highest_flow["node_list"][1:-1]
+        for each_sw in pass_sw_list_highest[:-1]:
+            residual_link_bandwidth_dic[each_sw] -= bandwidth_highest
+
+    # append lowest flow
+    sorted_flow_list_soft_on_residual.append(sorted_flow_list_soft_on_all[0])
+
+    return sorted_flow_list_soft_on_residual
 
 def sort_list_by_bandwidth(flow_list_soft, reverse):
     for each_flow in flow_list_soft:
