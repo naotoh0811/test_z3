@@ -93,7 +93,8 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
                 # "dec_point": dec_point \
             }
         else: # hard flow
-            cycle = random.choice([400, 400])
+            # cycle = random.choice([200, 400])
+            cycle = 400
 
             flow_dic = { \
                 "flow_id": i, \

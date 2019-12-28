@@ -168,6 +168,10 @@ def sort_list_by_minLatency_val(flow_list_soft, flow_list_hard):
                 minLatency += size * 8 / residual_link_bandwidth_dic[each_sw] + light_speed * link_length
             ## to dst node
             minLatency += size * 8 / link_bandwidth + light_speed * link_length
+            ## hop count penalty
+            penalty_latency = 5
+            count_hop = len(pass_sw_list[:-1])
+            minLatency += penalty_latency * count_hop
 
             # get TUF
             tuf = each_flow["tuf"]
