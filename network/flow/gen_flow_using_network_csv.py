@@ -56,6 +56,17 @@ def get_node_pair_samePath(cli_list, num_flow, num_sw, num_pass_sw):
     
     return node_pair_list
 
+def get_flow_property_fixed_bandwidth(num_flow_soft, fixed_bandwidth):
+    cycle = 10
+    while True:
+        payload = math.ceil((fixed_bandwidth * cycle / 8) / num_flow_soft - 30)
+        if payload <= 1500:
+            break
+        else:
+            cycle /= 2
+
+    return cycle, payload
+
 def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
     cli_list, sw_list = get_node_list_from_csv(node_filename)
 
@@ -77,11 +88,12 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
 
         # cycle = random.choice([100, 200, 300, 400, 600])
         # cycle = random.choice([50, 100, 200, 400])
-        payload = random.randint(1500, 1500) # 46 -- 1500
 
         if i < num_flow_soft: # soft flow
-            cycle = random.choice([50, 100])
-            # cycle = 50
+            # cycle = random.choice([50, 100])
+            # cycle = 100
+            # payload = random.randint(1500, 1500) # 46 -- 1500
+            cycle, payload = get_flow_property_fixed_bandwidth(num_flow_soft, 900)
 
             flow_dic = { \
                 "flow_id": i, \
@@ -96,6 +108,7 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
         else: # hard flow
             # cycle = random.choice([200, 400])
             cycle = 400
+            payload = random.randint(1500, 1500) # 46 -- 1500
 
             flow_dic = { \
                 "flow_id": i, \
