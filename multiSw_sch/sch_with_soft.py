@@ -197,7 +197,17 @@ def sort_list_by_minLatency_val(flow_list_soft, flow_list_hard):
             residual_link_bandwidth_dic[each_sw] -= bandwidth_highest
 
     # append lowest flow
-    sorted_flow_list_soft_on_residual.append(sorted_flow_list_soft_on_all[0])
+    lowest_flow = sorted_flow_list_soft_on_all[0]
+    sorted_flow_list_soft_on_residual.append(lowest_flow)
+
+    # check bandwidth < 0
+    bandwidth_lowest = lowest_flow["size"] * 8 / lowest_flow["cycle"]
+    pass_sw_list_lowest = lowest_flow["node_list"][1:-1]
+    for each_sw in pass_sw_list_lowest[:-1]:
+        residual_link_bandwidth_dic[each_sw] -= bandwidth_lowest
+    for i_link in residual_link_bandwidth_dic:
+        if residual_link_bandwidth_dic[i_link] < 0:
+            raise Exception('Flow\'s bandwidth exceeds link\'s bandwidth.')
 
     return sorted_flow_list_soft_on_residual
 

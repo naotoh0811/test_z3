@@ -81,6 +81,7 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
 
         if i < num_flow_soft: # soft flow
             cycle = random.choice([50, 100])
+            # cycle = 50
 
             flow_dic = { \
                 "flow_id": i, \
