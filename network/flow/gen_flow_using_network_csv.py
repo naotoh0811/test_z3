@@ -57,7 +57,7 @@ def get_node_pair_samePath(cli_list, num_flow, num_sw, num_pass_sw):
     return node_pair_list
 
 def get_flow_property_fixed_bandwidth(num_flow_soft, fixed_bandwidth):
-    cycle = 10
+    cycle = 50
     while True:
         payload = math.ceil((fixed_bandwidth * cycle / 8) / num_flow_soft - 30)
         if payload <= 1500:
@@ -67,7 +67,13 @@ def get_flow_property_fixed_bandwidth(num_flow_soft, fixed_bandwidth):
 
     return cycle, payload
 
-def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
+def get_payload_from_flow_property(num_flow_soft, fixed_bandwidth, cycle):
+    payload = math.ceil((fixed_bandwidth * cycle / 8) / num_flow_soft - 30)
+    if payload > 1500 or payload < 46:
+        raise Exception('Payload size is invalid.')
+    return payload
+
+def gen_flow(num_flow, num_flow_soft, fixed_bandwidth, cycle_soft, node_filename, output_filename):
     cli_list, sw_list = get_node_list_from_csv(node_filename)
 
     num_sw = len(sw_list)
@@ -93,13 +99,14 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
             # cycle = random.choice([50, 100])
             # cycle = 100
             # payload = random.randint(1500, 1500) # 46 -- 1500
-            cycle, payload = get_flow_property_fixed_bandwidth(num_flow_soft, 900)
+            # cycle, payload = get_flow_property_fixed_bandwidth(num_flow_soft, fixed_bandwidth)
+            payload = get_payload_from_flow_property(num_flow_soft, fixed_bandwidth, cycle_soft)
 
             flow_dic = { \
                 "flow_id": i, \
                 "src": src_node, \
                 "dst": dst_node, \
-                "cycle": cycle, \
+                "cycle": cycle_soft, \
                 "payload": payload, \
                 "kind": 'soft'
                 # "tuf": tuf_list, \
@@ -125,11 +132,13 @@ def gen_flow(num_flow, num_flow_soft, node_filename, output_filename):
     with open(output_filename, "w") as f:
         f.write(yaml.dump(flow_dic_list))
 
-def main(num_flow, num_flow_soft):
+def main(num_flow, num_flow_soft, fixed_bandwidth, cycle_soft):
     home_dir = os.path.expanduser('~')
     gen_flow( \
         num_flow, \
         num_flow_soft, \
+        fixed_bandwidth, \
+        cycle_soft, \
         '{}/workspace/test_z3/network/network/node.csv'.format(home_dir), \
         '{}/workspace/test_z3/network/flow/flow.yml'.format(home_dir))
 
@@ -137,10 +146,14 @@ def main(num_flow, num_flow_soft):
 if __name__ == "__main__":
     num_flow = 3
     num_flow_soft = 2
-    if len(sys.argv) == 3:
+    fixed_bandwidth = 900
+    cycle_soft = 50
+    if len(sys.argv) == 5:
         num_flow = int(sys.argv[1])
         num_flow_soft = int(sys.argv[2])
+        fixed_bandwidth = int(sys.argv[3])
+        cycle_soft = int(sys.argv[4])
     else:
         print("WARNING: arg is invalid. Now set num_flow to 3, num_flow_soft to 2.")
 
-    main(num_flow, num_flow_soft)
+    main(num_flow, num_flow_soft, fixed_bandwidth, cycle_soft)
