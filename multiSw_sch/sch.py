@@ -208,7 +208,8 @@ def get_deadline(each_flow):
         deemed_val = first_val * deemed_rate
         deemed_deadline = (deemed_val - tuf[1][4]) / tuf[1][3]
 
-        return deemed_deadline
+        # return deemed_deadline
+        return 0
 
 def add_constraint(flow_list, flow_infos, times_for_gcl, s):
     open_time = times_for_gcl.open_time
@@ -233,7 +234,7 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
         s.add(send_time[src_node] >= 0)
         s.add(send_time[src_node] <= cycle) # 無くても条件は変わらないが、計算量削減のため上限を設ける
         # deadline
-        s.add(recv_time[dst_node] - send_time[src_node] <= deadline-1)
+        s.add(recv_time[dst_node] - send_time[src_node] <= deadline - 1)
 
         for i_node in node_list_only_sw:
             i_flow = i_flow_dic[i_node]
@@ -273,12 +274,12 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
                 # 最悪の場合 (closeの瞬間に転送)を想定
                 # s.add(recv_time[dst_node] - close_time[i_node][i_flow][i_last_win] >= link_delay)
                 # と思っていたが、やっぱりopenの瞬間に転送を想定 既にキューにパケットがある場合を考慮しない
-                s.add(recv_time[dst_node] - open_time[i_node][i_flow][i_last_win] >= link_delay)
+                s.add(recv_time[dst_node] - open_time[i_node][i_flow][0] >= link_delay)
 
                 # これがないと計算時間が無限になる
                 # 精々10サイクル分くらいで十分か
                 # s.add(close_time[i_node][i_flow][i_last_win] < superCycle*30)
-                s.add(recv_time[dst_node] < superCycle*10)
+                s.add(recv_time[dst_node] < superCycle*3)
 
             prev_i_node = i_node
             prev_i_flow = i_flow
@@ -478,10 +479,10 @@ def main(external_flow_list):
     if m == UNSAT:
         return UNSAT
 
-    print_result_each_sw(flow_infos, times_for_gcl, m)
-    print("--------------------")
-    print_result_each_flow(flow_list, flow_infos, times_for_gcl, m)
-    print("====================")
+    # print_result_each_sw(flow_infos, times_for_gcl, m)
+    # print("--------------------")
+    # print_result_each_flow(flow_list, flow_infos, times_for_gcl, m)
+    # print("====================")
     home_dir = os.path.expanduser('~')
     output_result_yaml_sw(flow_infos, flow_list, times_for_gcl, m, \
         '{}/workspace/test_z3/multiSw_sch/gcl_sw.yml'.format(home_dir))

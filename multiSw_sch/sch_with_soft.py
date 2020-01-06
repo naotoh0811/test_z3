@@ -49,7 +49,8 @@ def check_existence_and_get_flow_list(flow_with_path_hard_filename, flow_with_pa
         onlyHard = True
     if onlyHard and onlySoft:
         print('ERROR: Maybe flow_with_path is not exist.')
-    print('| ', end='')
+    # print('| ', end='')
+    print("")
 
     return flow_list_hard, flow_list_soft, onlyHard, onlySoft
 
@@ -89,7 +90,11 @@ def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft
             flow_list_hard_with_soft = copy.deepcopy(flow_list_hard)
         for i_repeat in range(len(sorted_flow_list_soft)):
             flow_list_hard_with_soft.append(sorted_flow_list_soft[i_repeat])
+            sch_start_time = time.time()
             sat_or_unsat = sch.main(flow_list_hard_with_soft)
+            sch_elapsed_time = time.time() - sch_start_time
+            # print(sch_elapsed_time)
+            
             # print('flow_hard + flow_soft[0]~[{}] -> '.format(i_repeat), end="")
             # print('sat' if sat_or_unsat == SAT else 'unsat')
             # print("--------------------")
@@ -156,7 +161,7 @@ def sort_list_by_minLatency_val(flow_list_soft, flow_list_hard):
     # sort
     sorted_flow_list_soft_on_all = copy.deepcopy(flow_list_soft)
     sorted_flow_list_soft_on_residual = []
-    for i  in range(len(flow_list_soft) - 1):
+    for i in range(len(flow_list_soft) - 1):
         # calculate minLatency_val
         for each_flow in sorted_flow_list_soft_on_all:
             size = each_flow["size"]
@@ -211,6 +216,7 @@ def sort_list_by_minLatency_val(flow_list_soft, flow_list_hard):
         if residual_link_bandwidth_dic[i_link] < 0:
             raise Exception('Flow\'s bandwidth exceeds link\'s bandwidth.')
 
+    # pprint.pprint(sorted_flow_list_soft_on_residual)
     return sorted_flow_list_soft_on_residual
 
 def sort_list_by_bandwidth(flow_list_soft, reverse):

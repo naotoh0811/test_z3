@@ -33,6 +33,7 @@ def get_path_by_dijkstra_cpp(src, dst): # not used
 
 def get_transferLatency(payload):
     # payload: 1500 -> return 12.29
+    # return math.ceil((payload + header) * 8 / link_bandwidth + light_speed * 10)
     return (payload + header) * 8 / link_bandwidth + light_speed * 10
 
 def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
@@ -69,13 +70,17 @@ def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
             # set TUF
             first_val = 100
             # first_val = random.randint(30, 200)
+
             # dec_point = random.randint(math.ceil(minLatency*2), math.ceil(minLatency*3))
-            dec_point = minLatency*1.1
+            # dec_point = math.ceil(minLatency*1.1)
+            dec_point = minLatency*1
+
             # x_intercept = random.randint(math.ceil(minLatency*4.3), math.ceil(minLatency*4.5))
             # x_intercept = \
             #     dec_point + minData_transferLatency * random.randint(10, 50) # dec_point + (6~30)
             x_intercept = float(dec_point + \
                 get_transferLatency(1500) * random.randint(1, 5)) # dec_point + (12~60)
+            
             slope = first_val / (dec_point - x_intercept)
             y_intercept = -slope * x_intercept
             tuf_list = [ \
