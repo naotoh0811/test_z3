@@ -197,12 +197,18 @@ def define_variables_cli(flow_list):
 
     return send_time, recv_time
 
-def get_deemed_deadline(tuf, deemed_rate):
-    first_val = tuf[0][4]
-    deemed_val = first_val * deemed_rate
-    deemed_deadline = (deemed_val - tuf[1][4]) / tuf[1][3]
+def get_deadline(each_flow):
+    if "deadline" in each_flow: # hard flow
+        return each_flow["deadline"]
+    else: # soft flow
+        deemed_rate = 1
+        tuf = each_flow["tuf"]
 
-    return deemed_deadline
+        first_val = tuf[0][4]
+        deemed_val = first_val * deemed_rate
+        deemed_deadline = (deemed_val - tuf[1][4]) / tuf[1][3]
+
+        return deemed_deadline
 
 def add_constraint(flow_list, flow_infos, times_for_gcl, s):
     open_time = times_for_gcl.open_time
@@ -219,19 +225,13 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
         i_flow_dic = each_flow["i_flow_dic"]
         ocu_time = each_flow["ocu_time"]
         link_delay = ocu_time
-        if "deadline" in each_flow: # hard flow
-            deadline = each_flow["deadline"]
-        else: # soft flow
-            deemed_rate = 0.7
-            tuf = each_flow["tuf"]
-            deadline = get_deemed_deadline(tuf, deemed_rate)
-            # print('dec_point: {}, deemed_deadline: {}, x_intercept: {}'.format(tuf[0][1], deadline, tuf[1][1]))
+        deadline = get_deadline(each_flow)
         prev_i_node = NOT_DEFINE
         prev_i_flow = NOT_DEFINE
 
         # 0 > time
         s.add(send_time[src_node] >= 0)
-        # s.add(send_time[src_node] <= cycle) # 無くても条件は変わらないが、計算量削減のため上限を設ける
+        s.add(send_time[src_node] <= cycle) # 無くても条件は変わらないが、計算量削減のため上限を設ける
         # deadline
         s.add(recv_time[dst_node] - send_time[src_node] <= deadline-1)
 
@@ -278,7 +278,7 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
                 # これがないと計算時間が無限になる
                 # 精々10サイクル分くらいで十分か
                 # s.add(close_time[i_node][i_flow][i_last_win] < superCycle*30)
-                s.add(recv_time[dst_node] < superCycle*30)
+                s.add(recv_time[dst_node] < superCycle*10)
 
             prev_i_node = i_node
             prev_i_flow = i_flow
@@ -339,7 +339,7 @@ def print_result_each_flow(flow_list, flow_infos, times_for_gcl, m):
         dst_node = node_list[-1]
         node_list_only_sw = node_list[1:-1]
         cycle = each_flow["cycle"]
-        deadline = each_flow["deadline"]
+        deadline = get_deadline(each_flow)
         i_flow_dic = each_flow["i_flow_dic"]
         ocu_time = each_flow["ocu_time"]
         
@@ -481,6 +481,7 @@ def main(external_flow_list):
     print_result_each_sw(flow_infos, times_for_gcl, m)
     print("--------------------")
     print_result_each_flow(flow_list, flow_infos, times_for_gcl, m)
+    print("====================")
     home_dir = os.path.expanduser('~')
     output_result_yaml_sw(flow_infos, flow_list, times_for_gcl, m, \
         '{}/workspace/test_z3/multiSw_sch/gcl_sw.yml'.format(home_dir))
