@@ -33,6 +33,8 @@ def check_existence_and_get_flow_list(flow_with_path_hard_filename, flow_with_pa
     # i_flow_dic in these lists are not valid. Don't reference it.
     onlyHard = False
     onlySoft = False
+    flow_list_hard = []
+    flow_list_soft = []
     if os.path.exists(flow_with_path_hard_filename):
         flow_list_hard = sch.get_flow_list_from_yaml(flow_with_path_hard_filename)
         num_hard = len(flow_list_hard)
@@ -321,7 +323,7 @@ def main(kind_prioritize, reverse):
         output_yaml_cli_send_low_prio(sorted_flow_list_low_prio, output_filename, kind_prioritize)
 
     # remove old pdf files
-    for pdf_file in glob.glob(home_dir + '/workspace/test_z3/multiSw_sch/window_sw*.pdf'):
+    for pdf_file in glob.glob(home_dir + '/workspace/test_z3/multiSw_sch/pdf/window_sw*.pdf'):
         if os.path.isfile(pdf_file):
             os.remove(pdf_file)
     # generate window graph

@@ -32,6 +32,7 @@ def get_path_by_dijkstra_cpp(src, dst): # not used
     return node_list
 
 def get_transferLatency(payload):
+    # payload: 1500 -> return 12.29
     return (payload + header) * 8 / link_bandwidth + light_speed * 10
 
 def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
@@ -54,7 +55,7 @@ def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
         if each_flow["kind"] == 'hard': # hard flow
             # set deadline
             # deadline = random.randint(math.ceil(minLatency*4), math.ceil(minLatency*4))
-            deadline = math.ceil(minLatency*3)
+            deadline = math.ceil(minLatency*1.1)
 
             flow_dic = { \
                 "flow_id": flow_id, \

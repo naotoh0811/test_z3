@@ -265,12 +265,16 @@ def add_constraint(flow_list, flow_infos, times_for_gcl, s):
                 s.add(open_time[i_node][i_flow][0] - send_time[src_node] >= link_delay)
             else: # not first sw
                 # next node
-                s.add(open_time[i_node][i_flow][0] - close_time[prev_i_node][prev_i_flow][0] >= link_delay)
+                # s.add(open_time[i_node][i_flow][0] - close_time[prev_i_node][prev_i_flow][0] >= link_delay)
+                s.add(open_time[i_node][i_flow][0] - open_time[prev_i_node][prev_i_flow][0] >= link_delay)
 
             if i_node == node_list_only_sw[-1]: # last sw
                 # to dst_node
                 # 最悪の場合 (closeの瞬間に転送)を想定
-                s.add(recv_time[dst_node] - close_time[i_node][i_flow][i_last_win] >= link_delay)
+                # s.add(recv_time[dst_node] - close_time[i_node][i_flow][i_last_win] >= link_delay)
+                # と思っていたが、やっぱりopenの瞬間に転送を想定 既にキューにパケットがある場合を考慮しない
+                s.add(recv_time[dst_node] - open_time[i_node][i_flow][i_last_win] >= link_delay)
+
                 # これがないと計算時間が無限になる
                 # 精々10サイクル分くらいで十分か
                 # s.add(close_time[i_node][i_flow][i_last_win] < superCycle*30)
@@ -335,10 +339,12 @@ def print_result_each_flow(flow_list, flow_infos, times_for_gcl, m):
         dst_node = node_list[-1]
         node_list_only_sw = node_list[1:-1]
         cycle = each_flow["cycle"]
+        deadline = each_flow["deadline"]
         i_flow_dic = each_flow["i_flow_dic"]
         ocu_time = each_flow["ocu_time"]
         
-        print("flow_id: " + str(flow_id) + ", cycle: " + str(cycle) + ", node_list: " + str(node_list))
+        print("flow_id: {}".format(flow_id))
+        print("cycle: {}, node_list: {}, deadline: {}".format(cycle, node_list, deadline))
         # print("send_time: " + str(m[send_time[src_node]].as_long() % cycle))
         print("send_time: " + str(m[send_time[src_node]].as_long()))
         for i_node in node_list_only_sw:
@@ -355,6 +361,9 @@ def print_result_each_flow(flow_list, flow_infos, times_for_gcl, m):
             print("")
         # print("recv_time: " + str(m[recv_time[dst_node]].as_long() % cycle))
         print("recv_time: " + str(m[recv_time[dst_node]].as_long()))
+        print("end_to_end latency: {}".format( \
+            m[recv_time[dst_node]].as_long() - m[send_time[src_node]].as_long() \
+        ))
         print("")
 
 def output_result_yaml_sw(flow_infos, flow_list, times_for_gcl, m, output_filename):
@@ -469,9 +478,9 @@ def main(external_flow_list):
     if m == UNSAT:
         return UNSAT
 
-    # print_result_each_sw(flow_infos, times_for_gcl, m)
-    # print("--------------------")
-    # print_result_each_flow(flow_list, flow_infos, times_for_gcl, m)
+    print_result_each_sw(flow_infos, times_for_gcl, m)
+    print("--------------------")
+    print_result_each_flow(flow_list, flow_infos, times_for_gcl, m)
     home_dir = os.path.expanduser('~')
     output_result_yaml_sw(flow_infos, flow_list, times_for_gcl, m, \
         '{}/workspace/test_z3/multiSw_sch/gcl_sw.yml'.format(home_dir))
