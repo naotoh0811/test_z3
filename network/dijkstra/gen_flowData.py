@@ -54,7 +54,7 @@ def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
         if each_flow["kind"] == 'hard': # hard flow
             # set deadline
             # deadline = random.randint(math.ceil(minLatency*4), math.ceil(minLatency*4))
-            deadline = math.ceil(minLatency*2)
+            deadline = math.ceil(minLatency*3)
 
             flow_dic = { \
                 "flow_id": flow_id, \
