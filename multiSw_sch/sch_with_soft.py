@@ -38,19 +38,19 @@ def check_existence_and_get_flow_list(flow_with_path_hard_filename, flow_with_pa
     if os.path.exists(flow_with_path_hard_filename):
         flow_list_hard = sch.get_flow_list_from_yaml(flow_with_path_hard_filename)
         num_hard = len(flow_list_hard)
-        print('num_hard: {}'.format(num_hard), end=' ')
+        # print('num_hard: {}'.format(num_hard), end=' ')
     else:
         onlySoft = True
     if os.path.exists(flow_with_path_soft_filename):
         flow_list_soft = sch.get_flow_list_from_yaml(flow_with_path_soft_filename)
         num_soft = len(flow_list_soft)
-        print('num_soft: {}'.format(num_soft), end=' ')
+        # print('num_soft: {}'.format(num_soft), end=' ')
     else:
         onlyHard = True
     if onlyHard and onlySoft:
         print('ERROR: Maybe flow_with_path is not exist.')
     # print('| ', end='')
-    print("")
+    # print("")
 
     return flow_list_hard, flow_list_soft, onlyHard, onlySoft
 
@@ -90,9 +90,13 @@ def repeat_schedule_with_soft(flow_list_hard, flow_list_soft, onlyHard, onlySoft
             flow_list_hard_with_soft = copy.deepcopy(flow_list_hard)
         for i_repeat in range(len(sorted_flow_list_soft)):
             flow_list_hard_with_soft.append(sorted_flow_list_soft[i_repeat])
+
+            # schedule with soft (with measuring time)
             sch_start_time = time.time()
             sat_or_unsat = sch.main(flow_list_hard_with_soft)
             sch_elapsed_time = time.time() - sch_start_time
+
+            # print time
             # print(sch_elapsed_time)
             
             # print('flow_hard + flow_soft[0]~[{}] -> '.format(i_repeat), end="")
