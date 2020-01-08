@@ -77,7 +77,7 @@ def get_hist_list_from_flow_list(flow_list_soft):
 
     return hist_and_priority_dic_list, flow_prio_list
 
-def explore_max_value_from_lists(hist_and_priority_dic_list, prio_permutation_list):
+def explore_max_value_from_lists(flow_list_soft, hist_and_priority_dic_list, prio_permutation_list):
     max_sum_expected_value = 0
     for each_permutation in prio_permutation_list:
         sum_expected_val = 0
@@ -97,15 +97,14 @@ def explore_max_value_from_lists(hist_and_priority_dic_list, prio_permutation_li
             sum_expected_val += expected_val
 
         # check sum_expected_val
-        print(sum_expected_val)
+        # print(sum_expected_val)
         if sum_expected_val > max_sum_expected_value:
             max_sum_expected_value = sum_expected_val
             max_prio_permutation_list = each_permutation
 
     return max_sum_expected_value, max_prio_permutation_list
 
-
-if __name__ == "__main__":
+def main():
     # get flow list
     flow_with_path_soft_filename = \
         '{}/workspace/test_z3/network/dijkstra/flow_with_path_soft.yml'.format(home_dir)
@@ -124,6 +123,9 @@ if __name__ == "__main__":
 
     # explore max value
     max_sum_expected_value, max_prio_permutation_list = \
-        explore_max_value_from_lists(hist_and_priority_dic_list, prio_permutation_list)
+        explore_max_value_from_lists(flow_list_soft, hist_and_priority_dic_list, prio_permutation_list)
 
-    print(max_sum_expected_value, max_prio_permutation_list)
+    return max_sum_expected_value, max_prio_permutation_list
+
+if __name__ == "__main__":
+    print(main())
