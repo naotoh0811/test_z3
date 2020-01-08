@@ -22,7 +22,7 @@ def get_latency_list_from_csv(csv_filename):
     
     return latency_list
 
-def get_latency_histgram(latency_list):
+def get_latency_hist_from_list(latency_list):
     hist, bins = np.histogram(latency_list, bins=10)
 
     probability = hist / len(latency_list)
@@ -51,17 +51,7 @@ def get_priority_from_flow_id(flow_id):
     
     raise Exception('Can not find flow whose flow_id is {}'.format(flow_id))
 
-
-if __name__ == "__main__":
-    # get flow list
-    flow_with_path_hard_filename = \
-        '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir)
-    flow_with_path_soft_filename = \
-        '{}/workspace/test_z3/network/dijkstra/flow_with_path_soft.yml'.format(home_dir)
-    flow_list_hard, flow_list_soft, onlyHard, onlySoft = sch_with_soft.check_existence_and_get_flow_list( \
-        flow_with_path_hard_filename, flow_with_path_soft_filename)
-    
-    # get latency_list and hist for prio
+def get_hist_list_from_flow_list(flow_list_soft):
     hist_and_priority_dic_list = []
     flow_prio_list = []
     for each_flow in flow_list_soft:
@@ -77,7 +67,7 @@ if __name__ == "__main__":
         # get latency_list and hist
         csv_filename = '{}/IEEE8021Q_test/results/latency{}.csv'.format(home_dir, flow_id)
         latency_list = get_latency_list_from_csv(csv_filename)
-        probability, half_bins = get_latency_histgram(latency_list)
+        probability, half_bins = get_latency_hist_from_list(latency_list)
 
         hist_and_priority_dic_list.append({ \
             "priority": priority, \
@@ -85,15 +75,9 @@ if __name__ == "__main__":
             "half_bins": half_bins \
         })
 
-    # sort list by priority
-    # list index is equal to priority
-    hist_and_priority_dic_list = sorted(hist_and_priority_dic_list, reverse=False, key=lambda x:x["priority"])
+    return hist_and_priority_dic_list, flow_prio_list
 
-    pprint.pprint(hist_and_priority_dic_list)
-    # get permutation list
-    prio_permutation_list = list(itertools.permutations(flow_prio_list))
-
-    # explore max value
+def explore_max_value_from_lists(hist_and_priority_dic_list, prio_permutation_list):
     max_sum_expected_value = 0
     for each_permutation in prio_permutation_list:
         sum_expected_val = 0
@@ -117,5 +101,29 @@ if __name__ == "__main__":
         if sum_expected_val > max_sum_expected_value:
             max_sum_expected_value = sum_expected_val
             max_prio_permutation_list = each_permutation
+
+    return max_sum_expected_value, max_prio_permutation_list
+
+
+if __name__ == "__main__":
+    # get flow list
+    flow_with_path_soft_filename = \
+        '{}/workspace/test_z3/network/dijkstra/flow_with_path_soft.yml'.format(home_dir)
+    _, flow_list_soft, _, _ = sch_with_soft.check_existence_and_get_flow_list( \
+        '', flow_with_path_soft_filename)
+    
+    # get latency_list and hist for prio
+    hist_and_priority_dic_list, flow_prio_list = get_hist_list_from_flow_list(flow_list_soft)
+
+    # sort list by priority
+    # list index is equal to priority
+    hist_and_priority_dic_list = sorted(hist_and_priority_dic_list, reverse=False, key=lambda x:x["priority"])
+
+    # get permutation list
+    prio_permutation_list = list(itertools.permutations(flow_prio_list))
+
+    # explore max value
+    max_sum_expected_value, max_prio_permutation_list = \
+        explore_max_value_from_lists(hist_and_priority_dic_list, prio_permutation_list)
 
     print(max_sum_expected_value, max_prio_permutation_list)
