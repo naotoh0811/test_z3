@@ -11,9 +11,7 @@ import multiSw_sch.sch as sch
 import multiSw_sch.sch_with_soft as sch_with_soft
 import multiSw_sch.gen_window_graph as gen_window_graph
 import multiSw_sch.explore_max_value as explore_max_value
-import network.flow.gen_flow_using_network_csv as gen_flow_using_network_csv
 sys.path.append('{}/IEEE8021Q_test'.format(home_dir))
-import results.calc_value as calc_value
 
 NOT_DEFINE = 1000
 UNSAT = -2
@@ -66,6 +64,50 @@ def output_yaml_cli_send_low_prio( \
     with open(output_filename, "a") as f:
         f.write(yaml.dump(yaml_output))
 
+def change_list_to_space_separeted(val_list):
+    output = ""
+    for each in val_list:
+        output += "{} ".format(each)
+    output = output.strip()
+
+    return output
+
+def get_pseudo_slope_list(flow_list_soft):
+    pseudo_slope_list = []
+    for each_flow in flow_list_soft:
+        first_tuf = each_flow["tuf"][0]
+        first_val = first_tuf[4]
+
+        last_tuf = each_flow["tuf"][-1]
+        last_slope = last_tuf[3]
+        last_y_intercept = last_tuf[4]
+        x_intercept = -(last_y_intercept / last_slope)
+
+        pseudo_slope = first_val / x_intercept
+
+        pseudo_slope_list.append(pseudo_slope)
+    
+    return pseudo_slope_list
+
+def get_slope_list(flow_list_soft):
+    slope_list =[abs(each_flow["tuf"][1][3]) for each_flow in flow_list_soft]
+    
+    return slope_list
+
+def output_params_to_csv(params_for_csv):
+    output_filename = \
+        '{}/IEEE8021Q_test/results/tuf_params.csv'.format(home_dir)
+
+    if not os.path.isfile(output_filename):
+        with open(output_filename, 'w') as f:
+            output_csv = ''
+            output_csv += 'priority_allocation,'
+            output_csv += 'slope,'
+            output_csv += 'pseudo_slope\n'
+            f.write(output_csv)
+    with open(output_filename, 'a') as f:
+        f.write(params_for_csv)
+
 
 def main(kind_prioritize):
     flow_with_path_hard_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir)
@@ -79,7 +121,23 @@ def main(kind_prioritize):
     start_time = time.time()
     max_prio_permutation_list = []
     if kind_prioritize == SORT:
+        params_for_csv = ""
+
+        # explore max value
         _, max_prio_permutation_list = explore_max_value.main()
+
+        # get TUF params
+        slope_list = get_slope_list(flow_list_soft)
+        pseudo_slope_list = get_pseudo_slope_list(flow_list_soft)
+
+        # for csv
+        params_for_csv += change_list_to_space_separeted(max_prio_permutation_list) + ","
+        params_for_csv += change_list_to_space_separeted(slope_list) + ","
+        params_for_csv += change_list_to_space_separeted(pseudo_slope_list)
+
+        # output params
+        output_params_to_csv(params_for_csv)
+
     sch_time_only_soft = time.time() - start_time
 
     # schedule hard
@@ -97,7 +155,7 @@ def main(kind_prioritize):
         if os.path.exists(gcl_cli_send_filename):
             os.remove(gcl_cli_send_filename)
 
-    # output gcl for soft
+    # output gcl for soft with priority
     if len(flow_list_soft) != 0:
         output_filename = '{}/workspace/test_z3/multiSw_sch/gcl_cli_send.yml'.format(home_dir)
         output_yaml_cli_send_low_prio( \
