@@ -133,7 +133,7 @@ def main(kind_prioritize):
         # for csv
         params_for_csv += change_list_to_space_separeted(max_prio_permutation_list) + ","
         params_for_csv += change_list_to_space_separeted(slope_list) + ","
-        params_for_csv += change_list_to_space_separeted(pseudo_slope_list)
+        params_for_csv += change_list_to_space_separeted(pseudo_slope_list) +"\n"
 
         # output params
         output_params_to_csv(params_for_csv)
