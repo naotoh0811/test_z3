@@ -92,7 +92,7 @@ def explore_max_value_from_lists(flow_list_soft, hist_and_priority_dic_list, pri
             tuf = each_flow["tuf"]
 
             # get priority from permutation list
-            print(i, each_permutation)
+            # print(i, each_permutation)
             priority = each_permutation[i]
 
             # get hist

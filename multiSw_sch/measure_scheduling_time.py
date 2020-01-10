@@ -32,6 +32,7 @@ def get_result_list(max_num_flow):
         elapsed_time = time.time() - start_time
 
         result_list.append(elapsed_time)
+        print(num_flow, elapsed_time)
 
     return result_list
 
@@ -79,15 +80,15 @@ def make_pdf(pdf_filename):
     plt.clf()
 
 def main():
-    max_num_flow = 9
+    max_num_flow = 10
 
     # get result list
     # result_list = get_result_list(max_num_flow)
-    result_list = [0.0001277923583984375, 0.0004677772521972656, 0.0019385814666748047, 0.012128591537475586, 0.08089661598205566, 0.69547438621521, 5.672691822052002, 59.926318883895874]
+    # result_list = [0.0001277923583984375, 0.0004677772521972656, 0.0019385814666748047, 0.012128591537475586, 0.08089661598205566, 0.69547438621521, 5.672691822052002, 59.926318883895874]
+    result_list = [0.00006389, 0.00021, 0.0079, 0.054, 0.39, 3.54, 35.62, 438, 4919]
 
     # generate graph
     gen_result_graph(result_list, max_num_flow)
-    print(result_list)
 
 
 if __name__ == "__main__":
