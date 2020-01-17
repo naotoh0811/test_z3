@@ -57,7 +57,7 @@ def gen_dammy_flow_list(num_flow):
 
     return dammy_flow_list
 
-def gen_result_graph_for_soft(result_list, max_num_flow):
+def gen_time_graph_for_soft(result_list, max_num_flow):
     # generate num_flow list
     num_flow_list = range(2, max_num_flow + 1)
 
@@ -85,7 +85,7 @@ def gen_result_graph_for_soft(result_list, max_num_flow):
     # make pdf
     make_pdf('{}/workspace/test_z3/multiSw_sch/pdf/num_soft_flow_vs_time.pdf'.format(home_dir))
 
-def gen_result_graph_for_hard_errorbar(x, y, y_err):
+def gen_time_graph_for_hard_errorbar(x, y, y_err):
     # set font
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14
@@ -114,7 +114,7 @@ def gen_result_graph_for_hard_errorbar(x, y, y_err):
     # make pdf
     make_pdf('{}/workspace/test_z3/multiSw_sch/pdf/num_hard_flow_vs_time.pdf'.format(home_dir))
 
-def gen_result_graph_for_hard_boxplot(num_flow_hard_list, elapsed_time_list_list):
+def gen_time_graph_for_hard_boxplot(num_flow_hard_list, elapsed_time_list_list):
     # set font
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14
@@ -144,6 +144,34 @@ def gen_result_graph_for_hard_boxplot(num_flow_hard_list, elapsed_time_list_list
     # make pdf
     make_pdf('{}/workspace/test_z3/multiSw_sch/pdf/num_hard_flow_vs_time.pdf'.format(home_dir))
 
+def gen_rate_graph(num_flow_hard_list, sat_rate_list):
+    # set font
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["font.size"] = 14
+
+    fig, ax = plt.subplots()
+
+    # plot
+    ax.plot(num_flow_hard_list, sat_rate_list, marker='.', c='b')
+
+    # set label
+    ax.set_xlabel('Number of hard real-time flows')
+    ax.set_ylabel('Scheduling success rate [%]')
+
+    # set ticks
+    max_num_flow_hard = num_flow_hard_list[-1]
+    ax.set_xticks(range(1, max_num_flow_hard + 1))
+
+    # set lim
+    ax.set_ylim(0,100)
+
+    # set grid
+    ax.grid()
+
+    # shape layout
+    plt.tight_layout()
+    # make pdf
+    make_pdf('{}/workspace/test_z3/multiSw_sch/pdf/num_hard_flow_vs_rate.pdf'.format(home_dir))
 
 def make_pdf(pdf_filename):
     pp = PdfPages(pdf_filename)
@@ -160,10 +188,10 @@ def measure_time_for_soft():
     result_list = [0.00006389, 0.00021, 0.0079, 0.054, 0.39, 3.54, 35.62, 438, 4919]
 
     # generate graph
-    gen_result_graph_for_soft(result_list, max_num_flow)
+    gen_time_graph_for_soft(result_list, max_num_flow)
 
 def measure_time_for_hard():
-    max_num_flow_hard = 10
+    max_num_flow_hard = 7
     num_flow_hard_list = range(1, max_num_flow_hard + 1)
     # for errorbar
     mean_elapsed_time_list = []
@@ -171,11 +199,14 @@ def measure_time_for_hard():
     lower_err_list = []
     # for boxplot
     elapsed_time_list_list = []
+    # for rate
+    sat_rate_list = []
 
     for num_flow_hard in num_flow_hard_list:
-
+        sat_count = 0
+        unsat_count = 0
         elapsed_time_list = []
-        for i in range(10):
+        for i in range(20):
             # generate network and flow
             num_sw = 5
             num_cli_for_each_sw = num_flow_hard
@@ -199,30 +230,43 @@ def measure_time_for_hard():
             sat_or_unsat = sch.main(flow_list_hard)
             elapsed_time = time.time() - start_time
 
-            if sat_or_unsat == UNSAT:
-                raise Exception('UNSAT')
+            # count SAT/UNSAT
+            if sat_or_unsat == SAT:
+                sat_count += 1
+                print(num_flow_hard, 'SAT', elapsed_time)
+                elapsed_time_list.append(elapsed_time)
+            else:
+                unsat_count += 1
+                print(num_flow_hard, 'UNSAT')
 
-            print(num_flow_hard, 'SAT', elapsed_time)
-            elapsed_time_list.append(elapsed_time)
+        # calculate SAT rate
+        sat_rate = (sat_count / (sat_count + unsat_count)) * 100
 
         # for errorbar
-        max_elapsed_time = max(elapsed_time_list)
-        mean_elapsed_time = mean(elapsed_time_list)
-        min_elapsed_time = min(elapsed_time_list)
-        mean_elapsed_time_list.append(mean_elapsed_time)
-        upper_err_list.append(max_elapsed_time - mean_elapsed_time)
-        lower_err_list.append(mean_elapsed_time - min_elapsed_time)
+        # max_elapsed_time = max(elapsed_time_list)
+        # mean_elapsed_time = mean(elapsed_time_list)
+        # min_elapsed_time = min(elapsed_time_list)
+        # mean_elapsed_time_list.append(mean_elapsed_time)
+        # upper_err_list.append(max_elapsed_time - mean_elapsed_time)
+        # lower_err_list.append(mean_elapsed_time - min_elapsed_time)
+
         # for boxplot
-        elapsed_time_list_list.append(elapsed_time_list)
+        if sat_rate > 3:
+            elapsed_time_list_list.append(elapsed_time_list)
+            sat_rate_list.append(sat_rate)
+        else:
+            break
+
 
     # for errorbar
-    x = np.array(num_flow_hard_list)
-    y = np.array(mean_elapsed_time_list)
-    y_err = np.array([lower_err_list] + [upper_err_list])
+    # x = np.array(num_flow_hard_list)
+    # y = np.array(mean_elapsed_time_list)
+    # y_err = np.array([lower_err_list] + [upper_err_list])
 
     # generate graph
-    # gen_result_graph_for_hard_errorbar(x, y, y_err)
-    gen_result_graph_for_hard_boxplot(num_flow_hard_list, elapsed_time_list_list)
+    # gen_time_graph_for_hard_errorbar(x, y, y_err)
+    gen_time_graph_for_hard_boxplot(num_flow_hard_list, elapsed_time_list_list)
+    gen_rate_graph(num_flow_hard_list, sat_rate_list)
 
 
 def main():
