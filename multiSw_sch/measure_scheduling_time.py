@@ -4,6 +4,7 @@ import random
 import time
 import itertools
 import numpy as np
+import yaml
 from statistics import mean
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -18,7 +19,7 @@ UNSAT = -2
 SAT = -1
 
 
-def get_result_list(max_num_flow):
+def get_result_list_for_soft(max_num_flow):
     result_list = []
     for num_flow in range(2, max_num_flow + 1):
         # generate dammy flow
@@ -179,24 +180,18 @@ def make_pdf(pdf_filename):
     pp.close()
     plt.clf()
 
-def measure_time_for_soft():
-    max_num_flow = 10
+def output_to_yaml(num_flow_hard, elapsed_time_list, sat_rate):
+    output_list = [{ \
+        "num_flow_hard": num_flow_hard, \
+        "elapsed_time_list": elapsed_time_list, \
+        "sat_rate": sat_rate \
+    }]
+    yaml_filename = '{}/workspace/test_z3/multiSw_sch/data/time_and_rate.yml'.format(home_dir)
+    with open(yaml_filename, "a") as f:
+        f.write(yaml.dump(output_list))
 
-    # get result list
-    # result_list = get_result_list(max_num_flow)
-    # result_list = [0.0001277923583984375, 0.0004677772521972656, 0.0019385814666748047, 0.012128591537475586, 0.08089661598205566, 0.69547438621521, 5.672691822052002, 59.926318883895874]
-    result_list = [0.00006389, 0.00021, 0.0079, 0.054, 0.39, 3.54, 35.62, 438, 4919]
-
-    # generate graph
-    gen_time_graph_for_soft(result_list, max_num_flow)
-
-def measure_time_for_hard():
-    max_num_flow_hard = 7
+def get_result_list_for_hard(max_num_flow_hard):
     num_flow_hard_list = range(1, max_num_flow_hard + 1)
-    # for errorbar
-    mean_elapsed_time_list = []
-    upper_err_list = []
-    lower_err_list = []
     # for boxplot
     elapsed_time_list_list = []
     # for rate
@@ -206,7 +201,7 @@ def measure_time_for_hard():
         sat_count = 0
         unsat_count = 0
         elapsed_time_list = []
-        for i in range(20):
+        for i in range(5):
             # generate network and flow
             num_sw = 5
             num_cli_for_each_sw = num_flow_hard
@@ -242,29 +237,49 @@ def measure_time_for_hard():
         # calculate SAT rate
         sat_rate = (sat_count / (sat_count + unsat_count)) * 100
 
-        # for errorbar
-        # max_elapsed_time = max(elapsed_time_list)
-        # mean_elapsed_time = mean(elapsed_time_list)
-        # min_elapsed_time = min(elapsed_time_list)
-        # mean_elapsed_time_list.append(mean_elapsed_time)
-        # upper_err_list.append(max_elapsed_time - mean_elapsed_time)
-        # lower_err_list.append(mean_elapsed_time - min_elapsed_time)
-
         # for boxplot
         if sat_rate > 3:
             elapsed_time_list_list.append(elapsed_time_list)
             sat_rate_list.append(sat_rate)
+            output_to_yaml(num_flow_hard, elapsed_time_list, sat_rate)
         else:
             break
 
+    return num_flow_hard_list, elapsed_time_list_list, sat_rate_list
 
-    # for errorbar
-    # x = np.array(num_flow_hard_list)
-    # y = np.array(mean_elapsed_time_list)
-    # y_err = np.array([lower_err_list] + [upper_err_list])
+def get_result_list_from_yaml():
+    yaml_filename = '{}/workspace/test_z3/multiSw_sch/data/time_and_rate.yml'.format(home_dir)
+    with open(yaml_filename, "r+") as f:
+        result_list = yaml.load(f, yaml.SafeLoader)
+    
+    num_flow_hard_list = []
+    elapsed_time_list_list = []
+    sat_rate_list = []
+    for each_result in result_list:
+        num_flow_hard_list.append(each_result["num_flow_hard"])
+        elapsed_time_list_list.append(each_result["elapsed_time_list"])
+        sat_rate_list.append(each_result["sat_rate"])
+
+    return num_flow_hard_list, elapsed_time_list_list, sat_rate_list
+
+def measure_time_for_soft():
+    max_num_flow = 10
+
+    # get result list
+    # result_list = get_result_list_for_soft(max_num_flow)
+    # result_list = [0.0001277923583984375, 0.0004677772521972656, 0.0019385814666748047, 0.012128591537475586, 0.08089661598205566, 0.69547438621521, 5.672691822052002, 59.926318883895874]
+    result_list = [0.00006389, 0.00021, 0.0079, 0.054, 0.39, 3.54, 35.62, 438, 4919]
 
     # generate graph
-    # gen_time_graph_for_hard_errorbar(x, y, y_err)
+    gen_time_graph_for_soft(result_list, max_num_flow)
+
+def measure_time_for_hard():
+    # get result list
+    max_num_flow_hard = 3
+    num_flow_hard_list, elapsed_time_list_list, sat_rate_list = get_result_list_for_hard(max_num_flow_hard)
+    # num_flow_hard_list, elapsed_time_list_list, sat_rate_list = get_result_list_from_yaml()
+
+    # generate graph
     gen_time_graph_for_hard_boxplot(num_flow_hard_list, elapsed_time_list_list)
     gen_rate_graph(num_flow_hard_list, sat_rate_list)
 

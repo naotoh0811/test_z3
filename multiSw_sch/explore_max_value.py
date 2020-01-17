@@ -1,5 +1,4 @@
 import numpy as np
-import yaml
 import os.path
 import sys
 import pprint
