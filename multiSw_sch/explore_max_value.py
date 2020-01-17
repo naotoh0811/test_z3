@@ -23,7 +23,7 @@ def get_latency_list_from_csv(csv_filename):
     return latency_list
 
 def get_latency_hist_from_list(latency_list):
-    hist, bins = np.histogram(latency_list, bins=10)
+    hist, bins = np.histogram(latency_list, bins=30)
 
     probability = hist / len(latency_list)
 

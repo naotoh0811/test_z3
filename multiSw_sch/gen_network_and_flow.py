@@ -9,7 +9,6 @@ sys.path.append('{}/workspace/test_z3'.format(home_dir))
 import network.network.gen_linear_network as gen_linear_network
 import network.flow.gen_flow_using_network_csv as gen_flow_using_network_csv
 import network.dijkstra.gen_flowData as gen_flowData
-import multiSw_sch.sch as sch
 
 
 def main(num_sw, num_cli_for_each_sw, num_flow, num_flow_soft, num_pass_sw, fixed_bandwidth, cycle_soft):

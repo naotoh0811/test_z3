@@ -3,11 +3,20 @@ import sys
 import random
 import time
 import itertools
+import numpy as np
+from statistics import mean
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 home_dir = os.path.expanduser('~')
 sys.path.append('{}/workspace/test_z3'.format(home_dir))
 import multiSw_sch.explore_max_value as explore_max_value
+import multiSw_sch.gen_network_and_flow as gen_network_and_flow
+import multiSw_sch.sch as sch
+import multiSw_sch.sch_with_soft as sch_with_soft
+
+UNSAT = -2
+SAT = -1
+
 
 def get_result_list(max_num_flow):
     result_list = []
@@ -48,7 +57,7 @@ def gen_dammy_flow_list(num_flow):
 
     return dammy_flow_list
 
-def gen_result_graph(result_list, max_num_flow):
+def gen_result_graph_for_soft(result_list, max_num_flow):
     # generate num_flow list
     num_flow_list = range(2, max_num_flow + 1)
 
@@ -68,10 +77,73 @@ def gen_result_graph(result_list, max_num_flow):
     ax.set_xlabel('Number of soft real-time flows')
     ax.set_ylabel('Calculation time [s]')
 
+    # set grid
+    ax.grid()
+
     # shape layout
     plt.tight_layout()
     # make pdf
-    make_pdf('{}/workspace/test_z3/multiSw_sch/pdf/num_flow_vs_time.pdf'.format(home_dir))
+    make_pdf('{}/workspace/test_z3/multiSw_sch/pdf/num_soft_flow_vs_time.pdf'.format(home_dir))
+
+def gen_result_graph_for_hard_errorbar(x, y, y_err):
+    # set font
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["font.size"] = 14
+
+    fig, ax = plt.subplots()
+
+    # plot
+    ax.errorbar(x, y, yerr=y_err, fmt='b.-')
+
+    # set label
+    ax.set_xlabel('Number of hard real-time flows')
+    ax.set_ylabel('Calculation time [s]')
+
+    # set ticks
+    max_num_flow_hard = x[-1]
+    ax.set_xticks(range(1, max_num_flow_hard + 1))
+
+    # set lim
+    ax.set_ylim(0,)
+
+    # set grid
+    ax.grid()
+
+    # shape layout
+    plt.tight_layout()
+    # make pdf
+    make_pdf('{}/workspace/test_z3/multiSw_sch/pdf/num_hard_flow_vs_time.pdf'.format(home_dir))
+
+def gen_result_graph_for_hard_boxplot(num_flow_hard_list, elapsed_time_list_list):
+    # set font
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["font.size"] = 14
+
+    fig, ax = plt.subplots()
+
+    # plot
+    ax.boxplot(elapsed_time_list_list, labels=num_flow_hard_list, patch_artist=True, \
+        boxprops={'facecolor': 'lightblue'})
+
+    # set label
+    ax.set_xlabel('Number of hard real-time flows')
+    ax.set_ylabel('Calculation time [s]')
+
+    # set ticks
+    max_num_flow_hard = num_flow_hard_list[-1]
+    ax.set_xticks(range(1, max_num_flow_hard + 1))
+
+    # set lim
+    ax.set_ylim(0,)
+
+    # set grid
+    ax.grid()
+
+    # shape layout
+    plt.tight_layout()
+    # make pdf
+    make_pdf('{}/workspace/test_z3/multiSw_sch/pdf/num_hard_flow_vs_time.pdf'.format(home_dir))
+
 
 def make_pdf(pdf_filename):
     pp = PdfPages(pdf_filename)
@@ -79,7 +151,7 @@ def make_pdf(pdf_filename):
     pp.close()
     plt.clf()
 
-def main():
+def measure_time_for_soft():
     max_num_flow = 10
 
     # get result list
@@ -88,8 +160,77 @@ def main():
     result_list = [0.00006389, 0.00021, 0.0079, 0.054, 0.39, 3.54, 35.62, 438, 4919]
 
     # generate graph
-    gen_result_graph(result_list, max_num_flow)
+    gen_result_graph_for_soft(result_list, max_num_flow)
 
+def measure_time_for_hard():
+    max_num_flow_hard = 10
+    num_flow_hard_list = range(1, max_num_flow_hard + 1)
+    # for errorbar
+    mean_elapsed_time_list = []
+    upper_err_list = []
+    lower_err_list = []
+    # for boxplot
+    elapsed_time_list_list = []
+
+    for num_flow_hard in num_flow_hard_list:
+
+        elapsed_time_list = []
+        for i in range(10):
+            # generate network and flow
+            num_sw = 5
+            num_cli_for_each_sw = num_flow_hard
+            num_flow = num_flow_hard
+            num_flow_soft = 0
+            num_pass_sw = 5
+            fixed_bandwidth = 900
+            cycle_soft = 50
+            gen_network_and_flow.main( \
+                num_sw, num_cli_for_each_sw, num_flow, num_flow_soft, num_pass_sw, fixed_bandwidth, cycle_soft \
+            )
+
+            # get list
+            flow_with_path_hard_filename = \
+                '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir)
+            flow_list_hard, _, _, _ = sch_with_soft.check_existence_and_get_flow_list( \
+                flow_with_path_hard_filename, '')
+
+            # measure scheduling time
+            start_time = time.time()
+            sat_or_unsat = sch.main(flow_list_hard)
+            elapsed_time = time.time() - start_time
+
+            if sat_or_unsat == UNSAT:
+                raise Exception('UNSAT')
+
+            print(num_flow_hard, 'SAT', elapsed_time)
+            elapsed_time_list.append(elapsed_time)
+
+        # for errorbar
+        max_elapsed_time = max(elapsed_time_list)
+        mean_elapsed_time = mean(elapsed_time_list)
+        min_elapsed_time = min(elapsed_time_list)
+        mean_elapsed_time_list.append(mean_elapsed_time)
+        upper_err_list.append(max_elapsed_time - mean_elapsed_time)
+        lower_err_list.append(mean_elapsed_time - min_elapsed_time)
+        # for boxplot
+        elapsed_time_list_list.append(elapsed_time_list)
+
+    # for errorbar
+    x = np.array(num_flow_hard_list)
+    y = np.array(mean_elapsed_time_list)
+    y_err = np.array([lower_err_list] + [upper_err_list])
+
+    # generate graph
+    # gen_result_graph_for_hard_errorbar(x, y, y_err)
+    gen_result_graph_for_hard_boxplot(num_flow_hard_list, elapsed_time_list_list)
+
+
+def main():
+    # for soft scheduling
+    # measure_time_for_soft()
+
+    # for hard scheduling
+    measure_time_for_hard()
 
 if __name__ == "__main__":
     main()
