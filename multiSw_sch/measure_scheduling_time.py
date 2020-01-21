@@ -19,33 +19,46 @@ UNSAT = -2
 SAT = -1
 
 
-def get_result_list_for_soft(max_num_flow):
-    result_list = []
-    for num_flow in range(2, max_num_flow + 1):
-        # generate dammy flow
-        flow_list = gen_dammy_flow_list(num_flow)
+def get_result_list_for_soft(max_num_flow_soft):
+    num_flow_soft_list = range(2, max_num_flow_soft + 1)
+    elapsed_time_list_list = []
+    for num_flow in num_flow_soft_list:
+        elapsed_time_list = []
+        for i in range(10):
+            # generate dammy flow
+            flow_list = gen_dammy_flow_list(num_flow)
 
-        # get hist list
-        hist_and_priority_dic_list, flow_prio_list = explore_max_value.get_hist_list_from_flow_list(flow_list, for_measure=True)
+            # get hist list
+            hist_and_priority_dic_list, flow_prio_list = explore_max_value.get_hist_list_from_flow_list(flow_list, for_measure=True)
 
-        # sort list by priority
-        # list index is equal to priority
-        hist_and_priority_dic_list = sorted(hist_and_priority_dic_list, reverse=False, key=lambda x:x["priority"])
+            # sort list by priority
+            # list index is equal to priority
+            hist_and_priority_dic_list = sorted(hist_and_priority_dic_list, reverse=False, key=lambda x:x["priority"])
 
-        # get permutation list
-        prio_permutation_list = list(itertools.permutations(flow_prio_list))
+            # get permutation list
+            prio_permutation_list = list(itertools.permutations(flow_prio_list))
 
-        # explore max value
-        start_time = time.time()
-        max_sum_expected_value, max_prio_permutation_list = \
-            explore_max_value.explore_max_value_from_lists(flow_list, hist_and_priority_dic_list, prio_permutation_list)
-        elapsed_time = time.time() - start_time
+            # explore max value
+            start_time = time.time()
+            max_sum_expected_value, max_prio_permutation_list = \
+                explore_max_value.explore_max_value_from_lists(flow_list, hist_and_priority_dic_list, prio_permutation_list)
+            elapsed_time = time.time() - start_time
 
-        result_list.append(elapsed_time)
-        print(num_flow, elapsed_time)
+            print(num_flow, elapsed_time)
+            elapsed_time_list.append(elapsed_time)
 
-    return result_list
+        # output to yaml
+        output_list = [{
+            "num_flow_soft": num_flow,
+            "elapsed_time_list": elapsed_time_list
+        }]
+        output_filename = '{}/workspace/test_z3/multiSw_sch/data/time_soft.yml'.format(home_dir)
+        output_to_yaml(output_list, output_filename)
 
+        # append list_list
+        elapsed_time_list_list.append(elapsed_time_list)
+
+    return num_flow_soft_list, elapsed_time_list_list
 
 def gen_dammy_flow_list(num_flow):
     dammy_flow_list = []
@@ -58,9 +71,9 @@ def gen_dammy_flow_list(num_flow):
 
     return dammy_flow_list
 
-def gen_time_graph_for_soft(result_list, max_num_flow):
+def gen_time_graph_for_soft(result_list, max_num_flow_soft):
     # generate num_flow list
-    num_flow_list = range(2, max_num_flow + 1)
+    num_flow_list = range(2, max_num_flow_soft + 1)
 
     # set font
     plt.rcParams["font.family"] = "Times New Roman"
@@ -75,8 +88,12 @@ def gen_time_graph_for_soft(result_list, max_num_flow):
     ax.set_yscale('log')
 
     # set label
-    ax.set_xlabel('Number of soft real-time flows')
-    ax.set_ylabel('Calculation time [s]')
+    font_size_label = 18
+    ax.set_xlabel('Number of soft real-time flows', fontsize=font_size_label)
+    ax.set_ylabel('Calculation time [s]', fontsize=font_size_label)
+
+    # set ticks
+    ax.set_xticks(range(2, 11))
 
     # set grid
     ax.grid()
@@ -89,7 +106,7 @@ def gen_time_graph_for_soft(result_list, max_num_flow):
 def gen_time_graph_for_hard_errorbar(x, y, y_err):
     # set font
     plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 14
+    plt.rcParams["font.size"] = 12
 
     fig, ax = plt.subplots()
 
@@ -118,21 +135,23 @@ def gen_time_graph_for_hard_errorbar(x, y, y_err):
 def gen_time_graph_for_hard_boxplot(num_flow_hard_list, elapsed_time_list_list):
     # set font
     plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 14
+    plt.rcParams["font.size"] = 15
 
-    fig, ax = plt.subplots()
+    fig = plt.figure(figsize=(8, 5))
+    ax = fig.add_subplot(111)
 
     # plot
     ax.boxplot(elapsed_time_list_list, labels=num_flow_hard_list, patch_artist=True, \
         boxprops={'facecolor': 'lightblue'})
 
     # set label
-    ax.set_xlabel('Number of hard real-time flows')
-    ax.set_ylabel('Calculation time [s]')
+    font_size_label = 18
+    ax.set_xlabel('Number of hard real-time flows', fontsize=font_size_label)
+    ax.set_ylabel('Calculation time [s]', fontsize=font_size_label)
 
     # set ticks
     max_num_flow_hard = num_flow_hard_list[-1]
-    ax.set_xticks(range(1, max_num_flow_hard + 1))
+    # ax.set_xticks(range(1, max_num_flow_hard + 1))
 
     # set lim
     ax.set_ylim(0,)
@@ -180,18 +199,12 @@ def make_pdf(pdf_filename):
     pp.close()
     plt.clf()
 
-def output_to_yaml(num_flow_hard, elapsed_time_list, sat_rate):
-    output_list = [{ \
-        "num_flow_hard": num_flow_hard, \
-        "elapsed_time_list": elapsed_time_list, \
-        "sat_rate": sat_rate \
-    }]
-    yaml_filename = '{}/workspace/test_z3/multiSw_sch/data/time_and_rate.yml'.format(home_dir)
-    with open(yaml_filename, "a") as f:
+def output_to_yaml(output_list, output_filename):
+    with open(output_filename, "a") as f:
         f.write(yaml.dump(output_list))
 
 def get_result_list_for_hard(max_num_flow_hard):
-    num_flow_hard_list = range(1, max_num_flow_hard + 1)
+    num_flow_hard_list = range(30, max_num_flow_hard + 1)
     # for boxplot
     elapsed_time_list_list = []
     # for rate
@@ -201,7 +214,7 @@ def get_result_list_for_hard(max_num_flow_hard):
         sat_count = 0
         unsat_count = 0
         elapsed_time_list = []
-        for i in range(5):
+        for i in range(20):
             # generate network and flow
             num_sw = 5
             num_cli_for_each_sw = num_flow_hard
@@ -241,7 +254,14 @@ def get_result_list_for_hard(max_num_flow_hard):
         if sat_rate > 3:
             elapsed_time_list_list.append(elapsed_time_list)
             sat_rate_list.append(sat_rate)
-            output_to_yaml(num_flow_hard, elapsed_time_list, sat_rate)
+
+            output_list = [{
+                "num_flow_hard": num_flow_hard,
+                "elapsed_time_list": elapsed_time_list,
+                "sat_rate": sat_rate
+            }]
+            output_filename = '{}/workspace/test_z3/multiSw_sch/data/time_and_rate_hard.yml'.format(home_dir)
+            output_to_yaml(output_list, output_filename)
         else:
             break
 
@@ -263,21 +283,21 @@ def get_result_list_from_yaml():
     return num_flow_hard_list, elapsed_time_list_list, sat_rate_list
 
 def measure_time_for_soft():
-    max_num_flow = 10
+    max_num_flow_soft = 4
 
     # get result list
-    # result_list = get_result_list_for_soft(max_num_flow)
+    num_flow_list, elapsed_time_list_list = get_result_list_for_soft(max_num_flow_soft)
     # result_list = [0.0001277923583984375, 0.0004677772521972656, 0.0019385814666748047, 0.012128591537475586, 0.08089661598205566, 0.69547438621521, 5.672691822052002, 59.926318883895874]
-    result_list = [0.00006389, 0.00021, 0.0079, 0.054, 0.39, 3.54, 35.62, 438, 4919]
+    # result_list = [0.00006389, 0.00021, 0.0079, 0.054, 0.39, 3.54, 35.62, 438, 4919]
 
     # generate graph
-    gen_time_graph_for_soft(result_list, max_num_flow)
+    # gen_time_graph_for_soft(result_list, max_num_flow_soft)
 
 def measure_time_for_hard():
     # get result list
-    max_num_flow_hard = 3
-    num_flow_hard_list, elapsed_time_list_list, sat_rate_list = get_result_list_for_hard(max_num_flow_hard)
-    # num_flow_hard_list, elapsed_time_list_list, sat_rate_list = get_result_list_from_yaml()
+    # max_num_flow_hard = 50
+    # num_flow_hard_list, elapsed_time_list_list, sat_rate_list = get_result_list_for_hard(max_num_flow_hard)
+    num_flow_hard_list, elapsed_time_list_list, sat_rate_list = get_result_list_from_yaml()
 
     # generate graph
     gen_time_graph_for_hard_boxplot(num_flow_hard_list, elapsed_time_list_list)
@@ -286,10 +306,10 @@ def measure_time_for_hard():
 
 def main():
     # for soft scheduling
-    # measure_time_for_soft()
+    measure_time_for_soft()
 
     # for hard scheduling
-    measure_time_for_hard()
+    # measure_time_for_hard()
 
 if __name__ == "__main__":
     main()
