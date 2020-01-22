@@ -53,7 +53,7 @@ def get_result_list_for_soft(max_num_flow_soft):
             "elapsed_time_list": elapsed_time_list
         }]
         output_filename = '{}/workspace/test_z3/multiSw_sch/data/time_soft.yml'.format(home_dir)
-        output_to_yaml(output_list, output_filename)
+        # output_to_yaml(output_list, output_filename)
 
         # append list_list
         elapsed_time_list_list.append(elapsed_time_list)
@@ -71,9 +71,9 @@ def gen_dammy_flow_list(num_flow):
 
     return dammy_flow_list
 
-def gen_time_graph_for_soft(result_list, max_num_flow_soft):
+def gen_time_graph_for_soft_plot(result_list, max_num_flow_soft):
     # generate num_flow list
-    num_flow_list = range(2, max_num_flow_soft + 1)
+    num_flow_soft_list = range(2, max_num_flow_soft + 1)
 
     # set font
     plt.rcParams["font.family"] = "Times New Roman"
@@ -82,7 +82,7 @@ def gen_time_graph_for_soft(result_list, max_num_flow_soft):
     fig, ax = plt.subplots()
 
     # plot
-    p = ax.plot(num_flow_list, result_list, marker=".", c='b')
+    p = ax.plot(num_flow_soft_list, result_list, marker=".", c='b')
 
     # set scale
     ax.set_yscale('log')
@@ -103,10 +103,48 @@ def gen_time_graph_for_soft(result_list, max_num_flow_soft):
     # make pdf
     make_pdf('{}/workspace/test_z3/multiSw_sch/pdf/num_soft_flow_vs_time.pdf'.format(home_dir))
 
-def gen_time_graph_for_hard_errorbar(x, y, y_err):
+def gen_time_graph_for_soft_errorbar(y, y_err, max_num_flow_soft):
+    # generate num_flow list
+    num_flow_soft_list = range(2, max_num_flow_soft + 1)
+    x = np.array(num_flow_soft_list)
+
     # set font
     plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 12
+    plt.rcParams["font.size"] = 14
+
+    fig, ax = plt.subplots()
+
+    # plot
+    plt.rcParams["errorbar.capsize"] = 5
+    ax.errorbar(x, y, yerr=y_err, fmt='b.-')
+
+    # set scale
+    ax.set_yscale('log')
+
+    # set label
+    font_size_label = 18
+    ax.set_xlabel('Number of soft real-time flows', fontsize=font_size_label)
+    ax.set_ylabel('Calculation time [s]', fontsize=font_size_label)
+
+    # set ticks
+    ax.set_xticks(range(2, 11))
+
+    # set grid
+    ax.grid()
+
+    # shape layout
+    plt.tight_layout()
+    # make pdf
+    make_pdf('{}/workspace/test_z3/multiSw_sch/pdf/num_soft_flow_vs_time.pdf'.format(home_dir))
+
+def gen_time_graph_for_hard_errorbar(y, y_err, max_num_flow_hard):
+    # generate num_flow list
+    num_flow_hard_list = range(1, max_num_flow_hard + 1)
+    x = np.array(num_flow_hard_list)
+
+    # set font
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["font.size"] = 11
 
     fig, ax = plt.subplots()
 
@@ -114,8 +152,9 @@ def gen_time_graph_for_hard_errorbar(x, y, y_err):
     ax.errorbar(x, y, yerr=y_err, fmt='b.-')
 
     # set label
-    ax.set_xlabel('Number of hard real-time flows')
-    ax.set_ylabel('Calculation time [s]')
+    font_size_label = 18
+    ax.set_xlabel('Number of hard real-time flows', fontsize=font_size_label)
+    ax.set_ylabel('Calculation time [s]', fontsize=font_size_label)
 
     # set ticks
     max_num_flow_hard = x[-1]
@@ -267,8 +306,8 @@ def get_result_list_for_hard(max_num_flow_hard):
 
     return num_flow_hard_list, elapsed_time_list_list, sat_rate_list
 
-def get_result_list_from_yaml():
-    yaml_filename = '{}/workspace/test_z3/multiSw_sch/data/time_and_rate.yml'.format(home_dir)
+def get_result_list_from_yaml_hard():
+    yaml_filename = '{}/workspace/test_z3/multiSw_sch/data/time_and_rate_hard.yml'.format(home_dir)
     with open(yaml_filename, "r+") as f:
         result_list = yaml.load(f, yaml.SafeLoader)
     
@@ -282,25 +321,59 @@ def get_result_list_from_yaml():
 
     return num_flow_hard_list, elapsed_time_list_list, sat_rate_list
 
+def get_result_list_from_yaml_soft():
+    yaml_filename = '{}/workspace/test_z3/multiSw_sch/data/time_soft.yml'.format(home_dir)
+    with open(yaml_filename, "r+") as f:
+        result_list = yaml.load(f, yaml.SafeLoader)
+    
+    num_flow_soft_list = []
+    elapsed_time_list_list = []
+    for each_result in result_list:
+        num_flow_soft_list.append(each_result["num_flow_soft"])
+        elapsed_time_list_list.append(each_result["elapsed_time_list"])
+
+    return num_flow_soft_list, elapsed_time_list_list
+
+def change_list_for_errorbar(result_list):
+    mean_list = []
+    lower_err_list = []
+    upper_err_list = []
+    for each_list in result_list:
+        mean_val = mean(each_list)
+        lower_err = mean_val - min(each_list)
+        upper_err = max(each_list) - mean_val
+
+        mean_list.append(mean_val)
+        lower_err_list.append(lower_err)
+        upper_err_list.append(upper_err)
+
+    # list -> array
+    y = np.array(mean_list)
+    y_err = np.array([lower_err_list] + [upper_err_list])
+
+    return y, y_err
+
 def measure_time_for_soft():
-    max_num_flow_soft = 4
+    max_num_flow_soft = 3
 
     # get result list
-    num_flow_list, elapsed_time_list_list = get_result_list_for_soft(max_num_flow_soft)
-    # result_list = [0.0001277923583984375, 0.0004677772521972656, 0.0019385814666748047, 0.012128591537475586, 0.08089661598205566, 0.69547438621521, 5.672691822052002, 59.926318883895874]
-    # result_list = [0.00006389, 0.00021, 0.0079, 0.054, 0.39, 3.54, 35.62, 438, 4919]
+    num_flow_soft_list, elapsed_time_list_list = get_result_list_for_soft(max_num_flow_soft)
+    # num_flow_soft_list, elapsed_time_list_list = get_result_list_from_yaml_soft()
 
     # generate graph
-    # gen_time_graph_for_soft(result_list, max_num_flow_soft)
+    # y, y_err = change_list_for_errorbar(elapsed_time_list_list)
+    # gen_time_graph_for_soft_errorbar(y, y_err, max_num_flow_soft)
 
 def measure_time_for_hard():
     # get result list
-    # max_num_flow_hard = 50
+    max_num_flow_hard = 30
     # num_flow_hard_list, elapsed_time_list_list, sat_rate_list = get_result_list_for_hard(max_num_flow_hard)
-    num_flow_hard_list, elapsed_time_list_list, sat_rate_list = get_result_list_from_yaml()
+    num_flow_hard_list, elapsed_time_list_list, sat_rate_list = get_result_list_from_yaml_hard()
 
     # generate graph
-    gen_time_graph_for_hard_boxplot(num_flow_hard_list, elapsed_time_list_list)
+    y, y_err = change_list_for_errorbar(elapsed_time_list_list)
+    # gen_time_graph_for_hard_boxplot(num_flow_hard_list, elapsed_time_list_list)
+    gen_time_graph_for_hard_errorbar(y, y_err, max_num_flow_hard)
     gen_rate_graph(num_flow_hard_list, sat_rate_list)
 
 

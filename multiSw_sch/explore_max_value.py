@@ -10,6 +10,8 @@ import network.dijkstra.gen_flowData as gen_flowData
 sys.path.append('{}/IEEE8021Q_test'.format(home_dir))
 import results.calc_value as calc_value
 
+UNDEFINE = 1.5
+
 def get_latency_list_from_csv(csv_filename):
     latency_list = []
     with open(csv_filename, 'r') as f:
@@ -84,6 +86,14 @@ def get_hist_list_from_flow_list(flow_list_soft, for_measure=False):
 
 def explore_max_value_from_lists(flow_list_soft, hist_and_priority_dic_list, prio_permutation_list):
     max_sum_expected_value = 0
+    expected_val_dic = {}
+    # initialize dict
+    for i in range(len(flow_list_soft)):
+        expected_val_dic[i] = {}
+        for each_prio in prio_permutation_list[0]:
+            if not each_prio in expected_val_dic[i]:
+                expected_val_dic[i][each_prio] = UNDEFINE
+
     for each_permutation in prio_permutation_list:
         sum_expected_val = 0
         for i, each_flow in enumerate(flow_list_soft):
@@ -94,12 +104,20 @@ def explore_max_value_from_lists(flow_list_soft, hist_and_priority_dic_list, pri
             # print(i, each_permutation)
             priority = each_permutation[i]
 
-            # get hist
-            probability = hist_and_priority_dic_list[priority]["probability"]
-            half_bins = hist_and_priority_dic_list[priority]["half_bins"]
-
             # get expected value
-            expected_val = get_expected_val_from_histgram_and_tuf(probability, half_bins, tuf)
+            if expected_val_dic[i][priority] == UNDEFINE:
+                # calculate expected value
+                ## get hist
+                probability = hist_and_priority_dic_list[priority]["probability"]
+                half_bins = hist_and_priority_dic_list[priority]["half_bins"]
+                ## calculate expected value
+                expected_val = get_expected_val_from_histgram_and_tuf(probability, half_bins, tuf)
+                ## add to dict
+                expected_val_dic[i][priority] = expected_val
+            else:
+                # get expected value from dict
+                expected_val = expected_val_dic[i][priority]
+
             sum_expected_val += expected_val
 
         # check sum_expected_val

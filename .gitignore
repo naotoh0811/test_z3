@@ -8,3 +8,5 @@ __pycache__/
 *.yml
 *.csv
 *.log
+
+!/multiSw_sch/data/*.yml
