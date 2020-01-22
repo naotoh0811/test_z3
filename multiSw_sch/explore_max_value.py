@@ -55,15 +55,16 @@ def get_priority_from_flow_id(flow_id):
 def get_hist_list_from_flow_list(flow_list_soft, for_measure=False):
     hist_and_priority_dic_list = []
     flow_prio_list = []
-    prio_for_measure = 0
+    # prio_for_measure = 0
     for each_flow in flow_list_soft:
         # get flow info
         flow_id = each_flow["flow_id"]
         if not for_measure:
             priority = get_priority_from_flow_id(flow_id)
         else:
-            priority = prio_for_measure
-            prio_for_measure = min(prio_for_measure + 1, 6)
+            # priority = prio_for_measure
+            priority = flow_id % 7
+            # prio_for_measure = min(prio_for_measure + 1, 6)
 
         # check flow_prio_list
         if priority in flow_prio_list:
