@@ -24,7 +24,7 @@ def get_result_list_for_soft(max_num_flow_soft):
     elapsed_time_list_list = []
     for num_flow in num_flow_soft_list:
         elapsed_time_list = []
-        for i in range(1):
+        for i in range(10):
             # generate dammy flow
             flow_list = gen_dammy_flow_list(num_flow)
 
@@ -40,8 +40,8 @@ def get_result_list_for_soft(max_num_flow_soft):
 
             # explore max value
             start_time = time.time()
-            _, max_prio_permutation_list = \
-                explore_max_value.explore_max_value_from_lists(flow_list, hist_and_priority_dic_list, prio_permutation_list)
+            _, _ = explore_max_value.explore_max_value_from_lists( \
+                flow_list, hist_and_priority_dic_list, prio_permutation_list)
             elapsed_time = time.time() - start_time
 
             print(num_flow, elapsed_time)
@@ -53,12 +53,12 @@ def get_result_list_for_soft(max_num_flow_soft):
             "elapsed_time_list": elapsed_time_list
         }]
         output_filename = '{}/workspace/test_z3/multiSw_sch/data/time_soft.yml'.format(home_dir)
-        # output_to_yaml(output_list, output_filename)
+        output_to_yaml(output_list, output_filename)
 
         # append list_list
         elapsed_time_list_list.append(elapsed_time_list)
 
-    return num_flow_soft_list, elapsed_time_list_list
+    return elapsed_time_list_list
 
 def gen_dammy_flow_list(num_flow):
     dammy_flow_list = []
@@ -120,7 +120,7 @@ def gen_time_graph_for_soft_errorbar(y, y_err, order_list, max_num_flow_soft):
     ax.errorbar(x, y, yerr=y_err, fmt='b.-', label='Measured time')
 
     # plot order
-    ax.plot(x, order_list, color='r', marker='.', label='Estimated time')
+    ax.plot(x, order_list, color='r', marker='.', label='O(N*N!)')
 
     # set scale
     ax.set_yscale('log')
@@ -131,7 +131,7 @@ def gen_time_graph_for_soft_errorbar(y, y_err, order_list, max_num_flow_soft):
     ax.set_ylabel('Calculation time [s]', fontsize=font_size_label)
 
     # set ticks
-    ax.set_xticks(range(2, 11))
+    ax.set_xticks(range(2, max_num_flow_soft + 1))
 
     # set grid
     ax.grid()
@@ -165,7 +165,6 @@ def gen_time_graph_for_hard_errorbar(y, y_err, max_num_flow_hard):
     ax.set_ylabel('Calculation time [s]', fontsize=font_size_label)
 
     # set ticks
-    max_num_flow_hard = x[-1]
     ax.set_xticks(range(1, max_num_flow_hard + 1))
 
     # set lim
@@ -360,13 +359,13 @@ def change_list_for_errorbar(result_list):
     return y, y_err
 
 def get_order_val_list(max_num_flow_soft):
-    return [0.0000004 * i * factorial(i) for i in range(2, max_num_flow_soft + 1)]
+    return [0.0000003 * i * factorial(i) for i in range(2, max_num_flow_soft + 1)]
 
 def measure_time_for_soft():
-    max_num_flow_soft = 10
+    max_num_flow_soft = 11
 
     # get result list
-    # num_flow_soft_list, elapsed_time_list_list = get_result_list_for_soft(max_num_flow_soft)
+    # elapsed_time_list_list = get_result_list_for_soft(max_num_flow_soft)
     elapsed_time_list_list = get_result_list_from_yaml_soft()
 
     # generate graph
