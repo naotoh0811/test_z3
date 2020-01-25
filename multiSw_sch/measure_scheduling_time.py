@@ -157,6 +157,7 @@ def gen_time_graph_for_hard_errorbar(y, y_err, max_num_flow_hard):
     fig, ax = plt.subplots()
 
     # plot
+    plt.rcParams["errorbar.capsize"] = 5
     ax.errorbar(x, y, yerr=y_err, fmt='b.-')
 
     # set label
@@ -389,10 +390,10 @@ def measure_time_for_hard():
 
 def main():
     # for soft scheduling
-    measure_time_for_soft()
+    # measure_time_for_soft()
 
     # for hard scheduling
-    # measure_time_for_hard()
+    measure_time_for_hard()
 
 if __name__ == "__main__":
     main()

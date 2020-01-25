@@ -80,9 +80,10 @@ def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
             #     dec_point + minData_transferLatency * random.randint(10, 50) # dec_point + (6~30)
             x_intercept = float(dec_point + \
                 # get_transferLatency(1500) * random.randint(1, 5)) # dec_point + (12~60)
-                random.randint( \
-                    math.ceil(get_transferLatency(1500)), \
-                    math.ceil(get_transferLatency(1500)) * 5) \
+                random.randint(
+                    math.ceil(get_transferLatency(1500)),
+                    math.ceil(get_transferLatency(1500)) * 5)
+                    # math.ceil(get_transferLatency(1500)) * 10)
             )
 
             slope = first_val / (dec_point - x_intercept)

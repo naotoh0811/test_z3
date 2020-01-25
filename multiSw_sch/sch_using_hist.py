@@ -22,6 +22,7 @@ SORT = 0
 RANDOM = 1
 NONE = 2
 HIST = 3
+SLOPE = 4
 
 light_speed = 5 * (10 ** (-3)) # in us/m
 link_length = 10
@@ -57,8 +58,8 @@ def output_yaml_cli_send_low_prio( \
 
         yaml_output.append(yaml_each_cli)
 
-        # prio for hist
-        if kind_prioritize == HIST:
+        # prio for hist or SLOPE
+        if kind_prioritize == HIST or kind_prioritize == SLOPE:
             prio = min(prio + 1, 6)
 
     with open(output_filename, "a") as f:
@@ -90,7 +91,7 @@ def get_pseudo_slope_list(flow_list_soft):
     return pseudo_slope_list
 
 def get_slope_list(flow_list_soft):
-    slope_list =[abs(each_flow["tuf"][1][3]) for each_flow in flow_list_soft]
+    slope_list = [abs(each_flow["tuf"][1][3]) for each_flow in flow_list_soft]
     
     return slope_list
 
@@ -108,6 +109,23 @@ def output_params_to_csv(params_for_csv):
     with open(output_filename, 'a') as f:
         f.write(params_for_csv)
 
+def sort_list_by_pseudo_slope(flow_list_soft):
+    for each_flow in flow_list_soft:
+        first_tuf = each_flow["tuf"][0]
+        first_val = first_tuf[4]
+
+        last_tuf = each_flow["tuf"][-1]
+        last_slope = last_tuf[3]
+        last_y_intercept = last_tuf[4]
+        x_intercept = -(last_y_intercept / last_slope)
+
+        pseudo_slope = first_val / x_intercept
+        each_flow["pseudo_slope"] = pseudo_slope
+    
+    sorted_flow_list_soft = sorted(flow_list_soft, reverse=False, key=lambda x:x["pseudo_slope"])
+    # pprint.pprint(sorted_flow_list_soft)
+
+    return sorted_flow_list_soft
 
 def main(kind_prioritize):
     flow_with_path_hard_filename = '{}/workspace/test_z3/network/dijkstra/flow_with_path_hard.yml'.format(home_dir)
@@ -137,6 +155,10 @@ def main(kind_prioritize):
 
         # output params
         output_params_to_csv(params_for_csv)
+
+    # sort by slope
+    if kind_prioritize == SLOPE:
+        flow_list_soft = sort_list_by_pseudo_slope(flow_list_soft)
 
     sch_time_only_soft = time.time() - start_time
 
@@ -189,5 +211,7 @@ if __name__ == "__main__":
             kind_prioritize = NONE
         elif sys.argv[1] == 'HIST':
             kind_prioritize = HIST
+        elif sys.argv[1] == 'SLOPE':
+            kind_prioritize = SLOPE
 
     main(kind_prioritize)
