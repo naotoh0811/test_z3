@@ -208,8 +208,8 @@ def get_deadline(each_flow):
         deemed_val = first_val * deemed_rate
         deemed_deadline = (deemed_val - tuf[1][4]) / tuf[1][3]
 
-        # return deemed_deadline
-        return 0
+        return deemed_deadline
+        # return 0
 
 def add_constraint(flow_list, flow_infos, times_for_gcl, s):
     open_time = times_for_gcl.open_time
@@ -483,7 +483,6 @@ def main(external_flow_list):
     # print("--------------------")
     # print_result_each_flow(flow_list, flow_infos, times_for_gcl, m)
     # print("====================")
-    home_dir = os.path.expanduser('~')
     output_result_yaml_sw(flow_infos, flow_list, times_for_gcl, m, \
         '{}/workspace/test_z3/multiSw_sch/gcl_sw.yml'.format(home_dir))
     output_result_yaml_cli_send(flow_list, times_for_gcl, m, \

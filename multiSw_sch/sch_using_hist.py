@@ -5,6 +5,7 @@ import pprint
 import yaml
 import time
 import random
+import copy
 home_dir = os.path.expanduser('~')
 sys.path.append('{}/workspace/test_z3'.format(home_dir))
 import multiSw_sch.sch as sch
@@ -23,6 +24,7 @@ RANDOM = 1
 NONE = 2
 HIST = 3
 SLOPE = 4
+SOFTGCL = 5
 
 light_speed = 5 * (10 ** (-3)) # in us/m
 link_length = 10
@@ -59,7 +61,7 @@ def output_yaml_cli_send_low_prio( \
         yaml_output.append(yaml_each_cli)
 
         # prio for hist or SLOPE
-        if kind_prioritize == HIST or kind_prioritize == SLOPE:
+        if kind_prioritize == HIST or kind_prioritize == SLOPE or kind_prioritize == SOFTGCL:
             prio = min(prio + 1, 6)
 
     with open(output_filename, "a") as f:
@@ -157,18 +159,34 @@ def main(kind_prioritize):
         output_params_to_csv(params_for_csv)
 
     # sort by slope
-    if kind_prioritize == SLOPE:
+    if kind_prioritize == SLOPE or kind_prioritize == SOFTGCL:
         flow_list_soft = sort_list_by_pseudo_slope(flow_list_soft)
 
     sch_time_only_soft = time.time() - start_time
 
     # schedule hard
-    start_time = time.time()
-    if not onlySoft:
-        sat_or_unsat = sch.main(flow_list_hard)
+    if kind_prioritize != SOFTGCL:
+        start_time = time.time()
+        if not onlySoft:
+            sat_or_unsat = sch.main(flow_list_hard)
+            if sat_or_unsat == UNSAT:
+                raise Exception('UNSAT')
+        sch_time_only_hard = time.time() - start_time
+
+    # schedule hard with choosen soft (SOFTGCL)
+    else:
+        sorted_flow_list_low_prio = []
+        num_flow_soft_choosen = 3
+        flow_list_soft_choosen = flow_list_soft[-1 * num_flow_soft_choosen:]
+        flow_list_soft = flow_list_soft[:-1 * num_flow_soft_choosen]
+        flow_list_hard_with_soft = flow_list_hard + flow_list_soft_choosen
+
+        # schedule with soft (include outputting gcl_cli_send.yml)
+        start_time = time.time()
+        sat_or_unsat = sch.main(flow_list_hard_with_soft)
+        sch_time_only_hard = time.time() - start_time
         if sat_or_unsat == UNSAT:
             raise Exception('UNSAT')
-    sch_time_only_hard = time.time() - start_time
 
     # if onlySoft, gcl_cli_send.yml is not updated.
     # so delete old gcl_cli_send.yml
@@ -213,5 +231,7 @@ if __name__ == "__main__":
             kind_prioritize = HIST
         elif sys.argv[1] == 'SLOPE':
             kind_prioritize = SLOPE
+        elif sys.argv[1] == 'SOFTGCL':
+            kind_prioritize = SOFTGCL
 
     main(kind_prioritize)
