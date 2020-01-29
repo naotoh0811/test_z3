@@ -176,7 +176,7 @@ def main(kind_prioritize):
     # schedule hard with choosen soft (SOFTGCL)
     else:
         sorted_flow_list_low_prio = []
-        num_flow_soft_choosen = 3
+        num_flow_soft_choosen = 1
         flow_list_soft_choosen = flow_list_soft[-1 * num_flow_soft_choosen:]
         flow_list_soft = flow_list_soft[:-1 * num_flow_soft_choosen]
         flow_list_hard_with_soft = flow_list_hard + flow_list_soft_choosen
