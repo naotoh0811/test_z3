@@ -26,6 +26,7 @@ NONE = 2
 HIST = 3
 SLOPE = 4
 SOFTGCL = 5
+SLOPE2 = 8
 
 light_speed = 5 * (10 ** (-3)) # in us/m
 link_length = 10
@@ -281,6 +282,8 @@ def output_params_to_csv(bandwidth_hard, bandwidth_soft, num_hard, num_soft, i_l
         file_suffix = '_sp'
     elif kind_prioritize == SOFTGCL:
         file_suffix = '_sg'
+    elif kind_prioritize == SLOPE2:
+        file_suffix = '_sp2'
     output_filename = \
         '{}/IEEE8021Q_test/results/params_and_results{}.csv'.format(home_dir, file_suffix)
     if not os.path.isfile(output_filename):

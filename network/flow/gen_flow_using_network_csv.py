@@ -114,9 +114,9 @@ def gen_flow(num_flow, num_flow_soft, num_pass_sw, fixed_bandwidth, cycle_soft, 
         else: # hard flow
             # cycle = random.choice([200, 400])
             # cycle = 200 if i % 2 == 0 else 400
-            cycle = 400
-            # cycle_list = [100, 100, 200]
-            # cycle = cycle_list[i - 2]
+            #cycle = 400
+            cycle_list = [100, 100, 200]
+            cycle = cycle_list[i - 1]
             payload = random.randint(1500, 1500) # 46 -- 1500
 
             flow_dic = { \

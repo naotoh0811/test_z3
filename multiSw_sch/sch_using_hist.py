@@ -25,6 +25,7 @@ NONE = 2
 HIST = 3
 SLOPE = 4
 SOFTGCL = 5
+SLOPE2 = 8
 
 light_speed = 5 * (10 ** (-3)) # in us/m
 link_length = 10
@@ -44,6 +45,10 @@ def output_yaml_cli_send_low_prio( \
             prio = max_prio_permutation_list[i]
         elif kind_prioritize == RANDOM:
             prio = random.randint(0, 6)
+        elif kind_prioritize == SLOPE2:
+            prio = min(prio + 1, 6)
+            if i == len(flow_list_soft) - 1:
+                prio = 0
 
         # determine cycle
         cycle = each_flow["cycle"]
@@ -159,7 +164,7 @@ def main(kind_prioritize):
         output_params_to_csv(params_for_csv)
 
     # sort by slope
-    if kind_prioritize == SLOPE or kind_prioritize == SOFTGCL:
+    if kind_prioritize == SLOPE or kind_prioritize == SOFTGCL or kind_prioritize == SLOPE2:
         flow_list_soft = sort_list_by_pseudo_slope(flow_list_soft)
 
     sch_time_only_soft = time.time() - start_time
@@ -233,5 +238,7 @@ if __name__ == "__main__":
             kind_prioritize = SLOPE
         elif sys.argv[1] == 'SOFTGCL':
             kind_prioritize = SOFTGCL
+        elif sys.argv[1] == 'SLOPE2':
+            kind_prioritize = SLOPE2
 
     main(kind_prioritize)

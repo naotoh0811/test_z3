@@ -111,7 +111,9 @@ def gen_time_graph_for_soft_errorbar(y, y_err, order_list, max_num_flow_soft):
 
     # set font
     plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 14
+    plt.rcParams["mathtext.fontset"] = "stix"
+    # plt.rcParams["font.size"] = 14
+    plt.rcParams["font.size"] = 16
 
     fig, ax = plt.subplots()
 
@@ -120,7 +122,7 @@ def gen_time_graph_for_soft_errorbar(y, y_err, order_list, max_num_flow_soft):
     ax.errorbar(x, y, yerr=y_err, fmt='b.-', label='Measured time')
 
     # plot order
-    ax.plot(x, order_list, color='r', marker='.', label='O(N*N!)')
+    ax.plot(x, order_list, color='r', marker='.', linestyle='dashed', label='$O(N \cdot N!)$')
 
     # set scale
     ax.set_yscale('log')
@@ -132,6 +134,9 @@ def gen_time_graph_for_soft_errorbar(y, y_err, order_list, max_num_flow_soft):
 
     # set ticks
     ax.set_xticks(range(2, max_num_flow_soft + 1))
+
+    # set lim
+    ax.set_ylim([10**(-6), 2*10**(2)])
 
     # set grid
     ax.grid()
@@ -152,7 +157,8 @@ def gen_time_graph_for_hard_errorbar(y, y_err, max_num_flow_hard):
 
     # set font
     plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 11
+    #plt.rcParams["font.size"] = 11
+    plt.rcParams["font.size"] = 16
 
     fig, ax = plt.subplots()
 
@@ -160,16 +166,20 @@ def gen_time_graph_for_hard_errorbar(y, y_err, max_num_flow_hard):
     plt.rcParams["errorbar.capsize"] = 5
     ax.errorbar(x, y, yerr=y_err, fmt='b.-')
 
+    # set scale
+    ax.set_yscale('log')
+
     # set label
     font_size_label = 18
     ax.set_xlabel('Number of hard real-time flows', fontsize=font_size_label)
     ax.set_ylabel('Calculation time [s]', fontsize=font_size_label)
 
     # set ticks
-    ax.set_xticks(range(1, max_num_flow_hard + 1))
+    #ax.set_xticks(range(1, max_num_flow_hard + 1))
+    ax.set_xticks([1] + list(range(3, max_num_flow_hard + 1, 3)))
 
     # set lim
-    ax.set_ylim(0,)
+    #ax.set_ylim(0,)
 
     # set grid
     ax.grid()
@@ -385,7 +395,7 @@ def measure_time_for_hard():
     y, y_err = change_list_for_errorbar(elapsed_time_list_list)
     # gen_time_graph_for_hard_boxplot(num_flow_hard_list, elapsed_time_list_list)
     gen_time_graph_for_hard_errorbar(y, y_err, max_num_flow_hard)
-    gen_rate_graph(num_flow_hard_list, sat_rate_list)
+    # gen_rate_graph(num_flow_hard_list, sat_rate_list)
 
 
 def main():

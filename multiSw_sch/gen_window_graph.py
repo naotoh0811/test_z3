@@ -7,27 +7,35 @@ import os.path
 home_dir = os.path.expanduser('~')
 # ref https://qiita.com/skotaro/items/5c9893d186ccd31f459d
 color_list = [
-    '#1f77b4', \
-    '#ff7f0e', \
-    '#2ca02c', \
-    '#d62728', \
-    '#9467bd', \
-    '#8c564b', \
-    '#e377c2', \
-    '#7f7f7f', \
-    '#bcbd22', \
-    '#17becf', \
+    # '#1f77b4',
+    # '#ff7f0e',
+    # '#2ca02c',
+    'red',
+    'blue',
+    'blue',
+    'skyblue',
+    'gray',
+    '#8c564b',
+    '#e377c2',
+    '#7f7f7f',
+    '#bcbd22',
+    '#17becf',
 
-    '#1f77b4', \
-    '#ff7f0e', \
-    '#2ca02c', \
-    '#d62728', \
-    '#9467bd', \
-    '#8c564b', \
-    '#e377c2', \
-    '#7f7f7f', \
-    '#bcbd22', \
+    '#1f77b4',
+    '#ff7f0e',
+    '#2ca02c',
+    '#d62728',
+    '#9467bd',
+    '#8c564b',
+    '#e377c2',
+    '#7f7f7f',
+    '#bcbd22',
     '#17becf' \
+]
+hatch_list = [
+    '///',
+    '++',
+    '..'
 ]
 
 def read_yaml(filename):
@@ -35,12 +43,15 @@ def read_yaml(filename):
     data = yaml.load(f, yaml.SafeLoader)
     return data
 
-def plot_window(ax, i_gate, open_time, close_time, window_hight, color, flow_name):
-    ax.broken_barh( \
-        [(open_time, close_time - open_time)], \
-        (window_hight*(i_gate*2+1), window_hight), \
-        facecolors=color, \
-        label=flow_name \
+def plot_window(ax, i_gate, open_time, close_time, window_hight, color, hatch, flow_name):
+    ax.broken_barh(
+        [(open_time, close_time - open_time)],
+        # (window_hight*(i_gate*2+1), window_hight),
+        (10, 80),
+        facecolors=color,
+        edgecolor='black',
+        hatch=hatch,
+        label=flow_name
     )
 
 def gen_graph_for_each_sw(each_sw):
@@ -52,7 +63,9 @@ def gen_graph_for_each_sw(each_sw):
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 15
 
-    fig, ax = plt.subplots()
+    # fig, ax = plt.subplots()
+    fig = plt.figure(figsize=(6, 1.8))
+    ax = fig.add_subplot(111)
     y_size = 100
     window_hight = y_size / (4 * 2 + 1)
 
@@ -73,19 +86,20 @@ def gen_graph_for_each_sw(each_sw):
 
     # plot for each gate
     for i_gate, each_control in enumerate(control):
-        nextNode = each_control["nextNode"]
+        # nextNode = each_control["nextNode"]
         open_close = each_control["open_close"]
 
         # add text on left-outside
-        ax.text(-0.1, (1/9)*(1.5+2*i_gate), 'to {}'.format(nextNode), transform=ax.transAxes)
+        # ax.text(-0.1, (1/9)*(1.5+2*i_gate), 'to {}'.format(nextNode), transform=ax.transAxes)
 
         for each_time in open_close:
             open_time = each_time[0]
             close_time = each_time[1]
             flow_id = each_time[2]
             color = color_list[flow_id]
-            flow_name = 'flow{}'.format(flow_id)
-            plot_window(ax, i_gate, open_time, close_time, window_hight, color, flow_name)
+            hatch = hatch_list[flow_id % 3]
+            flow_name = 'flow{}'.format(flow_id-2)
+            plot_window(ax, i_gate, open_time, close_time, window_hight, color, hatch, flow_name)
 
     # set legend
     handler_list, label_list = ax.get_legend_handles_labels()
@@ -96,7 +110,16 @@ def gen_graph_for_each_sw(each_sw):
         if not each_label in label_list_forLegend:
             handler_list_forLegend.append(each_handler)
             label_list_forLegend.append(each_label)
-    ax.legend(handler_list_forLegend, label_list_forLegend)
+    # ax.legend(handler_list_forLegend, label_list_forLegend)
+    ax.legend(
+        handler_list_forLegend,
+        label_list_forLegend,
+        bbox_to_anchor=(0.5, 1),
+        loc='lower center',
+        borderaxespad=0.2,
+        ncol=3,
+        # fontsize=font_size
+    )
 
     plt.tight_layout()
     pdf_filename = '{}/workspace/test_z3/multiSw_sch/pdf/window_sw{}.pdf'.format(home_dir, name)
@@ -115,3 +138,6 @@ def main():
 
     for each_sw in gcl_sw:
         gen_graph_for_each_sw(each_sw)
+
+if __name__ == "__main__":
+    main()

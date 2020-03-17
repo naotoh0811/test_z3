@@ -72,8 +72,8 @@ def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
             first_val = 100
             # first_val = random.randint(30, 200)
 
-            # dec_point = minLatency*1
-            dec_point = minLatency_ceil * 1.1
+            dec_point = minLatency*1
+            # dec_point = minLatency_ceil * 1.1
 
             # x_intercept = random.randint(math.ceil(minLatency*4.3), math.ceil(minLatency*4.5))
             # x_intercept = \
@@ -82,7 +82,7 @@ def gen_flowWithPath_from_data(data, yaml_filename_hard, yaml_filename_soft):
                 # get_transferLatency(1500) * random.randint(1, 5)) # dec_point + (12~60)
                 random.randint(
                     math.ceil(get_transferLatency(1500)),
-                    # math.ceil(get_transferLatency(1500)) * 5)
+                    #math.ceil(get_transferLatency(1500)) * 5)
                     math.ceil(get_transferLatency(1500)) * 10)
             )
 
